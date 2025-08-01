@@ -12,7 +12,7 @@ if grep -qiE 'debian|ubuntu' /etc/os-release; then
 elif grep -qiE 'centos|rhel|fedora' /etc/os-release; then
     PKG_INSTALL="yum install -y"
 else
-    echo "Sistema não reconhecido" && exit 1
+    echo "Sistema nao reconhecido" && exit 1
 fi
 
 echo "Instalando Ferramentas..."
