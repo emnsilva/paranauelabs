@@ -12,7 +12,7 @@ scrape_configs:
   # Monitoramento do próprio Prometheus
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['prometheus:9090']  # Usa nome do serviço Docker
+      - targets: ['localhost:9090']  # Usa nome do serviço Docker
 
   # Exporters padrão
   - job_name: 'node'
