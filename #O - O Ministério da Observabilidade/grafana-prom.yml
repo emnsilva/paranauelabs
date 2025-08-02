@@ -5,9 +5,9 @@ services:
   prometheus:
     image: prom/prometheus
     ports:
-      - "9090:9090"  # Exposição opcional
+      - ["9090:9090"]
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - [./prometheus.yml:/etc/prometheus/prometheus.yml]
     networks:
       - monitoramento
 

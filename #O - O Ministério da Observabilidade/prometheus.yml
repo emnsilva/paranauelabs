@@ -9,12 +9,6 @@ global:
       password: ${REMOTE_WRITE_PASSWORD}
 
 scrape_configs:
-  # Monitoramento do próprio Prometheus
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']  # Usa nome do serviço Docker
-
-  # Exporters padrão
   - job_name: 'node'
     static_configs:
       - targets: ['node-exporter:9100']
