@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  # ================== MONITORAMENTO ==================
+  # ============ MONITORAMENTO ============
   prometheus:
     image: prom/prometheus
     ports:
-      - "9090:9090"  # Porta fixa (mapeamento opcional)
+      - "9090:9090"  # Exposição opcional
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
@@ -14,53 +14,41 @@ services:
   node-exporter:
     image: prom/node-exporter
     expose:
-      - "9100"  # Porta padrão do container
+      - "9100"
     networks:
       - monitoramento
 
-  # ================== SERVIÇOS PRINCIPAIS ==================
+  # ============ BANCO DE DADOS ============
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}  # Pega do .env
-      POSTGRES_USER: ${POSTGRES_USER}  # Pega do .env
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Pega do .env
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     expose:
-      - "5432"  # Porta padrão do PostgreSQL
+      - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
     networks:
       - monitoramento
 
-  nginx:
-    image: nginx:latest
-    expose:
-      - "80"  # Porta padrão do container
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    networks:
-      - monitoramento
-
-    stress-ng:
-    image: alexeiled/stress-ng:latest
-    expose:
-      - "8080"  # Porta padrão do stress-ng
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-    command: ["--cpu", "4", "--timeout", "5m"]
-    networks:
-      - monitoramento
-
-  # ================== EXPORTERS ==================
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
     expose:
-      - "9187"  # Porta padrão
+      - "9187"
+    networks:
+      - monitoramento
+
+  # ============ WEBSERVER ============
+  nginx:
+    image: nginx:latest
+    expose:
+      - "80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
     networks:
       - monitoramento
 
@@ -68,7 +56,18 @@ services:
     image: nginx/nginx-prometheus-exporter
     command: -nginx.scrape-uri=http://nginx:80/stub_status
     expose:
-      - "9113"  # Porta padrão
+      - "9113"
+    networks:
+      - monitoramento
+
+  # ============ TESTE DE CARGA ============
+  stress-ng:
+    image: alexeiled/stress-ng:latest
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+    command: ["--cpu", "4", "--timeout", "5m"]
     networks:
       - monitoramento
 
