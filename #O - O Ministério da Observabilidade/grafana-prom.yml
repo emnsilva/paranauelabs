@@ -4,14 +4,17 @@ services:
   # ================== MONITORAMENTO ==================
   prometheus:
     image: prom/prometheus
+    ports:
+      - "9090:9090"  # Porta fixa (mapeamento opcional)
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - monitoramento
-    env_file: .env  # Carrega todas as variáveis
 
   node-exporter:
     image: prom/node-exporter
+    expose:
+      - "9100"  # Porta padrão do container
     networks:
       - monitoramento
 
@@ -19,9 +22,11 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}  # Pega do .env
+      POSTGRES_USER: ${POSTGRES_USER}  # Pega do .env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Pega do .env
+    expose:
+      - "5432"  # Porta padrão do PostgreSQL
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
@@ -30,18 +35,10 @@ services:
 
   nginx:
     image: nginx:latest
+    expose:
+      - "80"  # Porta padrão do container
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-    networks:
-      - monitoramento
-
-  stress-ng:
-    image: alexeiled/stress-ng:latest
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-    command: ["--cpu", "4", "--timeout", "5m"]
     networks:
       - monitoramento
 
@@ -49,13 +46,17 @@ services:
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+    expose:
+      - "9187"  # Porta padrão
     networks:
       - monitoramento
 
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter
     command: -nginx.scrape-uri=http://nginx:80/stub_status
+    expose:
+      - "9113"  # Porta padrão
     networks:
       - monitoramento
 
