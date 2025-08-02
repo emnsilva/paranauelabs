@@ -42,6 +42,18 @@ services:
     networks:
       - monitoramento
 
+    stress-ng:
+    image: alexeiled/stress-ng:latest
+    expose:
+      - "8080"  # Porta padrão do stress-ng
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+    command: ["--cpu", "4", "--timeout", "5m"]
+    networks:
+      - monitoramento
+
   # ================== EXPORTERS ==================
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
