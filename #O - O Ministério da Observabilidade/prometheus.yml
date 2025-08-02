@@ -9,6 +9,10 @@ global:
       password: ${REMOTE_WRITE_PASSWORD}
 
 scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
   - job_name: 'node'
     static_configs:
       - targets: ['node-exporter:9100']
