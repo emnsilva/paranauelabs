@@ -1,12 +1,13 @@
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: 30s
+  evaluation_interval: 30s
 
+  # Configuração opcional (se estiver usando remote write)
   remote_write:
-  - url: ${REMOTE_WRITE_URL}
-    basic_auth:
-      username: ${REMOTE_WRITE_USERNAME}
-      password: ${REMOTE_WRITE_PASSWORD}
+    - url: ${REMOTE_WRITE_URL}
+      basic_auth:
+        username: ${REMOTE_WRITE_USERNAME}
+        password: ${REMOTE_WRITE_PASSWORD}
 
 scrape_configs:
   - job_name: 'prometheus'
@@ -16,11 +17,17 @@ scrape_configs:
   - job_name: 'node'
     static_configs:
       - targets: ['node-exporter:9100']
+    metrics_path: /metrics
+    scrape_interval: 30s
 
   - job_name: 'nginx'
     static_configs:
       - targets: ['nginx-exporter:9113']
+    metrics_path: /metrics
+    scrape_interval: 30s
 
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres-exporter:9187']
+    metrics_path: /metrics
+    scrape_interval: 30s
