@@ -1,89 +1,38 @@
 version: '3.8'
-
 services:
-  # ============ MONITORAMENTO ============
+  # Infraestrutura
   prometheus:
     image: prom/prometheus
-    ports:
-      - "9090:9090"
+    ports: ["9090:9090"]
+    volumes: ["./prometheus.yml:/etc/prometheus/prometheus.yml"]
+
+  # Serviços Monitorados
+  nginx:
+    image: nginx/nginx-prometheus-exporter
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      - monitoramento
-    depends_on:
-      - node-exporter
-      - postgres-exporter
-      - nginx-exporter
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports: 
+      - "8080:80"    # Porta do NGINX
+      - "9113:9113"  # Porta das métricas
+    environment:
+      NGINX_PORT: 80
 
-  node-exporter:
-    image: prom/node-exporter
-    expose:
-      - "9100"
-    networks:
-      - monitoramento
-    restart: unless-stopped
-
-  # ============ BANCO DE DADOS ============
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    expose:
-      - "5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 5s
-    networks:
-      - monitoramento
-    restart: unless-stopped
 
-  postgres-exporter:
+  postgres_exporter:
     image: prometheuscommunity/postgres-exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
-    expose:
-      - "9187"
-    networks:
-      - monitoramento
-    depends_on:
-      - postgres
-    restart: unless-stopped
+    depends_on: ["postgres"]
 
-  # ============ WEBSERVER ============
-  nginx:
-    image: nginx:latest
-    expose:
-      - "80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    networks:
-      - monitoramento
-    restart: unless-stopped
-
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter
-    command: -nginx.scrape-uri=http://nginx:80/stub_status
-    expose:
-      - "9113"
-    networks:
-      - monitoramento
-    depends_on:
-      - nginx
-    restart: unless-stopped
-
-  # ============ TESTE DE CARGA ============
-  stress-ng:
+  stress:
     image: alexeiled/stress-ng:latest
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-    command: ["--cpu", "4", "--timeout", "5m"]
-    networks:
-      - monitoramento
+    command: ["--cpu", "4", "--vm", "2"]
 
-networks:
-  monitoramento:
-    driver: bridge
+  # Exportadores
+  node_exporter:
+    image: prom/node-exporter
+    ports: ["9100:9100"]
