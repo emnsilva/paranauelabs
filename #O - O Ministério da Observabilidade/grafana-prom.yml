@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   # Infraestrutura
   prometheus:
@@ -20,12 +19,12 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_PASSWORD: senha_do_db
+      POSTGRES_PASSWORD: POSTGRES_PASSWORD
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://usuário_do_db:$senha_do_db@postgres:5432/nome_do_db?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://postgres:POSTGRES_PASSWORD@postgres:5432/POSTGRES_DB?sslmode=disable"
     depends_on: ["postgres"]
 
   stress:
