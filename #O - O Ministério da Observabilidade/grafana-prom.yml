@@ -20,12 +20,12 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: senha_do_db
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://usuário_do_db:$senha_do_db@postgres:5432/nome_do_db?sslmode=disable"
     depends_on: ["postgres"]
 
   stress:
