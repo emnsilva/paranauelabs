@@ -1,21 +1,30 @@
 # vpc.tf: Contém toda a definição dos VPCs
 # Configuração dinâmica de providers
 provider "aws" {
-  for_each = var.vpcs
-  alias    = "${each.key}_region"
-  region   = each.value.region
+  alias  = "primary_region"
+  region = var.vpcs["primary"].region
 }
 
-# Criação dinâmica de VPCs
+provider "aws" {
+  alias  = "backup_region"
+  region = var.vpcs["backup"].region
+}
+
+# Criação DINÂMICA das VPCs (aqui sim usamos for_each)
 resource "aws_vpc" "this" {
   for_each = var.vpcs
 
-  provider             = aws["${each.key}_region"]
+  provider = (
+    each.key == "primary" 
+    ? aws.primary_region 
+    : aws.backup_region
+  )
+
   cidr_block          = each.value.cidr_block
-  enable_dns_support   = true    # Habilita suporte DNS
-  enable_dns_hostnames = true    # Habilita hostnames DNS
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 
   tags = {
-    Name = each.key
+    Name = "vpc-${each.key}"
   }
 }
