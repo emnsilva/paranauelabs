@@ -17,7 +17,7 @@ resource "aws_vpc" "primary" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpc-primary"
+    Name = "main"
   }
 }
 
@@ -28,6 +28,6 @@ resource "aws_vpc" "backup" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpc-backup"
+    Name = "backup"
   }
 }
