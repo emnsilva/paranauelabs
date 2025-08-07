@@ -1,7 +1,7 @@
 # tf.tfvars: Atribui valores específicos às variáveis. São informações sensíveis que não podem ser expostas.
 # Sobrescreva os valores padrão aqui para ambientes específicos
 vpcs = {
-  primary = {  # VPC main
+  main = {  # VPC main
     region     = "sa-east-1"    # Sua região principal
     cidr_block = "10.0.0.0/16"  # Faixa de IPs
   }
