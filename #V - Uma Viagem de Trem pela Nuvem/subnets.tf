@@ -1,29 +1,28 @@
-# subnets.tf: Subnets públicas numeradas de 1 a 8 em cada VPC
-
-# Subnets na VPC Main (sa-east-1)
-resource "aws_subnet" "main_public" {
-  provider                = aws.main
-  count                   = 8
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(var.vpcs["main"].cidr_block, 4, count.index)
-  availability_zone       = "${var.vpcs["main"].region}${substr("abcdefgh", count.index, 1)}"
-  map_public_ip_on_launch = true
+# subnets.tf
+# Subnets para a VPC MAIN (sa-east-1)
+resource "aws_subnet" "main" {
+  for_each          = { for idx, color in var.subnet_colors : color => idx }
+  provider          = aws.main
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(var.vpcs["main"].cidr_block, 8, each.value + 1)  # 10.0.1.0/24, 10.0.2.0/24...
+  availability_zone = "${var.vpcs["main"].region}a"
 
   tags = {
-    Name = "${count.index + 1}"  # Numerando de 1 a 8
+    Name = "{each.key}"
+    Role = each.key
   }
 }
 
-# Subnets na VPC Backup (us-east-1) - Espelho exato
-resource "aws_subnet" "backup_public" {
-  provider                = aws.backup
-  count                   = 8
-  vpc_id                  = aws_vpc.backup.id
-  cidr_block              = cidrsubnet(var.vpcs["backup"].cidr_block, 4, count.index)
-  availability_zone       = "${var.vpcs["backup"].region}${substr("abcdefgh", count.index, 1)}"
-  map_public_ip_on_launch = true
+# Subnets para a VPC BACKUP (us-east-1)
+resource "aws_subnet" "backup" {
+  for_each          = { for idx, color in var.subnet_colors : color => idx }
+  provider          = aws.backup
+  vpc_id            = aws_vpc.backup.id
+  cidr_block        = cidrsubnet(var.vpcs["backup"].cidr_block, 8, each.value + 1)  # 10.1.1.0/24, 10.1.2.0/24...
+  availability_zone = "${var.vpcs["backup"].region}a"
 
   tags = {
-    Name = "${count.index + 1}"  # Numerando de 1 a 8
+    Name = "{each.key}"
+    Role = each.key
   }
 }
