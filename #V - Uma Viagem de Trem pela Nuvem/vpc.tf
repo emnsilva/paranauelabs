@@ -1,8 +1,8 @@
 # vpc.tf: Contém toda a definição dos VPCs
 # Configura os providers
 provider "aws" {
-  alias  = "primary"
-  region = var.vpcs["primary"].region
+  alias  = "main"
+  region = var.vpcs["main"].region
 }
 
 provider "aws" {
@@ -11,9 +11,9 @@ provider "aws" {
 }
 
 # Cria as VPCs
-resource "aws_vpc" "primary" {
-  provider             = aws.primary
-  cidr_block          = var.vpcs["primary"].cidr_block
+resource "aws_vpc" "main" {
+  provider             = aws.main
+  cidr_block          = var.vpcs["main"].cidr_block
   enable_dns_support   = true    # Habilita suporte DNS
   enable_dns_hostnames = true    # Habilita hostnames DNS
 
