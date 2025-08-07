@@ -1,4 +1,4 @@
-# subnets.tf: Cria 8 subnets públicas em cada VPC (main e backup) como espelhos exatos
+# subnets.tf: Subnets públicas numeradas de 1 a 8 em cada VPC
 
 # Subnets na VPC Main (sa-east-1)
 resource "aws_subnet" "main_public" {
@@ -10,7 +10,7 @@ resource "aws_subnet" "main_public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "main-public-${count.index + 1}"
+    Name = "${count.index + 1}"  # Numerando de 1 a 8
   }
 }
 
@@ -19,11 +19,11 @@ resource "aws_subnet" "backup_public" {
   provider                = aws.backup
   count                   = 8
   vpc_id                  = aws_vpc.backup.id
-  cidr_block              = cidrsubnet(var.vpcs["backup"].cidr_block, 4, count.index) # Mesmos índices
+  cidr_block              = cidrsubnet(var.vpcs["backup"].cidr_block, 4, count.index)
   availability_zone       = "${var.vpcs["backup"].region}${substr("abcdefgh", count.index, 1)}"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "backup-public-${count.index + 1}"
+    Name = "${count.index + 1}"  # Numerando de 1 a 8
   }
 }
