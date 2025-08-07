@@ -4,7 +4,7 @@ vpcs = {
 }
 
 # O template é reutilizado para ambas as VPCs!
-subnet_template = [
+subnets = [
   { az_suffix = "a", cidr_index = 1 },
   { az_suffix = "b", cidr_index = 2 },
   { az_suffix = "c", cidr_index = 3 },
