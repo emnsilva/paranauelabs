@@ -18,10 +18,10 @@ resource "aws_subnet" "main" {
   availability_zone = "${var.vpcs["main"].region}a"
 
   # Tags padrão:
-  # - Name: Nome da subnet no formato "FWWC_2027_<cor>".
+  # - Name: Nome da subnet no formato "main_<cor>".
   # - Role: Tag opcional para filtrar subnets por cor (ex.: red, green).
   tags = {
-    Name = "FWWC_2027_${each.key}"
+    Name = "main_${each.key}"
     Role = each.key
   }
 }
@@ -35,7 +35,7 @@ resource "aws_subnet" "backup" {
   availability_zone = "${var.vpcs["backup"].region}a"
 
   tags = {
-    Name = "FWWC_2027_${each.key}"
+    Name = "backup_${each.key}"
     Role = each.key
   }
 }
