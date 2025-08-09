@@ -1,20 +1,24 @@
-# Configura providers dinamicamente
+# Configuração explícita dos providers
 provider "aws" {
-  for_each = var.vpcs
-  alias    = each.key  # "primary" ou "backup"
-  region   = each.value.region
+  alias  = "primary"
+  region = var.vpcs["primary"].region
 }
 
-# Cria VPCs dinamicamente
-resource "aws_vpc" "this" {
-  for_each = var.vpcs
+provider "aws" {
+  alias  = "backup"
+  region = var.vpcs["backup"].region
+}
 
-  provider             = aws[each.key]  # Usa o provider correspondente
-  cidr_block          = each.value.cidr_block
-  enable_dns_support   = true
+# Criação dinâmica das VPCs usando count
+resource "aws_vpc" "this" {
+  count = length(var.vpcs)
+
+  provider = count.index == 0 ? aws.primary : aws.backup
+  cidr_block = values(var.vpcs)[count.index].cidr_block
+  enable_dns_support = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = each.value.vpc_name
+    Name = values(var.vpcs)[count.index].vpc_name
   }
 }
