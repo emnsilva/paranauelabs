@@ -1,7 +1,8 @@
-# Configuração explícita dos providers
+# vpc.tf: Contém toda a definição dos VPCs
+# Configura os providers
 provider "aws" {
-  alias  = "primary"
-  region = var.vpcs["primary"].region
+  alias  = "main"
+  region = var.vpcs["main"].region
 }
 
 provider "aws" {
