@@ -10,7 +10,7 @@ resource "azurerm_resource_group" "main" {
 
 # Cria a conta de armazenamento (equivalente ao bucket S3)
 resource "azurerm_storage_account" "example" {
-  name                     = "main_storage"  # Nome deve ser único globalmente
+  name                     = "main"  # Nome deve ser único globalmente
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Standard"
