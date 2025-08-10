@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
 # Provedor para região primária (São Paulo)
 provider "aws" {
   alias  = "sa_east"
