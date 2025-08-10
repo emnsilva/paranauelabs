@@ -8,9 +8,9 @@ resource "azurerm_resource_group" "main" {
   location = "brazilsouth"
 }
 
-# Cria a conta de armazenamento (equivalente ao bucket S3)
-resource "azurerm_storage_account" "example" {
-  name                     = "main"  # Nome deve ser único globalmente
+# Cria a conta de armazenamento com o nome "paranaublob"
+resource "azurerm_storage_account" "main" {
+  name                     = "paranaublob"  # Nome alterado conforme solicitado
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Standard"
@@ -20,6 +20,6 @@ resource "azurerm_storage_account" "example" {
 # Cria um container (similar a uma pasta no bucket S3)
 resource "azurerm_storage_container" "main" {
   name                  = "main-container"
-  storage_account_name  = azurerm_storage_account.main.name
-  container_access_type = "private"  # Pode ser "blob" ou "container" para acesso público
+  storage_account_name  = azurerm_storage_account.main.name  # Referência corrigida
+  container_access_type = "private"
 }
