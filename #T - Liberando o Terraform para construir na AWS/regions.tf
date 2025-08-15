@@ -12,3 +12,15 @@ locals {
     }
   }
 }
+
+variable "CLOUD_PRIMARY_REGION" {
+  type        = string
+  description = "Alias para região primária (primary/secondary)"
+  default     = "primary"
+}
+
+variable "CLOUD_SECONDARY_REGION" {
+  type        = string
+  description = "Alias para região secundária (primary/secondary)"
+  default     = "secondary"
+}
