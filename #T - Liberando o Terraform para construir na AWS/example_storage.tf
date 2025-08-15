@@ -5,7 +5,7 @@ variable "GCP_SECONDARY_REGION" {}
 
 # Configuração do Provider Google
 provider "google" {
-  credentials = var.GOOGLE_CREDENTIALS_B64
+  credentials = base64decode(var.GOOGLE_CREDENTIALS_B64)
   project     = var.GCP_PROJECT
   region      = var.GCP_PRIMARY_REGION
 }
