@@ -1,13 +1,13 @@
 # Provedor para região primária
 provider "aws" {
   alias  = "primary"
-  region = locals.region_mapping[var.CLOUD_PRIMARY_REGION].aws
+  region = locaL.region_mapping[var.CLOUD_PRIMARY_REGION].aws
 }
 
 # Provedor para região secundária
 provider "aws" {
   alias  = "secondary"
-  region = locals.region_mapping[var.CLOUD_SECONDARY_REGION].aws
+  region = local.region_mapping[var.CLOUD_SECONDARY_REGION].aws
 }
 
 # Bucket na região primária
