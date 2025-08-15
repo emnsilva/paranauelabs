@@ -25,7 +25,7 @@ resource "google_storage_bucket" "brasil" {
 }
 
 # Bucket nos USA
-resource "google_storage_bucket" "brasil" {
+resource "google_storage_bucket" "usa" {
   name          = "${var.GCP_PROJECT_ID}-bucket-br" # Nome dinâmico
   location      = "us-east1"
   storage_class = "STANDARD"
