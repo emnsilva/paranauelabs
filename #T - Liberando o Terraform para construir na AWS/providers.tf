@@ -6,25 +6,22 @@ terraform {
   }
 }
 
-# Configuração PRIMÁRIA (sem alias)
+# Configuração PRIMÁRIA
 provider "aws" {
-  alias = "primary"
   region = local.regions.aws[var.CLOUD_PRIMARY_REGION]
 }
 
 provider "azurerm" {
-  alias = "primary"
   features {}
   location = local.regions.azure[var.CLOUD_PRIMARY_REGION]
 }
 
 provider "google" {
-  alias = "primary"
   project = var.GCP_PROJECT_ID
   region  = local.regions.gcp[var.CLOUD_PRIMARY_REGION]
 }
 
-# Configuração SECUNDÁRIA (com alias explícito)
+# Configuração SECUNDÁRIA
 provider "aws" {
   alias  = "secondary"
   region = local.regions.aws[var.CLOUD_SECONDARY_REGION]
