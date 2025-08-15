@@ -1,14 +1,14 @@
-regions {
+locals {
   region_mapping = {
-    southamerica = {
-      aws   = "sa-east-1",
+    primary = {
+      gcp   = "southamerica-east1",
       azure = "brazilsouth",
-      gcp   = "southamerica-east1"
+      aws   = "sa-east-1"
     },
-    eastus = {
-      aws   = "us-east-1",
+    secondary = {
+      gcp   = "us-east1",
       azure = "eastus",
-      gcp   = "us-east1"
+      aws   = "us-east-1"
     }
   }
 }
