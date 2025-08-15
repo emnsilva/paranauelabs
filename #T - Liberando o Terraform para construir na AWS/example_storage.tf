@@ -1,12 +1,31 @@
+# Declaração das variáveis (obrigatória mesmo usando Terraform Cloud)
+variable "GOOGLE_CREDENTIALS_B64" {
+  type        = string
+  description = "Conteúdo do JSON da Service Account em Base64"
+  sensitive   = true
+}
+
+variable "GCP_PROJECT_ID" {
+  type        = string
+  description = "ID do projeto no Google Cloud"
+}
+
+variable "BUCKET_PREFIX" {
+  type        = string
+  description = "Prefixo para nomear os buckets"
+  default     = "paranaubucket"
+}
+
+# Configuração do Provider
 provider "google" {
-  credentials = var.GOOGLE_CREDENTIALS_B64  # Usa a variável do Terraform Cloud
-  project     = var.GCP_PROJECT_ID      # Variável do workspace
-  region      = "southamerica-east1"    # Hardcoded (ou use var.GCP_REGION se preferir)
+  credentials = base64decode(var.GOOGLE_CREDENTIALS_B64)
+  project     = var.GCP_PROJECT_ID
+  region      = "southamerica-east1"
 }
 
 # Bucket no Brasil
 resource "google_storage_bucket" "brasil" {
-  name          = "${var.BUCKET_PREFIX}-br"  # Nome dinâmico
+  name          = "${var.BUCKET_PREFIX}-br"
   location      = "southamerica-east1"
   storage_class = "STANDARD"
 }
