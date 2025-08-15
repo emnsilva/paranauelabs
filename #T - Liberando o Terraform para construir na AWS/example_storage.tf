@@ -1,11 +1,11 @@
-variable "GOOGLE_CREDENTIALS" {}
+variable "GOOGLE_CREDENTIALS_B64" {}
 variable "GCP_PROJECT" {}
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 
 # Configuração do Provider Google
 provider "google" {
-  credentials = var.GOOGLE_CREDENTIALS
+  credentials = var.GOOGLE_CREDENTIALS_B64
   project     = var.GCP_PROJECT
   region      = var.GCP_PRIMARY_REGION
 }
