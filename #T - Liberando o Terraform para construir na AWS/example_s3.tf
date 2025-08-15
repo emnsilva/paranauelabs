@@ -1,3 +1,6 @@
+variable "AWS_REGION_PRIMARY" {}
+variable "AWS_REGION_SECONDARY" {}
+
 # Configuração dos providers AWS com variáveis dinâmicas
 provider "aws" {
   alias  = "primary"
