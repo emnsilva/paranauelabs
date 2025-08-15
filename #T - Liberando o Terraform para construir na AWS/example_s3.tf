@@ -1,7 +1,7 @@
 # Provedor para região primária
 provider "aws" {
   alias  = "primary"
-  region = locaL.region_mapping[var.CLOUD_PRIMARY_REGION].aws
+  region = local.region_mapping[var.CLOUD_PRIMARY_REGION].aws
 }
 
 # Provedor para região secundária
