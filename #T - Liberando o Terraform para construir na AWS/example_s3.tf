@@ -1,25 +1,25 @@
-# Provedor para região primária (São Paulo)
+# Provedor para região primária
 provider "aws" {
-  alias  = "sa_east"
-  region = "sa-east-1"
+  alias  = "primary"
+  region = local.region_mapping[var.PRIMARY_REGION_ALIAS].aws
 }
 
-# Provedor para região secundária (Norte da Virgínia)
+# Provedor para região secundária
 provider "aws" {
-  alias  = "us_east"
-  region = "us-east-1"
+  alias  = "secondary"
+  region = local.region_mapping[var.SECONDARY_REGION_ALIAS].aws
 }
 
 # Bucket na região primária
-resource "aws_s3_bucket" "bucket_sa" {
-  provider      = aws.sa_east
-  bucket        = "main-bucket"  # Nome deve ser único globalmente
+resource "aws_s3_bucket" "bucket_primary" {
+  provider      = aws.primary
+  bucket        = "main-bucket"  # Nome único globalmente
   force_destroy = true
 }
 
 # Bucket na região secundária
-resource "aws_s3_bucket" "bucket_us" {
-  provider      = aws.us_east
-  bucket        = "backup-bucket"  # Nome deve ser único globalmente
+resource "aws_s3_bucket" "bucket_secondary" {
+  provider      = aws.secondary
+  bucket        = "backup-bucket"  # Nome único globalmente
   force_destroy = true
 }
