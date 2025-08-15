@@ -32,16 +32,16 @@ resource "azurerm_storage_account" "main_us" {
   account_replication_type = "LRS"
 }
 
-# Container na região primária
+# Container na região primária (ATUALIZADO)
 resource "azurerm_storage_container" "main_br" {
   name                  = "main-container-br"
-  storage_account_id  = azurerm_storage_account.main_br.name
+  storage_account_id    = azurerm_storage_account.main_br.id  # Corrigido para .id
   container_access_type = "private"
 }
 
-# Container na região secundária
+# Container na região secundária (ATUALIZADO)
 resource "azurerm_storage_container" "main_us" {
   name                  = "main-container-us"
-  storage_account_id  = azurerm_storage_account.main_us.name
+  storage_account_id    = azurerm_storage_account.main_us.id  # Corrigido para .id
   container_access_type = "private"
 }
