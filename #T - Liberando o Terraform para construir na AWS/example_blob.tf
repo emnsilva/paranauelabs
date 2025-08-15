@@ -35,13 +35,13 @@ resource "azurerm_storage_account" "main_us" {
 # Container na região primária
 resource "azurerm_storage_container" "main_br" {
   name                  = "main-container-br"
-  storage_account_name  = azurerm_storage_account.main_br.name
+  storage_account_id  = azurerm_storage_account.main_br.name
   container_access_type = "private"
 }
 
 # Container na região secundária
 resource "azurerm_storage_container" "main_us" {
   name                  = "main-container-us"
-  storage_account_name  = azurerm_storage_account.main_us.name
+  storage_account_id  = azurerm_storage_account.main_us.name
   container_access_type = "private"
 }
