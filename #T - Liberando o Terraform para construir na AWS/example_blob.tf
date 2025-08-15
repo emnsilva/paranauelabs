@@ -1,13 +1,13 @@
 # Grupo de recursos na região primária
 resource "azurerm_resource_group" "main_br" {
   name     = "main-blob-storage-br"
-  location = locals.region_mapping[var.CLOUD_PRIMARY_REGION].azure
+  location = local.region_mapping[var.CLOUD_PRIMARY_REGION].azure
 }
 
 # Grupo de recursos na região secundária
 resource "azurerm_resource_group" "main_us" {
   name     = "main-blob-storage-us"
-  location = locals.region_mapping[var.CLOUD_SECONDARY_REGION].azure
+  location = local.region_mapping[var.CLOUD_SECONDARY_REGION].azure
 }
 
 # Conta de armazenamento na região primária
