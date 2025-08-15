@@ -1,22 +1,18 @@
-provider "azurerm" {
-  features {}
-}
-
-# Grupo de recursos na região primária (Brazil South)
+# Grupo de recursos na região primária
 resource "azurerm_resource_group" "main_br" {
   name     = "main-blob-storage-br"
-  location = "brazilsouth"
+  location = local.region_mapping[var.PRIMARY_REGION_ALIAS].azure
 }
 
-# Grupo de recursos na região secundária (East US)
+# Grupo de recursos na região secundária
 resource "azurerm_resource_group" "main_us" {
   name     = "main-blob-storage-us"
-  location = "eastus"
+  location = local.region_mapping[var.SECONDARY_REGION_ALIAS].azure
 }
 
 # Conta de armazenamento na região primária
 resource "azurerm_storage_account" "main_br" {
-  name                     = "paranaublobbr"  # Nome único para Brazil
+  name                     = "paranaublobbr"
   resource_group_name      = azurerm_resource_group.main_br.name
   location                 = azurerm_resource_group.main_br.location
   account_tier             = "Standard"
@@ -25,23 +21,22 @@ resource "azurerm_storage_account" "main_br" {
 
 # Conta de armazenamento na região secundária
 resource "azurerm_storage_account" "main_us" {
-  name                     = "paranaublobus"  # Nome único para East US
+  name                     = "paranaublobus"
   resource_group_name      = azurerm_resource_group.main_us.name
   location                 = azurerm_resource_group.main_us.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
-# Container na região primária (ATUALIZADO)
+# Containers (já atualizados para usar storage_account_id)
 resource "azurerm_storage_container" "main_br" {
   name                  = "main-container-br"
-  storage_account_id    = azurerm_storage_account.main_br.id  # Corrigido para .id
+  storage_account_id    = azurerm_storage_account.main_br.id
   container_access_type = "private"
 }
 
-# Container na região secundária (ATUALIZADO)
 resource "azurerm_storage_container" "main_us" {
   name                  = "main-container-us"
-  storage_account_id    = azurerm_storage_account.main_us.id  # Corrigido para .id
+  storage_account_id    = azurerm_storage_account.main_us.id
   container_access_type = "private"
 }
