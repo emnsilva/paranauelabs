@@ -1,4 +1,3 @@
-# providers.tf (ou adicione isso em um dos arquivos existentes)
 terraform {
   required_providers {
     aws = {
@@ -8,6 +7,11 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
+    }
+    # Adicione o Google Provider aqui ↓
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 6.48.0"  # Versão recomendada (consulte a mais recente)
     }
   }
 }
