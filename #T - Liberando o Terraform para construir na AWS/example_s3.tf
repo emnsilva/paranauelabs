@@ -1,25 +1,24 @@
-# Provedor para região primária (São Paulo)
+# Configuração dos providers AWS com variáveis dinâmicas
 provider "aws" {
-  alias  = "sa_east"
-  region = "sa-east-1"
+  alias  = "primary"
+  region = var.AWS_REGION_PRIMARY
 }
 
-# Provedor para região secundária (Norte da Virgínia)
 provider "aws" {
-  alias  = "us_east"
-  region = "us-east-1"
+  alias  = "secondary"
+  region = var.AWS_REGION_SECONDARY
 }
 
 # Bucket na região primária
-resource "aws_s3_bucket" "bucket_sa" {
-  provider      = aws.sa_east
-  bucket        = "main-bucket"  # Nome deve ser único globalmente
-  force_destroy = true
+resource "aws_s3_bucket" "primary_bucket" {
+  provider      = aws.primary
+  bucket        = "primary-bucket"  # Substitua por um nome único global
+  force_destroy = true  # Permite deletar o bucket mesmo com conteúdo (cuidado!)
 }
 
 # Bucket na região secundária
-resource "aws_s3_bucket" "bucket_us" {
-  provider      = aws.us_east
-  bucket        = "backup-bucket"  # Nome deve ser único globalmente
+resource "aws_s3_bucket" "secondary_bucket" {
+  provider      = aws.secondary
+  bucket        = "secondary-bucket"  # Nome único global
   force_destroy = true
 }
