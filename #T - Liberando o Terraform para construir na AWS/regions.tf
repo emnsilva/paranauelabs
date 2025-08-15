@@ -1,26 +1,17 @@
+# regions.tf - Mapeamento básico de regiões por provedor
 locals {
-  region_mapping = {
-    primary = {
-      gcp   = "southamerica-east1",
-      azure = "brazilsouth",
-      aws   = "sa-east-1"
-    },
-    secondary = {
-      gcp   = "us-east1",
-      azure = "eastus",
-      aws   = "us-east-1"
+  regions = {
+    aws = {
+      southamerica = "sa-east-1"
+      eastus       = "us-east-1"
+    }
+    azure = {
+      southamerica = "brazilsouth"
+      eastus       = "eastus"
+    }
+    gcp = {
+      southamerica = "southamerica-east1"
+      eastus      = "us-east4"
     }
   }
-}
-
-variable "CLOUD_PRIMARY_REGION" {
-  type        = string
-  description = "Alias para região primária (primary/secondary)"
-  default     = "primary"
-}
-
-variable "CLOUD_SECONDARY_REGION" {
-  type        = string
-  description = "Alias para região secundária (primary/secondary)"
-  default     = "secondary"
 }
