@@ -1,11 +1,21 @@
 variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
 
+# Configuração do provider com fallback automático
 provider "azurerm" {
   features {}
+  
+  # Configuração dinâmica (OIDC tem prioridade)
+  use_oidc        = try(var.ARM_USE_OIDC, false)  # Default false se não existir
+  subscription_id = try(var.ARM_SUBSCRIPTION_ID, null)
+  tenant_id       = try(var.ARM_TENANT_ID, null)
+  
+  # Fallback para credenciais estáticas (só usa se OIDC=false)
+  client_id       = try(var.ARM_USE_OIDC, false) ? null : try(var.ARM_CLIENT_ID, null)
+  client_secret   = try(var.ARM_USE_OIDC, false) ? null : try(var.ARM_CLIENT_SECRET, null)
 }
 
-# Configurações principais usando variáveis do Terraform Cloud
+# Seus recursos originais (sem alterações)
 resource "azurerm_resource_group" "primary" {
   name     = "primary-blob-storage-${lower(var.ARM_PRIMARY_REGION)}"
   location = var.ARM_PRIMARY_REGION
