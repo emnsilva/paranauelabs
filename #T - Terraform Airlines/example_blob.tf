@@ -1,16 +1,9 @@
 variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
 
-# Configuração flexível (OIDC vs estático)
-  use_oidc = lookup(env(), "ARM_USE_OIDC", "false") == "true" ? true : false
-  
-  # Se OIDC estiver desativado, tenta credenciais estáticas
-  client_id     = lookup(env(), "ARM_USE_OIDC", "false") == "true" ? null : lookup(env(), "ARM_CLIENT_ID", null)
-  client_secret = lookup(env(), "ARM_USE_OIDC", "false") == "true" ? null : lookup(env(), "ARM_CLIENT_SECRET", null)
-  
-  # Configurações comuns (pode ser via env ou hardcoded)
-  subscription_id = lookup(env(), "ARM_SUBSCRIPTION_ID", "seu-subscription-id")
-  tenant_id       = lookup(env(), "ARM_TENANT_ID", "seu-tenant-id")
+# Configuração mínima do provider
+provider "azurerm" {
+  features {}
 }
 
 # Seus recursos originais (sem alterações)
