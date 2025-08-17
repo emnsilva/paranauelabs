@@ -1,18 +1,16 @@
 variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
 
-# Configuração do provider com fallback automático
-provider "azurerm" {
-  features {}
+# Configuração flexível (OIDC vs estático)
+  use_oidc = lookup(env(), "ARM_USE_OIDC", "false") == "true" ? true : false
   
-  # Configuração dinâmica (OIDC tem prioridade)
-  use_oidc        = try(var.ARM_USE_OIDC, false)  # Default false se não existir
-  subscription_id = try(var.ARM_SUBSCRIPTION_ID, null)
-  tenant_id       = try(var.ARM_TENANT_ID, null)
+  # Se OIDC estiver desativado, tenta credenciais estáticas
+  client_id     = lookup(env(), "ARM_USE_OIDC", "false") == "true" ? null : lookup(env(), "ARM_CLIENT_ID", null)
+  client_secret = lookup(env(), "ARM_USE_OIDC", "false") == "true" ? null : lookup(env(), "ARM_CLIENT_SECRET", null)
   
-  # Fallback para credenciais estáticas (só usa se OIDC=false)
-  client_id       = try(var.ARM_USE_OIDC, false) ? null : try(var.ARM_CLIENT_ID, null)
-  client_secret   = try(var.ARM_USE_OIDC, false) ? null : try(var.ARM_CLIENT_SECRET, null)
+  # Configurações comuns (pode ser via env ou hardcoded)
+  subscription_id = lookup(env(), "ARM_SUBSCRIPTION_ID", "seu-subscription-id")
+  tenant_id       = lookup(env(), "ARM_TENANT_ID", "seu-tenant-id")
 }
 
 # Seus recursos originais (sem alterações)
