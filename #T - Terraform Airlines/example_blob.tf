@@ -3,13 +3,19 @@ variable "ARM_SECONDARY_REGION" {}
 
 # Configuração mínima do provider
 provider "azurerm" {
-  features {}
- 
-# Forçar autenticação apenas via OIDC
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+
+  # Configuração explícita para OIDC (versão 3.x+)
   use_oidc = true
   
-  # Desativar todos os outros métodos de autenticação
-  skip_provider_registration = true
+  # Nova forma de evitar registro de providers (em vez do deprecated skip_provider_registration)
+  resource_provider_registration {
+    skip = true
+  }
 }
 
 # Seus recursos originais (sem alterações)
