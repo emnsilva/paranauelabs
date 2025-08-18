@@ -19,14 +19,9 @@ resource "azurerm_resource_group" "primary" {
 }
 
 # Configurações principais usando variáveis do Terraform Cloud
-resource "azurerm_resource_group" "primary" {
-  name     = "secondary-blob-storage"
-  provider = azurerm.secondary
-  location = var.ARM_SECONDARY_REGION
-}
-
 resource "azurerm_resource_group" "secondary" {
   name     = "secondary-blob-storage"
+  provider = azurerm.secondary
   location = var.ARM_SECONDARY_REGION
 }
 
