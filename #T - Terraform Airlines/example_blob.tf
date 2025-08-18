@@ -3,12 +3,10 @@ variable "ARM_SECONDARY_REGION" {}
 
 provider "azurerm" {
   alias  = "primary"
-  region = var.ARM_PRIMARY_REGION
 }
 
 provider "azurerm" {
   alias  = "secondary"
-  region = var.ARM_SECONDARY_REGION
 }
 
 # Configurações principais usando variáveis do Terraform Cloud
