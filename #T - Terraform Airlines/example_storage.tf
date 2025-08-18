@@ -1,10 +1,14 @@
 variable "GOOGLE_CREDENTIALS_B64" {
-  default     = null # Torna opcional quando usar OIDC
-  description = "Credenciais em base64 (deixe vazio para OIDC)"
+  type        = string
+  default     = ""  # String vazia como padrão em vez de null
+  description = "Credenciais em base64 (deixe vazio para usar OIDC)"
 }
+
 variable "GCP_PROJECT" {
-   default     = null # Torna opcional quando usar OIDC
+  type        = string
+  description = "ID do projeto GCP"
 }
+
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 
