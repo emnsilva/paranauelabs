@@ -3,12 +3,12 @@ variable "GCP_SECONDARY_REGION" {}
 
 # Provider configurado para usar OIDC automaticamente no TFC
 provider "google" {
-  alias = primary
+  alias   = "primary"
   region  = var.GCP_PRIMARY_REGION
 }
 
 provider "google" {
-  alias = secondary
+  alias   = "secondary"
   region  = var.GCP_SECONDARY_REGION
 }
 
