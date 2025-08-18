@@ -1,7 +1,7 @@
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 
-# Provider configurado para usar OIDC automaticamente no TFC
+# Configuração dos providers GCP com variáveis dinâmicas
 provider "google" {
   alias   = "primary"
   region  = var.GCP_PRIMARY_REGION
@@ -12,7 +12,7 @@ provider "google" {
   region  = var.GCP_SECONDARY_REGION
 }
 
-# Recursos (nomes dinâmicos baseados nas variáveis)
+# Storage na região primária
 resource "google_storage_bucket" "primary" {
   name          = "primary-storage"
   provider      = google.primary
@@ -20,6 +20,7 @@ resource "google_storage_bucket" "primary" {
   storage_class = "STANDARD"
 }
 
+# Storage na região secundária
 resource "google_storage_bucket" "secondary" {
   name          = "secondary-storage"
   provider      = google.primary
