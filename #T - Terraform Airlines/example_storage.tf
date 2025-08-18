@@ -7,6 +7,12 @@ provider "google" {
   alias   = "primary"
   project = var.GCP_PROJECT
   region  = var.GCP_PRIMARY_REGION
+
+ # Configuração mágica que resolve todos os cenários:
+  credentials = fileexists("${path.module}/.skip-creds") ? null : (
+    var.GOOGLE_CREDENTIALS != null ? var.GOOGLE_CREDENTIALS : null
+  )
+}
 }
 
 provider "google" {
