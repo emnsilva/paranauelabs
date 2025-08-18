@@ -1,5 +1,3 @@
-variable "GOOGLE_CREDENTIALS_B64" {}
-variable "GCP_PROJECT" {}
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 
