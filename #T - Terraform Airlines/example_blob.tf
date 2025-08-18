@@ -11,7 +11,6 @@ provider "azurerm" {
   region = var.ARM_SECONDARY_REGION
 }
 
-
 # Configurações principais usando variáveis do Terraform Cloud
 resource "azurerm_resource_group" "primary" {
   name     = "primary-blob-storage"
