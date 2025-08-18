@@ -1,20 +1,6 @@
-# Variáveis compatíveis com seus Variable Sets existentes
-variable "GCP_PROJECT" {
-  description = "ID do projeto GCP (definido no Variable Set)"
-  type        = string
-}
-
-variable "GCP_PRIMARY_REGION" {
-  description = "Região primária (definida no Variable Set)"
-  type        = string
-  default     = "us-central1" # Fallback seguro
-}
-
-variable "GCP_SECONDARY_REGION" {
-  description = "Região secundária (definida no Variable Set)"
-  type        = string
-  default     = "us-east1" # Fallback seguro
-}
+variable "GCP_PROJECT" {}
+variable "GCP_PRIMARY_REGION" {}
+variable "GCP_SECONDARY_REGION" {}
 
 # Provider configurado para usar OIDC automaticamente no TFC
 provider "google" {
