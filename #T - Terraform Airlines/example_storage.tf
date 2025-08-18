@@ -1,4 +1,6 @@
-variable "GOOGLE_CREDENTIALS_B64" {}
+variable "GOOGLE_CREDENTIALS_B64" {
+  default = null
+}
 variable "GCP_PROJECT" {}
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
@@ -10,9 +12,7 @@ provider "google" {
   region  = var.GCP_PRIMARY_REGION
 
  # Configuração mágica que resolve todos os cenários:
-  credentials = fileexists("${path.module}/.skip-creds") ? null : (
-    var.GOOGLE_CREDENTIALS_B64 != null ? var.GOOGLE_CREDENTIALS=B64 : null
-  )
+  credentials = var.GOOGLE_CREDENTIALS_B64 != null ? base64decode(var.GOOGLE_CREDENTIALS_B64) : null
 }
 
 provider "google" {
