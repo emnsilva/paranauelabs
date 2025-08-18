@@ -11,7 +11,7 @@ provider "google" {
 
  # Configuração mágica que resolve todos os cenários:
   credentials = fileexists("${path.module}/.skip-creds") ? null : (
-    var.GOOGLE_CREDENTIALS_B64 != null ? var.GOOGLE_CREDENTIALS : null
+    var.GOOGLE_CREDENTIALS_B64 != null ? var.GOOGLE_CREDENTIALS=B64 : null
   )
 }
 
