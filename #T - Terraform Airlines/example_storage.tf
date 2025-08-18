@@ -1,30 +1,23 @@
-variable "GOOGLE_CREDENTIALS_B64" {
-  type        = string
-  default     = ""  # String vazia como padrão em vez de null
-  description = "Credenciais em base64 (deixe vazio para usar OIDC)"
-}
-
 variable "GCP_PROJECT" {}
-variable "GCP_PRIMARY_REGION" {}
-variable "GCP_SECONDARY_REGION" {}
+variable "GCP_REGION_PRIMARY" {}
+variable "GCP_REGION_SECONDARY" {}
 
-# Configuração do Provider Google
+# Provider único (OIDC ou credenciais automáticas)
 provider "google" {
-  credentials = base64decode(var.GOOGLE_CREDENTIALS_B64)
-  project     = var.GCP_PROJECT
-  region      = var.GCP_PRIMARY_REGION
+  project = var.GCP_PROJECT
+  region  = var.GCP_REGION_PRIMARY
 }
 
 # Bucket na região primária
 resource "google_storage_bucket" "primary" {
-  name          = "${var.GCP_PROJECT}-bucket-${lower(var.GCP_PRIMARY_REGION)}"
-  location      = var.GCP_PRIMARY_REGION
+  name          = "${var.GCP_PROJECT}-primary-bucket"
+  location      = var.GCP_REGION_PRIMARY
   storage_class = "STANDARD"
 }
 
 # Bucket na região secundária
 resource "google_storage_bucket" "secondary" {
-  name          = "${var.GCP_PROJECT}-bucket-${lower(var.GCP_SECONDARY_REGION)}"
-  location      = var.GCP_SECONDARY_REGION
+  name          = "${var.GCP_PROJECT}-secondary-bucket"
+  location      = var.GCP_REGION_SECONDARY
   storage_class = "STANDARD"
 }
