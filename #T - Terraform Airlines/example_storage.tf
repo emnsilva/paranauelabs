@@ -13,7 +13,6 @@ provider "google" {
     var.GOOGLE_CREDENTIALS != null ? var.GOOGLE_CREDENTIALS : null
   )
 }
-}
 
 provider "google" {
   alias   = "secondary"
