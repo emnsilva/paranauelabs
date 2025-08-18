@@ -1,14 +1,17 @@
+variable "GCP_PROJECT" {}
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 
 # Configuração dos providers GCP com variáveis dinâmicas
 provider "google" {
   alias   = "primary"
+  project = var.GCP_PROJECT
   region  = var.GCP_PRIMARY_REGION
 }
 
 provider "google" {
   alias   = "secondary"
+  project = var.GCP_PROJECT
   region  = var.GCP_SECONDARY_REGION
 }
 
