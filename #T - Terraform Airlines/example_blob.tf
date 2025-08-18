@@ -24,7 +24,7 @@ resource "azurerm_resource_group" "secondary" {
 }
 
 resource "azurerm_storage_account" "primary" {
-  name                     = "blob-primary"
+  name                     = "primarystorage"
   resource_group_name      = azurerm_resource_group.primary.name
   location                 = azurerm_resource_group.primary.location
   account_tier             = "Standard"
@@ -32,7 +32,7 @@ resource "azurerm_storage_account" "primary" {
 }
 
 resource "azurerm_storage_account" "secondary" {
-  name                     = "blob-secondary"
+  name                     = "secondarystorage"
   resource_group_name      = azurerm_resource_group.secondary.name
   location                 = azurerm_resource_group.secondary.location
   account_tier             = "Standard"
