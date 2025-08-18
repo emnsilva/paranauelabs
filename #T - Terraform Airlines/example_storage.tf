@@ -10,8 +10,6 @@ provider "google" {
   alias   = "primary"
   project = var.GCP_PROJECT
   region  = var.GCP_PRIMARY_REGION
-
- # Configuração mágica que resolve todos os cenários:
   credentials = var.GOOGLE_CREDENTIALS_B64 != null ? base64decode(var.GOOGLE_CREDENTIALS_B64) : null
 }
 
