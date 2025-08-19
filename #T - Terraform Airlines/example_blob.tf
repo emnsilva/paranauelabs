@@ -5,6 +5,16 @@ provider "azurerm" {
   features {}
 }
 
+provider "azurerm" {
+  alias  = "primary"
+  features {}
+}
+
+provider "azurerm" {
+  alias  = "secondary"
+  features {}
+}
+
 # Configurações principais usando variáveis do Terraform Cloud
 resource "azurerm_resource_group" "primary" {
   name     = "primary-blob-storage"
