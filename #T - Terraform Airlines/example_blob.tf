@@ -1,3 +1,6 @@
+variable "ARM_SECONDARY_REGION" {
+  default = null
+}
 variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
 
