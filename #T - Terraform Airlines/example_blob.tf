@@ -1,5 +1,6 @@
 variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
+variable "TFC_AZURE_PROVIDER_AUTH" {}
 
 provider "azurerm" {
   features {}
