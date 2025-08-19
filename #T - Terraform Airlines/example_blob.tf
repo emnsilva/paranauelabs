@@ -8,18 +8,21 @@ variable "TFC_AZURE_PROVIDER_AUTH" {
 provider "azurerm" {
   features {}
   use_oidc = var.TFC_AZURE_PROVIDER_AUTH != null ? var.TFC_AZURE_PROVIDER_AUTH : false
+  use_cli = false
 }
 
 provider "azurerm" {
   alias  = "primary"
   features {}
   use_oidc = var.TFC_AZURE_PROVIDER_AUTH != null ? var.TFC_AZURE_PROVIDER_AUTH : false
+  use_cli = false
 }
 
 provider "azurerm" {
   alias  = "secondary"
   features {}
   use_oidc = var.TFC_AZURE_PROVIDER_AUTH != null ? var.TFC_AZURE_PROVIDER_AUTH : false
+  use_cli = false
 }
 
 # Configurações principais usando variáveis do Terraform Cloud
