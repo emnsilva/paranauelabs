@@ -1,5 +1,6 @@
 variable "ARM_CLIENT_SECRET" {
   default = null
+  type    = string
 }
 variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
