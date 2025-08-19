@@ -2,6 +2,10 @@ variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
 
 provider "azurerm" {
+  features {}
+}
+
+provider "azurerm" {
   alias  = "primary"
   features {}
 }
