@@ -3,16 +3,19 @@ variable "ARM_SECONDARY_REGION" {}
 
 provider "azurerm" {
   features {}
+  use_oidc = var.TFC_AZURE_PROVIDER_AUTH != null ? var.TFC_AZURE_PROVIDER_AUTH : false
 }
 
 provider "azurerm" {
   alias  = "primary"
   features {}
+  use_oidc = var.TFC_AZURE_PROVIDER_AUTH != null ? var.TFC_AZURE_PROVIDER_AUTH : false
 }
 
 provider "azurerm" {
   alias  = "secondary"
   features {}
+  use_oidc = var.TFC_AZURE_PROVIDER_AUTH != null ? var.TFC_AZURE_PROVIDER_AUTH : false
 }
 
 # Configurações principais usando variáveis do Terraform Cloud
