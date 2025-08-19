@@ -1,19 +1,7 @@
 variable "ARM_PRIMARY_REGION" {}
 variable "ARM_SECONDARY_REGION" {}
 
-provider "azurerm" {
-  features {}
-}
-
-provider "azurerm" {
-  alias  = "primary"
-  features {}
-}
-
-provider "azurerm" {
-  alias  = "secondary"
-  features {}
-}
+provider "azurerm" { features {} }
 
 # Configurações principais usando variáveis do Terraform Cloud
 resource "azurerm_resource_group" "primary" {
