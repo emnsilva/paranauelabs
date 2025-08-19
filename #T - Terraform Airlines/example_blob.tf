@@ -3,6 +3,7 @@ variable "ARM_SECONDARY_REGION" {}
 
 provider "azurerm" {
   features {}
+  client_secret = var.ARM_CLIENT_SECRET_B64 != null ? base64decode(var.ARM_CLIENT_SECRET_B64) : null
 }
 
 provider "azurerm" {
