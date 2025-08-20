@@ -1,19 +1,13 @@
-# ARQUIVO: backend.tf
-# FINALIDADE: Configura onde o Terraform armazena o "estado" da infraestrutura
-
+# CONFIGURAÇÃO DO BACKEND REMOTO
+# Define onde o Terraform armazena o arquivo de estado
+# O estado é um arquivo JSON que guarda o mapa completo da infraestrutura
 terraform {
-  # Configura o backend remoto - onde o estado será armazenado
   backend "remote" {
-    # Usa o Terraform Cloud da HashiCorp
-    hostname = "app.terraform.io"
-    
-    # Nome da sua organização no Terraform Cloud
-    organization = "NOME_DA_ORGANIZAÇÃO"
+    hostname     = "app.terraform.io"    # Serviço do Terraform Cloud
+    organization = "ParanaueLabs"        # Nome da organização no Terraform Cloud
 
-    # Configuração dos workspaces (ambientes de trabalho)
     workspaces {
-      # Prefixo para identificar workspaces - buscará TODOS que começam com "gate_"
-      prefix = "gate_" 
+      prefix = "gate_"                   # Busca todos workspaces que começam com "gate_"
     }
   }
 }
