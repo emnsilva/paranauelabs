@@ -4,7 +4,7 @@
 terraform {
   backend "remote" {
     hostname     = "app.terraform.io"    # Serviço do Terraform Cloud
-    organization = "ParanaueLabs"        # Nome da organização no Terraform Cloud
+    organization = "NOME_DA_ORGANIZAÇÃO"        # Nome da organização no Terraform Cloud
 
     workspaces {
       prefix = "gate_"                   # Busca todos workspaces que começam com "gate_"
