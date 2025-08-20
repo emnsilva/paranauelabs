@@ -29,15 +29,15 @@ provider "google" {
 # Cria buckets de armazenamento no Google Cloud
 # Funcionam como containers para armazenar qualquer tipo de arquivo
 resource "google_storage_bucket" "primary" {
-  name          = "primary-storage"     # Nome do bucket
-  provider      = google.primary        # Usa provider da região primária
-  location      = var.GCP_PRIMARY_REGION # Localização do bucket
-  storage_class = "STANDARD"            # Classe de armazenamento (custo/desempenho)
+  name          = "primary-storage"        # Nome do bucket
+  provider      = google.primary           # Usa provider da região primária
+  location      = var.GCP_PRIMARY_REGION   # Localização do bucket
+  storage_class = "STANDARD"               # Classe de armazenamento (custo/desempenho)
 }
 
 resource "google_storage_bucket" "secondary" {
-  name          = "secondary-storage"   # Nome do bucket
-  provider      = google.primary        # ⚠️ Nota: usando provider primário
+  name          = "secondary-storage"      # Nome do bucket
+  provider      = google.primary           # ⚠️ Nota: usando provider primário
   location      = var.GCP_SECONDARY_REGION # Localização na região secundária
-  storage_class = "STANDARD"            # Classe de armazenamento padrão
+  storage_class = "STANDARD"               # Classe de armazenamento padrão
 }
