@@ -23,7 +23,7 @@ case $OS in
     rhel|centos|fedora)
         echo "Atualizando sistema (RHEL/CentOS/Fedora)..."
         sudo yum update -y -q  # Update com upgrade implícito no yum
-        sudo yum install -y stress-ng golang htop
+        sudo yum install -y -q stress-ng golang
         ;;
     *)
         echo "Distro nao suportada: $OS"
@@ -32,8 +32,8 @@ case $OS in
 esac
 
 # Prepara ambiente (funciona em qualquer distro)
-mkdir -p ~/logs_triagem
-cd ~/logs_triagem
+mkdir -p logs
+cd logs
 
 # Cria script de teste universal
 cat > stress.sh << 'EOF'
@@ -47,4 +47,4 @@ EOF
 chmod +x stress.sh
 
 echo "Instalacao concluida em $OS!"
-echo "Execute: cd ~/logs_triagem && ./stress.sh"
+echo "Execute: cd /logs && ./stress.sh"
