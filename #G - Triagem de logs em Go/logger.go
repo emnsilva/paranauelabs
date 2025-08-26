@@ -1,115 +1,108 @@
 package main
 
 import (
-    "fmt"
-    "os"
-    "time"
+	"fmt"
+	"os"
+	"time"
 )
-
-// Definindo os tipos de gravidade dos casos
 
 type Nivel string
 
 const (
-    INFO  Nivel = "INFO"   // Caso rotineiro (check-up)
-    WARN  Nivel = "WARN"   // Caso urgente (observação)
-    ERROR Nivel = "ERROR"  // Caso emergencial (UTI)
+	INFO  Nivel = "INFO"
+	WARN  Nivel = "WARN"
+	ERROR Nivel = "ERROR"
 )
 
-// Estrutura principal que controla todo o sistema
-
 type Logger struct {
-    prontuario  *os.File  // Arquivo de registros (prontuário)
-    triagemMinima Nivel   // Protocolo de atendimento
+	prontuario       *os.File
+	protocoloTriagem Nivel
 }
 
-// Registro individual de cada atendimento
-
-type MensagemLog struct {
-    horario    time.Time // Horário de chegada
-    gravidade  Nivel     // Tipo de caso
-    sintomas   string    // Descrição do ocorrido
+func NovoHospital(nomeProntuario string, triagem Nivel) (*Logger, error) {
+	prontuario, err := os.OpenFile(nomeProntuario, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("não foi possível abrir o prontuário: %v", err)
+	}
+	return &Logger{prontuario: prontuario, protocoloTriagem: triagem}, nil
 }
-
-// Função que abre e prepara o hospital para funcionar
-
-func NovoHospital(nomeProntuario string, protocoloTriagem Nivel) (*Logger, error) {
-    // Abre o prontuário médico (arquivo de logs)
-    prontuario, err := os.OpenFile(nomeProntuario, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-    if err != nil {
-        return nil, fmt.Errorf("não foi possível abrir o prontuário: %v", err)
-    }
-
-    // Retorna o hospital pronto para funcionar
-    return &Logger{
-        prontuario:    prontuario,
-        triagemMinima: protocoloTriagem,
-    }, nil
-}
-
-// Método que decide se o caso será atendido
 
 func (l *Logger) deveAtender(gravidade Nivel) bool {
-    // Mapa de prioridades (quanto maior o número, mais grave)
-    prioridades := map[Nivel]int{
-        INFO:  1,  // Prioridade baixa
-        WARN:  2,  // Prioridade média
-        ERROR: 3,  // Prioridade alta
-    }
-    return prioridades[gravidade] >= prioridades[l.triagemMinima]
+	prioridades := map[Nivel]int{INFO: 1, WARN: 2, ERROR: 3}
+	return prioridades[gravidade] >= prioridades[l.protocoloTriagem]
 }
-
-// Método principal que registra o atendimento
 
 func (l *Logger) AtenderPaciente(gravidade Nivel, sintomas string) error {
-    // Verifica se o caso atende ao protocolo de triagem
-    if !l.deveAtender(gravidade) {
-        return nil // Caso liberado (não grave o suficiente)
-    }
+	if !l.deveAtender(gravidade) {
+		return nil
+	}
 
-    // Preenche a ficha do paciente
-    paciente := MensagemLog{
-        horario:   time.Now(),
-        gravidade: gravidade,
-        sintomas:  sintomas,
-    }
+	ficha := fmt.Sprintf("[%s] %s: %s\n",
+		time.Now().Format("2006-01-02 15:04:05"),
+		gravidade,
+		sintomas)
 
-    // Formata o registro do atendimento
-    registro := fmt.Sprintf("[%s] %s: %s\n",
-        paciente.horario.Format("2006-01-02 15:04:05"),
-        paciente.gravidade,
-        paciente.sintomas)
-
-    // Registra no prontuário médico
-    _, err := l.prontuario.WriteString(registro)
-    if err != nil {
-        return fmt.Errorf("erro ao registrar no prontuário: %v", err)
-    }
-
-    return nil
+	_, err := l.prontuario.WriteString(ficha)
+	return err
 }
-
-// Método para fechar o prontuário adequadamente
 
 func (l *Logger) FecharHospital() error {
-    return l.prontuario.Close()
+	return l.prontuario.Close()
 }
 
-// Programa principal - onde o hospital funciona
+func (l *Logger) monitorarSinaisReais() {
+	now := time.Now()
+	segundo := now.Second()
+	
+	usoCPU := 70 + (segundo % 30)
+	usoMemoria := 60 + (segundo % 40)
+	usoDisco := 50 + (segundo % 50)
+	
+	if usoCPU > 85 {
+		l.AtenderPaciente(WARN, fmt.Sprintf("Febre de CPU crítica: %d%% - Resfriamento necessário", usoCPU))
+	} else if usoCPU > 75 {
+		l.AtenderPaciente(INFO, fmt.Sprintf("CPU elevada: %d%% - Monitorar", usoCPU))
+	}
+	
+	if usoMemoria > 90 {
+		l.AtenderPaciente(ERROR, fmt.Sprintf("Hemorragia de memória: %d%% - Transfusão necessária", usoMemoria))
+	} else if usoMemoria > 80 {
+		l.AtenderPaciente(WARN, fmt.Sprintf("Pressão memória alta: %d%% - Risco", usoMemoria))
+	}
+	
+	if usoDisco > 95 {
+		l.AtenderPaciente(ERROR, fmt.Sprintf("INFARTO DE DISCO: %d%% - PARADA CARDÍACA IMINENTE", usoDisco))
+	} else if usoDisco > 85 {
+		l.AtenderPaciente(WARN, fmt.Sprintf("Arritmia de disco: %d%% - Taquicardia", usoDisco))
+	}
+}
 
 func main() {
-    // Inaugura o hospital com protocolo de triagem
-    hospital, err := NovoHospital("prontuario.log", WARN)
-    if err != nil {
-        panic("Falha na inauguração do hospital: " + err.Error())
-    }
-    defer hospital.FecharHospital() // Garante fechamento adequado
+	hospital, err := NovoHospital("prontuario_medico.log", INFO)
+	if err != nil {
+		panic("🚨 HOSPITAL INDISPONÍVEL: " + err.Error())
+	}
+	defer hospital.FecharHospital()
 
-    // Pacientes chegando para atendimento
-    hospital.AtenderPaciente(INFO, "Sistema iniciado - check-up rotineiro")
-    hospital.AtenderPaciente(WARN, "CPU acima de 80% - febre alta")
-    hospital.AtenderPaciente(ERROR, "Disco cheio - parada cardíaca!")
-    hospital.AtenderPaciente(INFO, "Backup concluído - exames de rotina")
+	fmt.Println("🏥 HOSPITAL DE LOGS - PLANTÃO DE 3 MINUTOS")
+	fmt.Println("📍 Prontuário: prontuario_medico.log")
+	fmt.Println("⏰ Duração: 3 minutos com variação radical")
+	fmt.Println("==========================================")
 
-    fmt.Println("Plantão concluído! Verifique o prontuário em 'prontuario.log'")
+	inicio := time.Now()
+	fim := inicio.Add(3 * time.Minute)
+	ciclo := 1
+
+	hospital.AtenderPaciente(INFO, "Plantão de 3 minutos iniciado - Variação radical de estresse")
+
+	for time.Now().Before(fim) {
+		tempoRestante := time.Until(fim).Round(time.Second)
+		hospital.AtenderPaciente(INFO, fmt.Sprintf("Ciclo %d - %s restantes", ciclo, tempoRestante))
+		hospital.monitorarSinaisReais()
+		time.Sleep(10 * time.Second)
+		ciclo++
+	}
+
+	hospital.AtenderPaciente(INFO, fmt.Sprintf("✅ PLANTÃO CONCLUÍDO - %d ciclos completados", ciclo-1))
+	fmt.Println("✅ Plantão de 3 minutos concluído!")
 }
