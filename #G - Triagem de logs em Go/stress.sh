@@ -1,31 +1,38 @@
 #!/bin/bash
-echo "🏥 ESTRESSADOR DE PICO - 3 MINUTOS"
-INICIO=$(date +%s)
-FIM=$((INICIO + 180))
+echo "⚡ Estressador Iniciado (3min)"
+INICIO=$(date +%s)  # Marca o tempo de início
+FIM=$((INICIO + 180))  # Calcula tempo final (3 minutos)
 
-log() {
-    echo "[$(date '+%H:%M:%S')] $1: $2"
-}
+# Função auxiliar para log com timestamp
+log() { echo "[$(date '+%H:%M:%S')] $1: $2"; }
 
-log "INFO" "Iniciando estressador com variação radical"
-
+# === LOOP PRINCIPAL ===
+# Calcula segundos decorridos desde o início
 while [ $(date +%s) -lt $FIM ]; do
-    SEGUNDO=$((($(date +%s) - INICIO)))
+    SEG=$((($(date +%s) - INICIO)))
     
-    if [ $SEGUNDO -lt 45 ]; then
-        log "INFO" "FASE 1: Estresse Leve" && stress-ng --cpu 1 --timeout 15s
-        
-    elif [ $SEGUNDO -lt 90 ]; then
-        log "WARN" "FASE 2: Estresse Moderado" && stress-ng --cpu 2 --vm 1 --vm-bytes 500M --timeout 20s
-        
-    elif [ $SEGUNDO -lt 135 ]; then
-        log "ERROR" "FASE 3: Estresse Radical" && stress-ng --cpu 4 --vm 2 --vm-bytes 1G --timeout 25s
-        
+    # === FASE 1: 0-45s - ESTRESSE LEVE ===
+    if [ $SEG -lt 45 ]; then
+        log "INFO" "Fase Leve" 
+        stress-ng --cpu 1 --timeout 15s  # 1 core por 15s
+    
+    # === FASE 2: 45-90s - ESTRESSE MODERADO ===  
+    elif [ $SEG -lt 90 ]; then
+        log "WARN" "Fase Moderada" 
+        stress-ng --cpu 2 --timeout 20s  # 2 cores por 20s
+    
+    # === FASE 3: 90-135s - ESTRESSE RADICAL ===
+    elif [ $SEG -lt 135 ]; then
+        log "ERROR" "Fase Radical" 
+        stress-ng --cpu 4 --timeout 25s  # 4 cores por 25s
+    
+    # === FASE 4: 135-180s - EMERGÊNCIA ===
     else
-        log "ERROR" "FASE 4: EMERGÊNCIA MÁXIMA" && stress-ng --cpu 8 --vm 4 --vm-bytes 2G --timeout 30s
+        log "ERROR" "EMERGÊNCIA" 
+        stress-ng --cpu 8 --timeout 30s  # 8 cores por 30s
     fi
     
-    sleep 5
+    sleep 5  # Intervalo entre ciclos
 done
 
-log "INFO" "✅ ESTRESSADOR CONCLUÍDO"
+log "INFO" "✅ Concluído"

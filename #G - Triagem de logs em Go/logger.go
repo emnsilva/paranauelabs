@@ -6,103 +6,71 @@ import (
 	"time"
 )
 
+// === BLOCO 1: DEFINIÇÕES BÁSICAS ===
+// Define os tipos de níveis de log (como constantes tipadas)
 type Nivel string
-
-const (
-	INFO  Nivel = "INFO"
-	WARN  Nivel = "WARN"
-	ERROR Nivel = "ERROR"
+const ( 
+    INFO  Nivel = "INFO"   // Eventos normais do sistema
+    WARN  Nivel = "WARN"   // Situações que exigem atenção  
+    ERROR Nivel = "ERROR"  // Falhas críticas que precisam de ação
 )
 
+// === BLOCO 2: ESTRUTURA PRINCIPAL ===  
+// Logger é o coração do sistema - armazena configuração e estado
 type Logger struct {
-	prontuario       *os.File
-	protocoloTriagem Nivel
+    arquivo *os.File     // Arquivo onde os logs serão escritos
+    nivelMinimo Nivel    // Filtro: nível mínimo para registrar
 }
 
-func NovoHospital(nomeProntuario string, triagem Nivel) (*Logger, error) {
-	prontuario, err := os.OpenFile(nomeProntuario, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return nil, fmt.Errorf("não foi possível abrir o prontuário: %v", err)
-	}
-	return &Logger{prontuario: prontuario, protocoloTriagem: triagem}, nil
+// === BLOCO 3: INICIALIZAÇÃO ===
+// Cria e configura uma nova instância do Logger
+func NovoLogger(arquivo string, nivel Nivel) (*Logger, error) {
+    // Abre o arquivo em modo append (adiciona ao final), cria se não existir
+    f, err := os.OpenFile(arquivo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    if err != nil { return nil, err } // Se der erro, retorna logo
+    
+    return &Logger{arquivo: f, nivelMinimo: nivel}, nil // Retorna logger configurado
 }
 
-func (l *Logger) deveAtender(gravidade Nivel) bool {
-	prioridades := map[Nivel]int{INFO: 1, WARN: 2, ERROR: 3}
-	return prioridades[gravidade] >= prioridades[l.protocoloTriagem]
+// === BLOCO 4: FILTRO DE TRIAGEM ===
+// Decide se uma mensagem deve ser registrada baseado na prioridade
+func (l *Logger) deveRegistrar(nivel Nivel) bool {
+    // Mapa de prioridades: quanto maior o número, mais urgente
+    p := map[Nivel]int{INFO: 1, WARN: 2, ERROR: 3}
+    return p[nivel] >= p[l.nivelMinimo] // Só registra se prioridade >= mínima
 }
 
-func (l *Logger) AtenderPaciente(gravidade Nivel, sintomas string) error {
-	if !l.deveAtender(gravidade) {
-		return nil
-	}
-
-	ficha := fmt.Sprintf("[%s] %s: %s\n",
-		time.Now().Format("2006-01-02 15:04:05"),
-		gravidade,
-		sintomas)
-
-	_, err := l.prontuario.WriteString(ficha)
-	return err
+// === BLOCO 5: REGISTRO PRINCIPAL ===  
+// Método público para registrar mensagens (o coração do logger)
+func (l *Logger) Registrar(nivel Nivel, msg string) error {
+    if !l.deveRegistrar(nivel) { return nil } // Pula se não atender ao filtro
+    
+    // Formata a mensagem com timestamp e nível
+    log := fmt.Sprintf("[%s] %s: %s\n", 
+        time.Now().Format("2006-01-02 15:04:05"), // Timestamp formatado
+        nivel,    // Nível de gravidade
+        msg)      // Mensagem descritiva
+        
+    // Escreve no arquivo e retorna qualquer erro
+    _, err := l.arquivo.WriteString(log)
+    return err
 }
 
-func (l *Logger) FecharHospital() error {
-	return l.prontuario.Close()
-}
+// === BLOCO 6: LIMPEZA ===
+// Fecha o arquivo adequadamente - IMPORTANTE para evitar corrupção
+func (l *Logger) Fechar() error { return l.arquivo.Close() }
 
-func (l *Logger) monitorarSinaisReais() {
-	now := time.Now()
-	segundo := now.Second()
-	
-	usoCPU := 70 + (segundo % 30)
-	usoMemoria := 60 + (segundo % 40)
-	usoDisco := 50 + (segundo % 50)
-	
-	if usoCPU > 85 {
-		l.AtenderPaciente(WARN, fmt.Sprintf("Febre de CPU crítica: %d%% - Resfriamento necessário", usoCPU))
-	} else if usoCPU > 75 {
-		l.AtenderPaciente(INFO, fmt.Sprintf("CPU elevada: %d%% - Monitorar", usoCPU))
-	}
-	
-	if usoMemoria > 90 {
-		l.AtenderPaciente(ERROR, fmt.Sprintf("Hemorragia de memória: %d%% - Transfusão necessária", usoMemoria))
-	} else if usoMemoria > 80 {
-		l.AtenderPaciente(WARN, fmt.Sprintf("Pressão memória alta: %d%% - Risco", usoMemoria))
-	}
-	
-	if usoDisco > 95 {
-		l.AtenderPaciente(ERROR, fmt.Sprintf("INFARTO DE DISCO: %d%% - PARADA CARDÍACA IMINENTE", usoDisco))
-	} else if usoDisco > 85 {
-		l.AtenderPaciente(WARN, fmt.Sprintf("Arritmia de disco: %d%% - Taquicardia", usoDisco))
-	}
-}
-
+// === BLOCO 7: EXEMPLO DE USO ===
 func main() {
-	hospital, err := NovoHospital("prontuario_medico.log", INFO)
-	if err != nil {
-		panic("🚨 HOSPITAL INDISPONÍVEL: " + err.Error())
-	}
-	defer hospital.FecharHospital()
+    // Cria logger que registra a partir de INFO
+    logger, err := NovoLogger("logs.log", INFO)
+    if err != nil { panic("Erro: " + err.Error()) }
+    defer logger.Fechar() // Garante fechamento mesmo com erro
 
-	fmt.Println("🏥 HOSPITAL DE LOGS - PLANTÃO DE 3 MINUTOS")
-	fmt.Println("📍 Prontuário: prontuario_medico.log")
-	fmt.Println("⏰ Duração: 3 minutos com variação radical")
-	fmt.Println("==========================================")
-
-	inicio := time.Now()
-	fim := inicio.Add(3 * time.Minute)
-	ciclo := 1
-
-	hospital.AtenderPaciente(INFO, "Plantão de 3 minutos iniciado - Variação radical de estresse")
-
-	for time.Now().Before(fim) {
-		tempoRestante := time.Until(fim).Round(time.Second)
-		hospital.AtenderPaciente(INFO, fmt.Sprintf("Ciclo %d - %s restantes", ciclo, tempoRestante))
-		hospital.monitorarSinaisReais()
-		time.Sleep(10 * time.Second)
-		ciclo++
-	}
-
-	hospital.AtenderPaciente(INFO, fmt.Sprintf("✅ PLANTÃO CONCLUÍDO - %d ciclos completados", ciclo-1))
-	fmt.Println("✅ Plantão de 3 minutos concluído!")
+    // Registra exemplos de diferentes níveis
+    logger.Registrar(INFO, "Sistema iniciado")       // ✅ Será registrado
+    logger.Registrar(WARN, "CPU acima de 80%")       // ✅ Será registrado  
+    logger.Registrar(ERROR, "Disco cheio")           // ✅ Será registrado
+    
+    fmt.Println("Logs registrados em logs.log")
 }
