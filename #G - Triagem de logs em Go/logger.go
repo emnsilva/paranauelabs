@@ -2,75 +2,139 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+	"path/filepath"
 	"time"
 )
 
-// === BLOCO 1: DEFINIÇÕES BÁSICAS ===
-// Define os tipos de níveis de log (como constantes tipadas)
 type Nivel string
-const ( 
-    INFO  Nivel = "INFO"   // Eventos normais do sistema
-    WARN  Nivel = "WARN"   // Situações que exigem atenção  
-    ERROR Nivel = "ERROR"  // Falhas críticas que precisam de ação
-)
+const ( INFO Nivel = "INFO"; WARN Nivel = "WARN"; ERROR Nivel = "ERROR" )
 
-// === BLOCO 2: ESTRUTURA PRINCIPAL ===  
-// Logger é o coração do sistema - armazena configuração e estado
 type Logger struct {
-    arquivo *os.File     // Arquivo onde os logs serão escritos
-    nivelMinimo Nivel    // Filtro: nível mínimo para registrar
+    arquivo *os.File
+    nivelMinimo Nivel
 }
 
-// === BLOCO 3: INICIALIZAÇÃO ===
-// Cria e configura uma nova instância do Logger
-func NovoLogger(arquivo string, nivel Nivel) (*Logger, error) {
-    // Abre o arquivo em modo append (adiciona ao final), cria se não existir
-    f, err := os.OpenFile(arquivo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-    if err != nil { return nil, err } // Se der erro, retorna logo
+func NovoLogger(nivel Nivel) (*Logger, error) {
+    if err := os.MkdirAll("logs", 0755); err != nil {
+        return nil, fmt.Errorf("erro ao criar pasta logs: %v", err)
+    }
     
-    return &Logger{arquivo: f, nivelMinimo: nivel}, nil // Retorna logger configurado
+    caminhoCompleto := filepath.Join("logs", "prontuario.log")
+    f, err := os.OpenFile(caminhoCompleto, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    if err != nil { return nil, err }
+    
+    return &Logger{arquivo: f, nivelMinimo: nivel}, nil
 }
 
-// === BLOCO 4: FILTRO DE TRIAGEM ===
-// Decide se uma mensagem deve ser registrada baseado na prioridade
 func (l *Logger) deveRegistrar(nivel Nivel) bool {
-    // Mapa de prioridades: quanto maior o número, mais urgente
     p := map[Nivel]int{INFO: 1, WARN: 2, ERROR: 3}
-    return p[nivel] >= p[l.nivelMinimo] // Só registra se prioridade >= mínima
+    return p[nivel] >= p[l.nivelMinimo]
 }
 
-// === BLOCO 5: REGISTRO PRINCIPAL ===  
-// Método público para registrar mensagens (o coração do logger)
 func (l *Logger) Registrar(nivel Nivel, msg string) error {
-    if !l.deveRegistrar(nivel) { return nil } // Pula se não atender ao filtro
+    if !l.deveRegistrar(nivel) { return nil }
     
-    // Formata a mensagem com timestamp e nível
     log := fmt.Sprintf("[%s] %s: %s\n", 
-        time.Now().Format("2006-01-02 15:04:05"), // Timestamp formatado
-        nivel,    // Nível de gravidade
-        msg)      // Mensagem descritiva
+        time.Now().Format("2006-01-02 15:04:05"),
+        nivel, msg)
         
-    // Escreve no arquivo e retorna qualquer erro
     _, err := l.arquivo.WriteString(log)
     return err
 }
 
-// === BLOCO 6: LIMPEZA ===
-// Fecha o arquivo adequadamente - IMPORTANTE para evitar corrupção
 func (l *Logger) Fechar() error { return l.arquivo.Close() }
 
-// === BLOCO 7: EXEMPLO DE USO ===
-func main() {
-    // Cria logger que registra a partir de INFO
-    logger, err := NovoLogger("logs.log", INFO)
-    if err != nil { panic("Erro: " + err.Error()) }
-    defer logger.Fechar() // Garante fechamento mesmo com erro
-
-    // Registra exemplos de diferentes níveis
-    logger.Registrar(INFO, "Sistema iniciado")       // ✅ Será registrado
-    logger.Registrar(WARN, "CPU acima de 80%")       // ✅ Será registrado  
-    logger.Registrar(ERROR, "Disco cheio")           // ✅ Será registrado
+// ⭐⭐ SINTOMAS EMBARALHADOS E IMPREVISÍVEIS ⭐⭐
+func (l *Logger) monitorarSintomasAleatorios(ciclo int) {
+    rand.Seed(time.Now().UnixNano() + int64(ciclo))
     
-    fmt.Println("Logs registrados em logs.log")
+    // Gera sintomas aleatórios com padrões imprevisíveis
+    sintomasCPU := []string{
+        "Febre de CPU", "Overclock espontâneo", "Processador hiperativo", 
+        "Cache congestionado", "Núcleos em colapso", "Temperatura crítica",
+    }
+    
+    sintomasMemoria := []string{
+        "Hemorragia de RAM", "Vazamento de memória", "Swap congestionado",
+        "Buffer overload", "Alocação descontrolada", "Heap em crise",
+    }
+    
+    sintomasDisco := []string{
+        "Infarto de disco", "Taquicardia de IO", "Setores corruptos",
+        "Latência crítica", "Throughput colapsado", "FileSystem em pane",
+    }
+    
+    // ⭐⭐ EMBARALHA A ORDEM DOS SINTOMAS ⭐⭐
+    sintomaCPU := sintomasCPU[rand.Intn(len(sintomasCPU))]
+    sintomaMemoria := sintomasMemoria[rand.Intn(len(sintomasMemoria))]
+    sintomaDisco := sintomasDisco[rand.Intn(len(sintomasDisco))]
+    
+    // ⭐⭐ VALORES ALEATÓRIOS NÃO LINEARES ⭐⭐
+    usoCPU := 30 + rand.Intn(70)           // 30-100% (aleatório)
+    usoMemoria := 40 + rand.Intn(60)       // 40-100% (aleatório)  
+    usoDisco := 20 + rand.Intn(80)         // 20-100% (aleatório)
+    
+    // ⭐⭐ NIVEL ALEATÓRIO PARA CADA SINTOMA ⭐⭐
+    niveis := []Nivel{INFO, WARN, ERROR}
+    nivelCPU := niveis[rand.Intn(len(niveis))]
+    nivelMemoria := niveis[rand.Intn(len(niveis))]
+    nivelDisco := niveis[rand.Intn(len(niveis))]
+    
+    // Registra sintomas embaralhados
+    if rand.Intn(100) > 30 { // 70% de chance de registrar CPU
+        l.Registrar(nivelCPU, fmt.Sprintf("%s: %d%%", sintomaCPU, usoCPU))
+    }
+    
+    if rand.Intn(100) > 40 { // 60% de chance de registrar Memória
+        l.Registrar(nivelMemoria, fmt.Sprintf("%s: %d%%", sintomaMemoria, usoMemoria))
+    }
+    
+    if rand.Intn(100) > 50 { // 50% de chance de registrar Disco
+        l.Registrar(nivelDisco, fmt.Sprintf("%s: %d%%", sintomaDisco, usoDisco))
+    }
+    
+    // ⭐⭐ EVENTOS ESPECIAIS ALEATÓRIOS ⭐⭐
+    if rand.Intn(100) > 90 { // 10% de chance de evento especial
+        eventosEspeciais := []string{
+            "Paciente em recuperação espontânea",
+            "Sistema estabilizado misteriosamente", 
+            "Crise resolvida sem intervenção",
+            "Diagnóstico inconclusivo - sintomas sumiram",
+            "Remissão completa dos sintomas",
+        }
+        l.Registrar(INFO, eventosEspeciais[rand.Intn(len(eventosEspeciais))])
+    }
+}
+
+func main() {
+    logger, err := NovoLogger(INFO)
+    if err != nil { panic("Erro: " + err.Error()) }
+    defer logger.Fechar()
+
+    fmt.Println("🏥 HOSPITAL DE LOGS - PLANTÃO")
+    fmt.Println("📍 Prontuário: logs/prontuario.log")
+    fmt.Println("==========================================")
+
+    inicio := time.Now()
+    fim := inicio.Add(3 * time.Minute)
+    ciclo := 1
+
+    logger.Registrar(INFO, "Plantão iniciado")
+
+    for time.Now().Before(fim) {
+        tempoRestante := time.Until(fim).Round(time.Second)
+        
+        logger.Registrar(INFO, fmt.Sprintf("Ciclo %d - %s restantes", ciclo, tempoRestante))
+        
+        // ⭐⭐ MONITORAMENTO COM SINTOMAS EMBARALHADOS ⭐⭐
+        logger.monitorarSintomasAleatorios(ciclo)
+        
+        time.Sleep(8 * time.Second) // Intervalo variado
+        ciclo++
+    }
+
+    logger.Registrar(INFO, fmt.Sprintf("✅ PLANTÃO CONCLUÍDO - %d ciclos", ciclo-1))
+    fmt.Println("✅ Plantão concluído!")
 }

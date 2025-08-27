@@ -18,7 +18,7 @@ case $OS in
     ubuntu|debian)
         echo "Atualizando sistema (Ubuntu/Debian)..."
         sudo apt-get update && sudo apt-get upgrade -y -qq
-        sudo apt-get install -y stress-ng golang-go htop
+        sudo apt-get install -y -q stress-ng golang-go htop
         ;;
     rhel|centos|fedora)
         echo "Atualizando sistema (RHEL/CentOS/Fedora)..."
@@ -33,18 +33,6 @@ esac
 
 # Prepara ambiente (funciona em qualquer distro)
 mkdir -p logs
-cd logs
-
-# Cria script de teste universal
-cat > stress.sh << 'EOF'
-#!/bin/bash
-echo "Gerando carga no sistema ($(hostname))..."
-stress-ng --cpu 2 --timeout 20s
-stress-ng --vm 1 --vm-bytes 512M --timeout 15s
-echo "Carga concluida em $(date)"
-EOF
-
-chmod +x stress.sh
+chmod 777 logs
 
 echo "Instalacao concluida em $OS!"
-echo "Execute: cd /logs && ./stress.sh"
