@@ -46,95 +46,109 @@ func (l *Logger) Registrar(nivel Nivel, msg string) error {
 
 func (l *Logger) Fechar() error { return l.arquivo.Close() }
 
-// ⭐⭐ SINTOMAS EMBARALHADOS E IMPREVISÍVEIS ⭐⭐
-func (l *Logger) monitorarSintomasAleatorios(ciclo int) {
+// ⭐⭐ MONITORAMENTO COM MUITO MAIS ESTRESSE ⭐⭐
+func (l *Logger) monitorarSintomasIntensos(ciclo int) {
     rand.Seed(time.Now().UnixNano() + int64(ciclo))
     
-    // Gera sintomas aleatórios com padrões imprevisíveis
     sintomasCPU := []string{
-        "Febre de CPU", "Overclock espontâneo", "Processador hiperativo", 
-        "Cache congestionado", "Núcleos em colapso", "Temperatura crítica",
+        "FEBRE ALTA DE CPU", "OVERCLOCK PERIGOSO", "NÚCLEOS EM COLAPSO", 
+        "TEMPERATURA CRÍTICA", "THROTTLING ATIVADO", "PROCESSADOR SUPRA-AQUECIDO",
     }
     
     sintomasMemoria := []string{
-        "Hemorragia de RAM", "Vazamento de memória", "Swap congestionado",
-        "Buffer overload", "Alocação descontrolada", "Heap em crise",
+        "HEMORRAGIA DE RAM", "VAZAMENTO MASSIVO", "SWAP CONGESTIONADO",
+        "OUT OF MEMORY IMINENTE", "ALOCAÇÃO DESCONTROLADA", "HEAP EM CRISE",
     }
     
     sintomasDisco := []string{
-        "Infarto de disco", "Taquicardia de IO", "Setores corruptos",
-        "Latência crítica", "Throughput colapsado", "FileSystem em pane",
+        "INFARTO DE DISCO", "TAQUICARDIA DE IO", "SETORES CORRUPTOS",
+        "LATÊNCIA CRÍTICA", "THROUGHPUT COLAPSADO", "FILESYSTEM EM PANE",
     }
     
-    // ⭐⭐ EMBARALHA A ORDEM DOS SINTOMAS ⭐⭐
-    sintomaCPU := sintomasCPU[rand.Intn(len(sintomasCPU))]
-    sintomaMemoria := sintomasMemoria[rand.Intn(len(sintomasMemoria))]
-    sintomaDisco := sintomasDisco[rand.Intn(len(sintomasDisco))]
-    
-    // ⭐⭐ VALORES ALEATÓRIOS NÃO LINEARES ⭐⭐
-    usoCPU := 30 + rand.Intn(70)           // 30-100% (aleatório)
-    usoMemoria := 40 + rand.Intn(60)       // 40-100% (aleatório)  
-    usoDisco := 20 + rand.Intn(80)         // 20-100% (aleatório)
-    
-    // ⭐⭐ NIVEL ALEATÓRIO PARA CADA SINTOMA ⭐⭐
-    niveis := []Nivel{INFO, WARN, ERROR}
-    nivelCPU := niveis[rand.Intn(len(niveis))]
-    nivelMemoria := niveis[rand.Intn(len(niveis))]
-    nivelDisco := niveis[rand.Intn(len(niveis))]
-    
-    // Registra sintomas embaralhados
-    if rand.Intn(100) > 30 { // 70% de chance de registrar CPU
-        l.Registrar(nivelCPU, fmt.Sprintf("%s: %d%%", sintomaCPU, usoCPU))
+    sintomasRede := []string{
+        "PACKET LOSS CRÍTICO", "LATÊNCIA EXTREMA", "DNS INTOXICADO",
+        "CONEXÃO INTERMITENTE", "BANDWIDTH CONGESTIONADO", "TIMEOUT GENERALIZADO",
     }
     
-    if rand.Intn(100) > 40 { // 60% de chance de registrar Memória
-        l.Registrar(nivelMemoria, fmt.Sprintf("%s: %d%%", sintomaMemoria, usoMemoria))
-    }
-    
-    if rand.Intn(100) > 50 { // 50% de chance de registrar Disco
-        l.Registrar(nivelDisco, fmt.Sprintf("%s: %d%%", sintomaDisco, usoDisco))
-    }
-    
-    // ⭐⭐ EVENTOS ESPECIAIS ALEATÓRIOS ⭐⭐
-    if rand.Intn(100) > 90 { // 10% de chance de evento especial
-        eventosEspeciais := []string{
-            "Paciente em recuperação espontânea",
-            "Sistema estabilizado misteriosamente", 
-            "Crise resolvida sem intervenção",
-            "Diagnóstico inconclusivo - sintomas sumiram",
-            "Remissão completa dos sintomas",
+    // ⭐⭐ MAIS ESTRESSE: 70% de chance de gerar sintomas graves ⭐⭐
+    if rand.Intn(100) < 70 {
+        tipos := []struct{
+            nome    string
+            sintomas []string
+            peso    int
+        }{
+            {"CPU", sintomasCPU, 35},
+            {"Memória", sintomasMemoria, 30},
+            {"Disco", sintomasDisco, 25},
+            {"Rede", sintomasRede, 10},
         }
-        l.Registrar(INFO, eventosEspeciais[rand.Intn(len(eventosEspeciais))])
+        
+        tipoEscolhido := tipos[rand.Intn(len(tipos))]
+        sintoma := tipoEscolhido.sintomas[rand.Intn(len(tipoEscolhido.sintomas))]
+        
+        // ⭐⭐ VALORES MAIS ALTOS: 80-100% para mais ERROS ⭐⭐
+        valor := 80 + rand.Intn(20) // 80-100%
+        
+        // ⭐⭐ DISTRIBUIÇÃO MAIS AGRESSIVA: Menos INFO, mais WARN/ERROR ⭐⭐
+        var nivel Nivel
+        switch {
+        case valor > 95:
+            nivel = ERROR // 25% de chance
+        case valor > 85:
+            nivel = WARN  // 50% de chance  
+        default:
+            nivel = INFO  // 25% de chance
+        }
+        
+        l.Registrar(nivel, fmt.Sprintf("%s - %s: %d%%", tipoEscolhido.nome, sintoma, valor))
+    }
+    
+    // ⭐⭐ EVENTOS CATASTRÓFICOS ALEATÓRIOS ⭐⭐
+    if rand.Intn(100) > 80 { // 20% de chance de evento catastrófico
+        catastrofes := []string{
+            "🚨 COLAPSO SISTÊMICO IMINENTE - INTERVENÇÃO IMEDIATA",
+            "💥 FALHA EM CASCATA DETECTADA - TODOS OS SISTEMAS AFETADOS",
+            "🔥 SUPERAQUECIMENTO CRÍTICO - DESLIGAMENTO DE EMERGÊNCIA",
+            "⚡ CURTO-CIRCUITO VIRTUAL - DANOS IRREVERSÍVEIS",
+            "🌪️ TORNADO DE BUGS - CONTAMINAÇÃO GENERALIZADA",
+        }
+        l.Registrar(ERROR, catastrofes[rand.Intn(len(catastrofes))])
     }
 }
 
 func main() {
-    logger, err := NovoLogger(INFO)
+    // ⭐⭐ MUDA PARA WARN: Só registra WARN e ERROR ⭐⭐
+    logger, err := NovoLogger(WARN)
     if err != nil { panic("Erro: " + err.Error()) }
     defer logger.Fechar()
 
-    fmt.Println("🏥 HOSPITAL DE LOGS - PLANTÃO")
+    fmt.Println("🏥 HOSPITAL DE LOGS - PLANTÃO DE ESTRESSE MÁXIMO")
     fmt.Println("📍 Prontuário: logs/prontuario.log")
+    fmt.Println("⚡ FILTRO: Apenas WARN e ERROR serão registrados!")
+    fmt.Println("🔥 Preparando para estresse intenso...")
     fmt.Println("==========================================")
 
     inicio := time.Now()
     fim := inicio.Add(3 * time.Minute)
     ciclo := 1
 
-    logger.Registrar(INFO, "Plantão iniciado")
+    logger.Registrar(WARN, "🚨 PLANTÃO DE ESTRESSE MÁXIMO INICIADO - PREPARAR PARA EMERGÊNCIAS")
 
     for time.Now().Before(fim) {
         tempoRestante := time.Until(fim).Round(time.Second)
         
-        logger.Registrar(INFO, fmt.Sprintf("Ciclo %d - %s restantes", ciclo, tempoRestante))
+        if ciclo%3 == 0 { // A cada 3 ciclos
+            logger.Registrar(WARN, fmt.Sprintf("⏰ Ciclo %d - %s restantes", ciclo, tempoRestante))
+        }
         
-        // ⭐⭐ MONITORAMENTO COM SINTOMAS EMBARALHADOS ⭐⭐
-        logger.monitorarSintomasAleatorios(ciclo)
+        // ⭐⭐ MONITORAMENTO COM ESTRESSE INTENSO ⭐⭐
+        logger.monitorarSintomasIntensos(ciclo)
         
-        time.Sleep(8 * time.Second) // Intervalo variado
+        time.Sleep(8 * time.Second)
         ciclo++
     }
 
-    logger.Registrar(INFO, fmt.Sprintf("✅ PLANTÃO CONCLUÍDO - %d ciclos", ciclo-1))
-    fmt.Println("✅ Plantão concluído!")
+    logger.Registrar(WARN, fmt.Sprintf("✅ PLANTÃO CONCLUÍDO - %d ciclos de estresse intenso", ciclo-1))
+    fmt.Println("✅ Plantão de estresse máximo concluído!")
+    fmt.Println("📋 Prontuário com mostly WARN/ERROR salvo!")
 }
