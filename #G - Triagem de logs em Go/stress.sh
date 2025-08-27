@@ -1,9 +1,8 @@
 #!/bin/bash
-# estressador_final.sh - 15 linhas de caos controlado
 NOME_ARQUIVO="logs/Log$(date +%Y%m%d).log"
-echo "⚡ Estressador - Arquivo: $NOME_ARQUIVO"
+echo "⚡ Estressor - Arquivo: $NOME_ARQUIVO"
 mkdir -p logs
-echo "[$(date '+%H:%M:%S')] WARN: 🔥 Estressador iniciado" >> "$NOME_ARQUIVO"
+echo "[$(date '+%H:%M:%S')] WARN: 🔥 Estressor iniciado" >> "$NOME_ARQUIVO"
 
 inicio=$(date +%s)
 while [ $(($(date +%s) - inicio)) -lt 180 ]; do
@@ -16,5 +15,5 @@ while [ $(($(date +%s) - inicio)) -lt 180 ]; do
     sleep $((3 + RANDOM % 4))
 done
 
-echo "[$(date '+%H:%M:%S')] WARN: ✅ Estressador concluído" >> "$NOME_ARQUIVO"
-echo "✅ Concluído - Verifique $NOME_ARQUIVO"
+echo "[$(date '+%H:%M:%S')] WARN: ✅ Estressor concluido" >> "$NOME_ARQUIVO"
+echo "✅ Concluido - Verifique $NOME_ARQUIVO"
