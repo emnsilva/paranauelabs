@@ -1,10 +1,18 @@
+// Declara package main (programa executável) e importa as bibliotecas fundamentais para formatação, manipulação de arquivos, 
+// geração de aleatórios e controle de tempo.
+
 package main
 import ("fmt";"math/rand";"os";"time")
+
+// Define o tipo Nivel como string e três constantes para os níveis de log: INFO, WARN e ERROR.
 
 type Nivel string
 const ( INFO Nivel = "INFO"; WARN Nivel = "WARN"; ERROR Nivel = "ERROR" )
 
 type Logger struct { arquivo *os.File }
+
+// Função para criar um novo logger, que cria o diretório "logs" se não existir,
+// abre (ou cria) o arquivo de log com o nome baseado na data atual e retorna uma instância do Logger.
 
 func NovoLogger() (*Logger, error) {
 	os.MkdirAll("logs", 0755)
@@ -20,6 +28,9 @@ func (l *Logger) Registrar(nivel Nivel, msg string) {
 }
 
 func (l *Logger) Fechar() { l.arquivo.Close() }
+
+// Função principal que demonstra o uso do logger, registrando mensagens de log simuladas
+// por um período de 3 minutos, com uma pausa de 8 segundos entre cada registro.
 
 func main() {
 	logger, _ := NovoLogger()

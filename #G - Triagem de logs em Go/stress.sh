@@ -15,5 +15,5 @@ while [ $(($(date +%s) - inicio)) -lt 180 ]; do
     sleep $((3 + RANDOM % 4))
 done
 
-echo "[$(date '+%H:%M:%S')] WARN: ✅ Estressor concluido" >> "$NOME_ARQUIVO"
+echo "[$(date '+%H:%M:%S')] ✅ Estressor concluido" >> "$NOME_ARQUIVO"
 echo "✅ Concluido - Verifique $NOME_ARQUIVO"
