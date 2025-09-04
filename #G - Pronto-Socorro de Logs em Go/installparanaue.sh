@@ -31,7 +31,7 @@ case $OS in
         ;;
 esac
 
-# Prepara ambiente (funciona em qualquer distro)
+# Cria pasta logs com permissão de escrita
 mkdir -p logs
 chmod 777 logs
 
