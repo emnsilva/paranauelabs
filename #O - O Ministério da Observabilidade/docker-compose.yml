@@ -1,0 +1,39 @@
+services:
+  # Infraestrutura
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes: ["./prometheus.yml:/etc/prometheus/prometheus.yml"]
+
+  # Serviços Monitorados
+  nginx:
+    image: nginx/nginx-prometheus-exporter
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports: 
+      - "8080:80"    # Porta do NGINX
+      - "9113:9113"  # Porta das métricas
+    environment:
+      NGINX_PORT: 80
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: ministerio
+     volumes:
+      - ./dbministerio.sql:/docker-entrypoint-initdb.d/dbministerio.sql
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:ministerio@postgres:5432/POSTGRES_DB?sslmode=disable"
+    depends_on: ["postgres"]
+
+  stress:
+    image: alexeiled/stress-ng:latest
+    command: ["--cpu", "4", "--vm", "2"]
+
+  # Exportadores
+  node_exporter:
+    image: prom/node-exporter
+    ports: ["9100:9100"]
