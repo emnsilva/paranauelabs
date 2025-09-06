@@ -20,7 +20,7 @@ services:
     image: postgres:15
     environment:
       POSTGRES_PASSWORD: ministerio
-     volumes:
+    volumes:
       - ./dbministerio.sql:/docker-entrypoint-initdb.d/dbministerio.sql
 
   postgres_exporter:
@@ -32,6 +32,10 @@ services:
   stress:
     image: alexeiled/stress-ng:latest
     command: ["--cpu", "4", "--vm", "2"]
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports: ["8081:8080"]
 
   # Exportadores
   node_exporter:
