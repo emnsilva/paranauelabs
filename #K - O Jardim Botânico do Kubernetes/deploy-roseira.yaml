@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canteiro-de-roseiras
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: roseira
+  template:
+    metadata:
+      labels:
+        app: roseira
+    spec:
+      containers:
+      - name: roseira-container
+        image: nginx:latest
+        ports:
+        - containerPort: 80
