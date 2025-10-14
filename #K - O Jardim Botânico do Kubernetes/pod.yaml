@@ -1,0 +1,21 @@
+apiVersion: v1                      # Versão da API do Kubernetes que estamos usando
+kind: Pod                           # Tipo do recurso: estamos criando um VASO
+metadata:                           # Metadados - informações de identificação
+  name: prometheus-pod              # Nome único do vaso no jardim
+  labels:                           # Etiquetas para identificar e agrupar vasos
+    app: prometheus                 # Etiqueta: "esta planta é um prometheus"
+    tier: monitoring                # Etiqueta: "esta planta é para monitoramento"
+spec:                               # Especificação - COMO o vaso deve ser
+  containers:                       # Lista de mudas que vão neste vaso
+  - name: prometheus-container      # Nome da primeira muda (container)
+    image: prom/prometheus:latest   # Semente oficial: qual imagem Docker usar
+    ports:                          # Portas que a planta expõe para o mundo
+    - containerPort: 9090           # Porta 9090 - onde visitantes acessam
+      protocol: TCP                 # Protocolo de comunicação
+    resources:                      # Nutrientes que a planta precisa
+      requests:                     # Nutrientes MÍNIMOS garantidos
+        memory: "512Mi"             # Memória: 512 Megabytes
+        cpu: "250m"                 # CPU: 250 milicores (0.25 core)
+      limits:                       # Nutrientes MÁXIMOS que pode consumir
+        memory: "1Gi"               # Memória: 1 Gibibyte
+        cpu: "500m"                 # CPU: 500 milicores (0.5 core)

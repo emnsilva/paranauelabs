@@ -1,0 +1,13 @@
+apiVersion: v1              # Usa a API estável do Kubernetes para Services
+kind: Service               # Tipo do recurso: SERVICE (nosso "portão")
+metadata:                   # Área de identificação e etiquetas
+  name: prometheus-service  # Nome DO PORTÃO - como vamos chamá-lo
+spec:                       # Configurações ESPECÍFICAS do Service
+  type: NodePort            # TIPO DO PORTÃO: porta fixa nos nodes
+  selector:                 # REGRA DE BUSCA: como achar os Pods certos
+    app: prometheus         # "Só passa quem tiver a label app=prometheus"
+  ports:                    # Configuração das PORTAS do portão
+  - port: 80                # Porta INTERNA do Service
+    targetPort: 9090        # Porta dos Pods (onde o Prometheus escuta)
+    nodePort: 30001         # Porta EXTERNA fixa nos nodes (opcional)
+    protocol: TCP           # Protocolo de comunicação

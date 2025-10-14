@@ -1,0 +1,20 @@
+apiVersion: autoscaling/v2        # Versão da API de autoscaling
+kind: HorizontalPodAutoscaler     # Tipo: JARDINEIRO HORIZONTAL
+metadata:
+  name: prometheus-hpa            # Nome do nosso jardineiro
+spec:
+  scaleTargetRef:                 # ALVO do jardineiro - ONDE ele vai atuar
+    apiVersion: apps/v1           # API do alvo (Deployment)
+    kind: Deployment              # Tipo do alvo: SISTEMA DE PLANTIO
+    name: prometheus-deployment   # Nome específico do sistema que ele cuida
+  
+  minReplicas: 1                  # MÍNIMO de vasos: mesmo vazio, mantém 1 vaso
+  maxReplicas: 10                 # MÁXIMO de vasos: limite de segurança
+  
+  metrics:                        # INSTRUMENTOS DE MEDIÇÃO do jardineiro
+  - type: Resource                # Tipo: RECURSOS (CPU/Memória)
+    resource:
+      name: cpu                   # Medindo USO DE CPU
+      target:
+        type: Utilization         # Tipo: PORCENTAGEM de utilização
+        averageUtilization: 50    # ALVO: escala quando a CPU passar de 50%
