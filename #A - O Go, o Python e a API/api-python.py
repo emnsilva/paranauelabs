@@ -1,97 +1,97 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
 import sqlite3
 
 # Cria a aplicação Flask - nossa base do xerife
 app = Flask(__name__)
+DB_PATH = 'outlaws.db'
 
-@app.route('/outlaws', methods=['GET', 'POST'])
-def handle_outlaws():
+def get_db():
     """
-    Rota para gerenciar a lista completa de procurados.
-    GET: Retorna todos os bandidos
-    POST: Adiciona um novo bandido à lista
+    Abre uma nova conexão com o banco de dados se não houver uma no contexto da requisição atual.
+    Isso garante que a mesma conexão seja reutilizada durante toda a requisição.
     """
-    # Conecta ao banco de dados - abre o cofre
-    conn = sqlite3.connect('outlaws.db')
-    # Configura para retornar linhas como dicionários (acesso por nome da coluna)
-    conn.row_factory = sqlite3.Row
-    
-    # SE FOR UMA REQUISIÇÃO GET - LISTAR TODOS OS BANDIDOS
-    if request.method == 'GET':
-        # Executa query para buscar todos os bandidos
-        outlaws = conn.execute('SELECT * FROM outlaws').fetchall()
-        # Fecha a conexão com o banco
-        conn.close()
-        # Converte cada linha para dicionário e retorna como JSON
-        return jsonify([dict(row) for row in outlaws])
-    
-    # SE FOR UMA REQUISIÇÃO POST - ADICIONAR NOVO BANDIDO
-    if request.method == 'POST':
-        # Pega os dados JSON do corpo da requisição
-        data = request.get_json()
-        # Cria um cursor para executar comandos SQL
-        cursor = conn.cursor()
-        # Insere novo bandido no banco de dados
-        cursor.execute(
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DB_PATH)
+        # Configura para retornar linhas como dicionários (acesso por nome da coluna)
+        db.row_factory = sqlite3.Row
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    """
+    Fecha a conexão com o banco de dados ao final da requisição.
+    """
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+@app.get('/outlaws')
+def get_outlaws():
+    """Lista todos os bandidos."""
+    db = get_db()
+    outlaws = db.execute('SELECT * FROM outlaws ORDER BY id').fetchall()
+    return jsonify([dict(row) for row in outlaws])
+
+@app.post('/outlaws')
+def create_outlaw():
+    """Adiciona um novo bandido."""
+    try:
+        data = request.get_json(force=True)
+    except:
+        return jsonify({'error': 'JSON inválido'}), 400
+
+    db = get_db()
+    with db: # 'with' gerencia commit/rollback automaticamente
+        cursor = db.execute(
             'INSERT INTO outlaws (name, reward, crime) VALUES (?, ?, ?)',
             (data['name'], data['reward'], data['crime'])
         )
-        # Salva as mudanças no banco
-        conn.commit()
-        # Fecha a conexão
-        conn.close()
-        # Retorna o ID do novo bandido criado com status 201 (Created)
-        return jsonify({'id': cursor.lastrowid}), 201
+    
+    # Busca o bandido recém-criado para retornar o objeto completo
+    new_outlaw = db.execute('SELECT * FROM outlaws WHERE id = ?', (cursor.lastrowid,)).fetchone()
+    return jsonify(dict(new_outlaw)), 201
 
-@app.route('/outlaws/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_outlaw(id):
-    """
-    Rota para gerenciar um bandido específico pelo ID.
-    GET: Busca um bandido pelo ID
-    PUT: Atualiza os dados de um bandido
-    DELETE: Remove um bandido da lista
-    """
-    # Conecta ao banco de dados
-    conn = sqlite3.connect('outlaws.db')
-    conn.row_factory = sqlite3.Row
-    # Cria cursor para executar comandos
-    cursor = conn.cursor()
-    
-    # SE FOR GET - BUSCAR BANDIDO ESPECÍFICO
-    if request.method == 'GET':
-        # Busca o bandido com o ID especificado
-        outlaw = cursor.execute('SELECT * FROM outlaws WHERE id = ?', (id,)).fetchone()
-        # Fecha a conexão
-        conn.close()
-        # Se encontrou, retorna como JSON; se não, retorna 404 (Não encontrado)
-        return jsonify(dict(outlaw)) if outlaw else ('', 404)
-    
-    # SE FOR PUT - ATUALIZAR BANDIDO
-    if request.method == 'PUT':
-        # Pega os novos dados do corpo da requisição
-        data = request.get_json()
-        # Atualiza TODOS os campos do bandido no banco
-        cursor.execute(
+@app.get('/outlaws/<int:id>')
+def get_outlaw(id):
+    """Busca um bandido específico pelo ID."""
+    db = get_db()
+    outlaw = db.execute('SELECT * FROM outlaws WHERE id = ?', (id,)).fetchone()
+    if not outlaw:
+        return jsonify({'error': 'Bandido não encontrado'}), 404
+    return jsonify(dict(outlaw))
+
+@app.put('/outlaws/<int:id>')
+def update_outlaw(id):
+    """Atualiza os dados de um bandido."""
+    try:
+        data = request.get_json(force=True)
+    except:
+        return jsonify({'error': 'JSON inválido'}), 400
+
+    db = get_db()
+    with db:
+        cursor = db.execute(
             'UPDATE outlaws SET name=?, reward=?, crime=? WHERE id=?',
             (data['name'], data['reward'], data['crime'], id)
         )
-        # Salva as mudanças
-        conn.commit()
-        # Fecha a conexão
-        conn.close()
-        # Se atualizou alguma linha, retorna sucesso; se não, retorna 404
-        return jsonify({'message': 'Atualizado'}) if cursor.rowcount > 0 else ('', 404)
     
-    # SE FOR DELETE - REMOVER BANDIDO
-    if request.method == 'DELETE':
-        # Remove o bandido do banco de dados
-        cursor.execute('DELETE FROM outlaws WHERE id = ?', (id,))
-        # Salva as mudanças
-        conn.commit()
-        # Fecha a conexão
-        conn.close()
-        # Se removeu alguma linha, retorna sucesso; se não, retorna 404
-        return jsonify({'message': 'Deletado'}) if cursor.rowcount > 0 else ('', 404)
+    if cursor.rowcount == 0:
+        return jsonify({'error': 'Bandido não encontrado'}), 404
+    
+    return jsonify({'message': 'Bandido atualizado com sucesso!'})
+
+@app.delete('/outlaws/<int:id>')
+def delete_outlaw(id):
+    """Remove um bandido da lista."""
+    db = get_db()
+    with db:
+        cursor = db.execute('DELETE FROM outlaws WHERE id = ?', (id,))
+    
+    if cursor.rowcount == 0:
+        return jsonify({'error': 'Bandido não encontrado'}), 404
+    
+    return jsonify({'message': 'Bandido deletado com sucesso!'})
 
 if __name__ == '__main__':
     # Inicia o servidor Flask
