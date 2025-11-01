@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS outlaws (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    reward REAL NOT NULL,
+    crime TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Limpa a tabela antes de inserir (evita duplicatas em testes)
+DELETE FROM outlaws;
+
+INSERT INTO outlaws (name, reward, crime) VALUES 
+    ('Carmen Sandiego', 20000, 'Roubo de Joias'),
+    ('Dazzle Annie', 8000, 'Assalto a banco'),
+    ('Fast Eddie B', 7000, 'Assassinato'),
+    ('Ihor Ihorovich', 3500, 'Golpe'),
+    ('Katherine Drib', 5000, 'Contrabando de Bebidas'),
+    ('Lady Agatha', 12000, 'Extorsao'),
+    ('Len Bulk', 6500, 'Roubo de Carga'),
+    ('Merey LaRoc', 15000, 'Trafico de Mulheres'),
+    ('Nick Brunch', 7000, 'Vandalismo'),
+    ('Scar Graynolt', 4500, 'Agiotagem');
