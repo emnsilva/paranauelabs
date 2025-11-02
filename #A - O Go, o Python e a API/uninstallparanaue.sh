@@ -1,7 +1,7 @@
 #!/bin/bash
 # uninstallparanaue.sh - Remove completamente o arsenal das APIs
 
-echo "🔫 Desinstalando todo o paranauê..."
+echo "Desinstalando paranauês..."
 echo "------------------------------------"
 
 # Detecta a distribuição
@@ -9,69 +9,48 @@ if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS=$ID
 else
-    echo "Não foi possível detectar a distro"
+    echo "Nao foi possível detectar a distro"
     exit 1
 fi
 
-# --- Remoção dos Pacotes ---
-echo "Removendo pacotes instalados..."
-
+# Remove pacotes conforme a distro
 case $OS in
     ubuntu|debian)
-        sudo apt-get remove -y --purge python3-flask golang-go sqlite3 curl snapd
-        sudo apt-get autoremove -y --purge
+        echo "Removendo paranauês (Ubuntu/Debian)..."
+        sudo snap remove postman
+        sudo apt-get remove -y python3-flask golang-go snapd
+        sudo apt-get autoremove -y
         ;;
     
-    rhel|centos|fedora)
-        if command -v dnf &> /dev/null; then
-            sudo dnf remove -y python3-flask golang sqlite curl wget
-        else
-            sudo yum remove -y python3-flask golang sqlite curl wget
+    rhel|centos)
+        echo "Removendo paranauês (RHEL/CentOS)..."
+        # Remove Postman manualmente
+        sudo rm -rf /opt/Postman
+        sudo rm -f /usr/bin/postman
+        sudo rm -f /usr/local/bin/postman
+        
+        # Remove .desktop file
+        USER_HOME=$(getent passwd $SUDO_USER 2>/dev/null | cut -d: -f6)
+        if [ -n "$USER_HOME" ]; then
+            sudo rm -f $USER_HOME/.local/share/applications/postman.desktop
         fi
+        
+        # Remove pacotes Python/Go
+        pip3 uninstall -y flask
+        sudo yum remove -y golang python3-pip
         ;;
 esac
 
-# --- Remoção do Postman ---
-echo "Removendo Postman..."
+# Remove projeto e configurações Go
+echo "Removendo projeto e configurações..."
+rm -rf ~/apis
+rm -rf /tmp/apis
+sudo rm -rf /root/apis
 
-# Remove versão Snap (Ubuntu/Debian)
-if command -v snap &> /dev/null; then
-    sudo snap remove postman 2>/dev/null || true
-fi
-
-# Remove versão manual (RHEL/CentOS/Fedora)
-sudo rm -rf /opt/Postman 2>/dev/null || true
-sudo rm -f /usr/bin/postman 2>/dev/null || true
-rm -f ~/.local/share/applications/postman.desktop 2>/dev/null || true
-
-# --- Limpeza dos Projetos ---
-echo "Limpando projetos e configurações..."
-
-# Remove diretório do projeto
-rm -rf ~/apis 2>/dev/null || true
-
-# Limpa cache do Go
+# Limpa cache e arquivos temporários
+echo "Limpando cache..."
 go clean -modcache 2>/dev/null || true
-rm -rf ~/go 2>/dev/null || true
+pip3 cache purge 2>/dev/null || true
 
-# Limpa cache do Python
-python3 -m pip cache purge 2>/dev/null || true
-
-# Limpa arquivos temporários
-rm -f postman.tar.gz 2>/dev/null || true
-
-# --- Limpeza de Configurações ---
-echo "Limpando configurações..."
-
-# Remove variáveis de ambiente (se foram adicionadas)
-if [ -f ~/.bashrc ]; then
-    sed -i '/GOPATH\|GOROOT/d' ~/.bashrc 2>/dev/null || true
-fi
-
-if [ -f ~/.profile ]; then
-    sed -i '/GOPATH\|GOROOT/d' ~/.profile 2>/dev/null || true
-fi
-
-# --- Finalização ---
 echo "------------------------------------"
-echo "Desinstalação concluída!"
+echo "Desinstalação completa!"
