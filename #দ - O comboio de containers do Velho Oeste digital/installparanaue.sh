@@ -30,7 +30,9 @@ case $OS in
     rhel|centos)
         echo "Atualizando sistema (RHEL/CentOS)..."
         yum update -y -q
-        yum install -y -q curl docker.io
+        yum install -y -q yum-utils curl device-mapper-persistent-data lvm2
+        yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+        yum install -y -q docker-ce docker-ce-cli containerd.io
 
         # Instala Postman manualmente
         echo "Instalando Postman manualmente..."
