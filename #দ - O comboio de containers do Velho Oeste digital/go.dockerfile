@@ -4,9 +4,9 @@ WORKDIR /app
 
 COPY api-go.go .
 
-RUN go mod init api-go
-RUN go get github.com/gorilla/mux github.com/lib/pq
-RUN go build -o /api-go api-go-new.go
+RUN go mod init api-go && \
+    go get github.com/gorilla/mux github.com/lib/pq && \
+    go build -o /api-go api-go.go
 
 EXPOSE 8080
 
