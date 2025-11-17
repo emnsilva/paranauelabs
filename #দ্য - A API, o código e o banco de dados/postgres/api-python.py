@@ -4,11 +4,13 @@ import psycopg2, os
 from functools import wraps
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
+from flasgger import Swagger, swag_from
 
 # Carrega as variáveis do arquivo .env
 load_dotenv()
 
 app = Flask(__name__)
+swagger = Swagger(app)
 
 # Conexão com PostgreSQL via variável de ambiente
 def get_db_connection():
@@ -76,6 +78,7 @@ def handle_exception(e):
 # GET - Lista os bandidos
 @app.get('/v1/outlaws')
 @with_db_connection()
+@swag_from('swagger/get_outlaws.yml')
 def get_outlaws(cursor):
     cursor.execute('SELECT * FROM outlaws ORDER BY id')
     outlaws = cursor.fetchall()
@@ -98,6 +101,7 @@ def get_outlaws(cursor):
 # GET - Busca um bandido específico pelo ID
 @app.get('/v1/outlaws/<int:id>')
 @with_db_connection()
+@swag_from('swagger/get_outlaw.yml')
 def get_outlaw(cursor, id):
     cursor.execute('SELECT * FROM outlaws WHERE id = %s', (id,))
     outlaw = cursor.fetchone()
@@ -116,6 +120,7 @@ def get_outlaw(cursor, id):
 # POST - Adiciona um novo bandido
 @app.post('/v1/outlaws')
 @with_db_connection(needs_json=True)
+@swag_from('swagger/create_outlaw.yml')
 def create_outlaw(cursor, data):
     cursor.execute(
         'INSERT INTO outlaws (name, reward, crime) VALUES (%s, %s, %s) RETURNING *',
@@ -135,6 +140,7 @@ def create_outlaw(cursor, data):
 # PUT - Atualiza informação de um bandido
 @app.put('/v1/outlaws/<int:id>')
 @with_db_connection(needs_json=True)
+@swag_from('swagger/update_outlaw.yml')
 def update_outlaw(cursor, id, data):
     cursor.execute(
         'UPDATE outlaws SET name=%s, reward=%s, crime=%s WHERE id=%s',
@@ -152,6 +158,7 @@ def update_outlaw(cursor, id, data):
 # DELETE - Remove um bandido
 @app.delete('/v1/outlaws/<int:id>')
 @with_db_connection()
+@swag_from('swagger/delete_outlaw.yml')
 def delete_outlaw(cursor, id):
     cursor.execute('DELETE FROM outlaws WHERE id = %s', (id,))
     if cursor.rowcount == 0:

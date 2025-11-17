@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-container
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./outlaws.sql:/docker-entrypoint-initdb.d/outlaws.sql
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    networks:
+      - labs-network
+
+  api-python:
+    build:
+      context: .
+      dockerfile: python.dockerfile
+    container_name: api-python-container
+    ports:
+      - "${PYTHON_API_PORT}:${PYTHON_API_PORT}"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DB_PYTHON_URL}
+    depends_on:
+      - postgres
+    networks: 
+      - labs-network
+      
+volumes:
+  postgres_data:
+
+networks:
+  labs-network:
+    driver: bridge

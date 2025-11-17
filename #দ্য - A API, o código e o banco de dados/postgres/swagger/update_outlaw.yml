@@ -1,0 +1,39 @@
+tags:
+  - Outlaws
+summary: Atualiza informação de um bandido
+description: Atualiza os dados de um bandido existente, identificado pelo seu ID.
+parameters:
+  - name: id
+    in: path
+    required: true
+    description: ID do bandido a ser atualizado.
+    schema:
+      type: integer
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - name
+          - reward
+          - crime
+        properties:
+          name:
+            type: string
+            example: "Lampião Atualizado"
+          reward:
+            type: number
+            format: float
+            example: 7500.00
+          crime:
+            type: string
+            example: "Cangaço 2.0"
+responses:
+  200:
+    description: Bandido atualizado com sucesso.
+  400:
+    description: JSON inválido.
+  404:
+    description: Bandido não encontrado.

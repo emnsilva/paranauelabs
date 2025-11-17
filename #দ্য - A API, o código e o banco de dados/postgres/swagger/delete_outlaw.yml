@@ -1,0 +1,16 @@
+tags:
+  - Outlaws
+summary: Remove um bandido
+description: Deleta um bandido do sistema usando seu ID.
+parameters:
+  - name: id
+    in: path
+    required: true
+    description: ID do bandido a ser deletado.
+    schema:
+      type: integer
+responses:
+  200:
+    description: Bandido deletado com sucesso.
+  404:
+    description: Bandido não encontrado.
