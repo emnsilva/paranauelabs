@@ -31,9 +31,25 @@ services:
       - postgres
     networks: 
       - labs-network
-      
+
+  api-go:
+    build:
+      context: .
+      dockerfile: go.dockerfile
+    container_name: api-go-container
+    ports:
+      - "${GO_API_PORT}:${GO_API_PORT}"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DB_GO_URL}
+    depends_on:
+    - postgres
+    networks:
+    - labs-network     
+  
 volumes:
-  postgres_data:
+    postgres_data:
 
 networks:
   labs-network:

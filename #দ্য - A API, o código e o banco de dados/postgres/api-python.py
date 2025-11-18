@@ -22,21 +22,18 @@ def get_db_connection():
     conn.cursor_factory = RealDictCursor
     return conn
 
-# Helper para gerar links HATEOAS
+# Refatorando a função generate_links para evitar repetição
 def generate_links(outlaw_id=None):
     base_links = {
         'self': url_for('get_outlaws', _external=True) if not outlaw_id else url_for('get_outlaw', id=outlaw_id, _external=True),
         'collection': url_for('get_outlaws', _external=True)
     }
     
-    if outlaw_id:
-        base_links.update({
-            'update': url_for('update_outlaw', id=outlaw_id, _external=True),
-            'delete': url_for('delete_outlaw', id=outlaw_id, _external=True)
-        })
-    else:
+    if not outlaw_id:
         base_links['create'] = url_for('create_outlaw', _external=True)
+        return base_links
     
+    base_links.update({'update': url_for('update_outlaw', id=outlaw_id, _external=True), 'delete': url_for('delete_outlaw', id=outlaw_id, _external=True)})
     return base_links
 
 # Decorador para gerenciar a conexão com o banco de dados
@@ -99,7 +96,6 @@ def get_outlaws(cursor):
     return response
 
 # GET - Busca um bandido específico pelo ID
-@app.get('/v1/outlaws/<int:id>')
 @with_db_connection()
 @swag_from('swagger/get_outlaw.yml')
 def get_outlaw(cursor, id):
@@ -113,7 +109,6 @@ def get_outlaw(cursor, id):
     
     return jsonify({
         'success': True,
-        'data': outlaw_dict,
         '_links': generate_links(id)
     })
 
@@ -174,5 +169,6 @@ def delete_outlaw(cursor, id):
     })
 
 # Inicia o servidor Flask usando a porta 5000
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
