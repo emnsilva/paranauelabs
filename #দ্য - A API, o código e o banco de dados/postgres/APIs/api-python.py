@@ -12,11 +12,16 @@ load_dotenv()
 app = Flask(__name__)
 swagger = Swagger(app)
 
+# Função para obter variáveis de ambiente
+def get_env_variable(key):
+    value = os.getenv(key)
+    if not value:
+        raise Exception(f"Variável de ambiente {key} não configurada")
+    return value
+
 # Conexão com PostgreSQL via variável de ambiente
 def get_db_connection():
-    database_url = os.getenv('DB_PYTHON_URL')
-    if not database_url:
-        raise Exception("DB_PYTHON_URL não configurada no ambiente")
+    database_url = get_env_variable('DB_URL')
     
     conn = psycopg2.connect(database_url)
     conn.cursor_factory = RealDictCursor
@@ -33,7 +38,10 @@ def generate_links(outlaw_id=None):
         base_links['create'] = url_for('create_outlaw', _external=True)
         return base_links
     
-    base_links.update({'update': url_for('update_outlaw', id=outlaw_id, _external=True), 'delete': url_for('delete_outlaw', id=outlaw_id, _external=True)})
+    base_links.update({
+        'update': url_for('update_outlaw', id=outlaw_id, _external=True),
+        'delete': url_for('delete_outlaw', id=outlaw_id, _external=True)
+    })
     return base_links
 
 # Decorador para gerenciar a conexão com o banco de dados
@@ -56,7 +64,7 @@ def with_db_connection(needs_json=False):
                 return result
             except Exception:
                 conn.rollback()
-                raise # Re-lança a exceção para o errorhandler do Flask
+                raise
             finally:
                 cursor.close()
                 conn.close()
@@ -96,6 +104,7 @@ def get_outlaws(cursor):
     return response
 
 # GET - Busca um bandido específico pelo ID
+@app.get('/v1/outlaws/<int:id>')
 @with_db_connection()
 @swag_from('swagger/get_outlaw.yml')
 def get_outlaw(cursor, id):
@@ -109,6 +118,7 @@ def get_outlaw(cursor, id):
     
     return jsonify({
         'success': True,
+        'data': outlaw_dict,
         '_links': generate_links(id)
     })
 
@@ -117,6 +127,10 @@ def get_outlaw(cursor, id):
 @with_db_connection(needs_json=True)
 @swag_from('swagger/create_outlaw.yml')
 def create_outlaw(cursor, data):
+    # Valida campos obrigatórios
+    if not data.get('name') or not data.get('crime') or not data.get('reward'):
+        return jsonify({'success': False, 'error': 'Campos obrigatórios: name, reward, crime'}), 400
+        
     cursor.execute(
         'INSERT INTO outlaws (name, reward, crime) VALUES (%s, %s, %s) RETURNING *',
         (data['name'], data['reward'], data['crime'])
@@ -168,7 +182,7 @@ def delete_outlaw(cursor, id):
         }
     })
 
-# Inicia o servidor Flask usando a porta 5000
-
+# Inicia o servidor Flask
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(get_env_variable('PYTHON_API_PORT'))
+    app.run(host='0.0.0.0', port=port)

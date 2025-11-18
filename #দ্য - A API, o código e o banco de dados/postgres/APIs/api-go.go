@@ -36,10 +36,17 @@ type Response struct {
 var db *sql.DB
 
 func main() {
-	// Conecta com o PostgreSQL com retry
-	dbURL := os.Getenv("DATABASE_URL")
+	// Conecta com o PostgreSQL com retry usando variáveis do .env
+	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
-		dbURL = "postgresql://acme:@cM3_2025!@postgres:5432/outlaws?sslmode=disable"
+		// Monta a URL com variáveis individuais (sem valores padrão)
+		dbHost := getEnv("POSTGRES_HOST")
+		dbPort := getEnv("POSTGRES_PORT")
+		dbUser := getEnv("POSTGRES_USER")
+		dbPassword := getEnv("POSTGRES_PASSWORD")
+		dbName := getEnv("POSTGRES_DB")
+		
+		dbURL = "postgresql://" + dbUser + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=disable"
 	}
 
 	var err error
@@ -83,15 +90,27 @@ func main() {
 
 	// Swagger simples - redireciona para Swagger UI online
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://petstore.swagger.io/?url=http://localhost:8080/swagger/get_outlaws.yml", http.StatusSeeOther)
+		http.Redirect(w, r, "https://petstore.swagger.io/?url=http://localhost:" + getEnv("GO_API_PORT") + "/swagger/get_outlaws.yml", http.StatusSeeOther)
 	})
 
 	// Serve arquivos YAML do Swagger
 	r.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", http.FileServer(http.Dir("./swagger"))))
 
-	log.Println("🚀 API Go rodando na porta 8080")
-	log.Println("📚 Swagger em http://localhost:8080/swagger")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	// Obtém a porta do .env
+	port := getEnv("GO_API_PORT")
+	
+	log.Printf("🚀 API Go rodando na porta %s", port)
+	log.Println("📚 Swagger em http://localhost:" + port + "/swagger")
+	log.Fatal(http.ListenAndServe(":" + port, r))
+}
+
+// getEnv obtém variável de ambiente (sem valor padrão)
+func getEnv(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		log.Fatalf("❌ Variável de ambiente %s não definida", key)
+	}
+	return value
 }
 
 // sendResponse envia uma resposta JSON formatada
@@ -230,16 +249,18 @@ func deleteOutlaw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	port := getEnv("GO_API_PORT")
 	links := map[string]string{
-		"collection": "http://localhost:8080/v1/outlaws",
-		"create":     "http://localhost:8080/v1/outlaws",
+		"collection": "http://localhost:" + port + "/v1/outlaws",
+		"create":     "http://localhost:" + port + "/v1/outlaws",
 	}
 	sendResponse(w, 200, true, nil, "Bandido deletado com sucesso", links)
 }
 
 // Gera links HATEOAS
 func generateLinks(id int) map[string]string {
-	baseURL := "http://localhost:8080/v1/outlaws"
+	port := getEnv("GO_API_PORT")
+	baseURL := "http://localhost:" + port + "/v1/outlaws"
 	links := map[string]string{
 		"self":       baseURL,
 		"collection": baseURL,
