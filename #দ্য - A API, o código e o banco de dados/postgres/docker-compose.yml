@@ -24,7 +24,7 @@ services:
   api-python:
     build:
       context: .
-      dockerfile: python.dockerfile
+      dockerfile: dockerfiles/python.dockerfile
     container_name: api-python-container
     ports:
       - "${PYTHON_API_PORT}:${PYTHON_API_PORT}"
@@ -41,7 +41,7 @@ services:
   api-go:
     build:
       context: .
-      dockerfile: go.dockerfile
+      dockerfile: dockerfiles/go.dockerfile
     container_name: api-go-container
     ports:
       - "${GO_API_PORT}:${GO_API_PORT}"
@@ -58,7 +58,7 @@ services:
   api-node:
     build:
       context: .
-      dockerfile: node.dockerfile
+      dockerfile: dockerfiles/node.dockerfile
     container_name: api-node-container
     ports:
       - "${NODE_API_PORT}:${NODE_API_PORT}"

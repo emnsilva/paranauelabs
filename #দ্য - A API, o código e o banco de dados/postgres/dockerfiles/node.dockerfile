@@ -2,11 +2,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY APIs/package*.json ./
 RUN npm install
 
-COPY api-node.js .
-COPY swagger/ ./swagger/
+COPY APIs/api-node.js .
+COPY ../swagger/ ./swagger/
 
 EXPOSE 3000
 
