@@ -1,8 +1,7 @@
 from flask import Flask, jsonify, request
 from flasgger import Swagger
-import psycopg2
+import psycopg2, os
 from psycopg2.extras import RealDictCursor
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
