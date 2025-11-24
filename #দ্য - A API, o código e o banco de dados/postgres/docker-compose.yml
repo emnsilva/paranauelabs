@@ -9,8 +9,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./outlaws.sql:/docker-entrypoint-initdb.d/outlaws.sql
+      - ./storage/data:/var/lib/postgresql/data
+      - ./storage/init/outlaws.sql:/docker-entrypoint-initdb.d/outlaws.sql
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     networks:
