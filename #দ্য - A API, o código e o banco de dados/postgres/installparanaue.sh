@@ -59,11 +59,6 @@ echo "Ativando a locomotiva (Docker)..."
 systemctl enable --now docker
 usermod -aG docker $SUDO_USER 2>/dev/null || true
 
-# Configura projeto
-echo "Configurando ambiente do projeto..."
-mkdir -p laboratorio
-chmod 777 laboratorio
-
 echo "Instalando o maquinista (Docker Compose)..."
 DOCKER_COMPOSE_VERSION="v2.27.0"
 curl -SL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
@@ -74,5 +69,10 @@ echo "Preparando os vagões do comboio..."
 for img in python:3.11-alpine golang:1.21-alpine postgres:15-alpine mysql:8.0 mongo:7.0 eclipse-temurin:17-jdk mcr.microsoft.com/dotnet/sdk:8.0-alpine; do 
     docker pull $img
 done
+
+# Configura projeto e define permissões
+echo "Configurando ambiente do projeto..."
+mkdir -p laboratorio/{postgres,mysql,mongo,sqlite}/{storage/{data,init},APIs,dockerfiles,swagger}
+chmod -R 777 laboratorio/
 
 echo "Instalação concluída!"
