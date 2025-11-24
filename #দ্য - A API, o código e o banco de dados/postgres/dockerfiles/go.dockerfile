@@ -3,7 +3,7 @@ FROM golang:1.21-alpine
 WORKDIR /app
 
 # Copia o código e os arquivos Swagger
-COPY api-go.go .
+COPY APIs/api-go.go .
 COPY swagger/ ./swagger/
 
 # Inicializa e baixa dependências
