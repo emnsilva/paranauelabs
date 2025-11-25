@@ -37,7 +37,7 @@ resource "google_storage_bucket" "primary" {
 
 resource "google_storage_bucket" "secondary" {
   name          = "secondary-storage"      # Nome do bucket
-  provider      = google.primary           # ⚠️ Nota: usando provider primário
+  provider      = google.secondary         # Usa provider da região secundária
   location      = var.GCP_SECONDARY_REGION # Localização na região secundária
   storage_class = "STANDARD"               # Classe de armazenamento padrão
 }
