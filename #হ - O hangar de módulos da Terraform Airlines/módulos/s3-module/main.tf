@@ -1,15 +1,14 @@
-# main.tf - Implementação do Bucket S3
+# main.tf - Implementação do Bucket S3 com provider dinâmico
 
 resource "aws_s3_bucket" "this" {
-  provider      = aws[var.provider_alias]
+  provider      = var.provider_alias == "primary" ? aws.primary : aws.secondary
   bucket        = var.bucket_name
   force_destroy = var.force_destroy
   tags          = var.tags
 }
 
-# Configuração padrão para evitar acesso público
 resource "aws_s3_bucket_public_access_block" "this" {
-  provider = aws[var.provider_alias]
+  provider = var.provider_alias == "primary" ? aws.primary : aws.secondary
 
   bucket = aws_s3_bucket.this.id
 
