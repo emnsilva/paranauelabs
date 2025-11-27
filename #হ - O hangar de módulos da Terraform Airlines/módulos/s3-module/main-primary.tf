@@ -1,3 +1,5 @@
+variable "AWS_REGION_PRIMARY" {}
+
 resource "aws_s3_bucket" "primary" {
   provider      = aws.primary
   bucket        = var.bucket_name
