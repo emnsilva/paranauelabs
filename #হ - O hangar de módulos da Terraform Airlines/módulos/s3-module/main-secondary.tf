@@ -1,3 +1,5 @@
+variable "AWS_REGION_SECONDARY" {}
+
 resource "aws_s3_bucket" "secondary" {
   provider      = aws.secondary
   bucket        = var.bucket_name
