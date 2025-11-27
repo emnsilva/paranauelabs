@@ -23,7 +23,6 @@ provider "google" {
   alias   = "secondary"                 # Apelido para região secundária
   project = var.GCP_PROJECT             # Mesmo projeto
   region  = var.GCP_SECONDARY_REGION    # Região secundária
-  credentials = var.GOOGLE_CREDENTIALS_B64 != null ? base64decode(var.GOOGLE_CREDENTIALS_B64) : null
 }
 
 # BUCKETS GOOGLE CLOUD STORAGE
@@ -38,7 +37,7 @@ resource "google_storage_bucket" "primary" {
 
 resource "google_storage_bucket" "secondary" {
   name          = "secondary-storage"      # Nome do bucket
-  provider      = google.secondary         # Usa provider da região secundária
+  provider      = google.primary           # ⚠️ Nota: usando provider primário
   location      = var.GCP_SECONDARY_REGION # Localização na região secundária
   storage_class = "STANDARD"               # Classe de armazenamento padrão
 }
