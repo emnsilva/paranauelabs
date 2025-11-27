@@ -7,7 +7,7 @@ resource "random_id" "suffix" {
 
 # AWS storage modules
 module "aws_primary_storage" {
-  source         = "./módulos/s3-module"
+  source         = "./modules/s3-module"
   bucket_name    = "primary-bucket-${random_id.suffix.hex}"
   provider_alias = "primary"
   region         = var.AWS_REGION_PRIMARY
@@ -20,7 +20,7 @@ module "aws_primary_storage" {
 }
 
 module "aws_secondary_storage" {
-  source         = "./módulos/s3-module" 
+  source         = "./modules/s3-module" 
   bucket_name    = "secondary-bucket-${random_id.suffix.hex}"
   provider_alias = "secondary"
   region         = var.AWS_REGION_SECONDARY
@@ -34,7 +34,7 @@ module "aws_secondary_storage" {
 
 # Azure storage modules  
 module "azure_primary_storage" {
-  source                = "./módulos/blob-module"
+  source                = "./modules/blob-module"
   storage_account_name  = "primarystor${random_id.suffix.hex}" # Azure requer nome sem hífen
   resource_group_name   = "primary-blob-storage-${random_id.suffix.hex}"
   location              = var.ARM_PRIMARY_REGION
@@ -45,7 +45,7 @@ module "azure_primary_storage" {
 }
 
 module "azure_secondary_storage" {
-  source                = "./módulos/blob-module"
+  source                = "./modules/blob-module"
   storage_account_name  = "secondarystor${random_id.suffix.hex}" # Azure requer nome sem hífen
   resource_group_name   = "secondary-blob-storage-${random_id.suffix.hex}" 
   location              = var.ARM_SECONDARY_REGION
@@ -57,7 +57,7 @@ module "azure_secondary_storage" {
 
 # GCP storage modules
 module "gcp_primary_storage" {
-  source         = "./módulos/gcs-module" 
+  source         = "./modules/gcs-module" 
   bucket_name    = "primary-storage-${random_id.suffix.hex}"
   provider_alias = "primary"
   location       = var.GCP_PRIMARY_REGION
@@ -66,7 +66,7 @@ module "gcp_primary_storage" {
 }
 
 module "gcp_secondary_storage" {
-  source         = "./módulos/gcs-module"
+  source         = "./modules/gcs-module"
   bucket_name    = "secondary-storage-${random_id.suffix.hex}"
   provider_alias = "secondary" 
   location       = var.GCP_SECONDARY_REGION
