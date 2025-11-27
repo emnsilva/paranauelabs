@@ -5,6 +5,7 @@ resource "aws_s3_bucket" "secondary" {
   bucket        = var.bucket_name
   force_destroy = var.force_destroy
   tags          = var.tags
+  region        = var.region
 }
 
 resource "aws_s3_bucket_public_access_block" "secondary" {
