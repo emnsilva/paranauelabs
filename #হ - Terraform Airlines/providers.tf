@@ -12,7 +12,7 @@ terraform {
     # Provedor Azure - Microsoft Azure
     azurerm = {
       source  = "hashicorp/azurerm" # Fonte oficial da HashiCorp
-      version = "~> 4.80.0"         # Versão aproximadamente 4.40.0
+      version = "~> 4.40.0"         # Versão aproximadamente 4.40.0
     }
     
     # Provedor Google - Google Cloud Platform
