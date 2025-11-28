@@ -1,15 +1,16 @@
 # deploy.tf - Orquestrando todos os módulos da Terraform Airlines
 
-# variables.tf - Declaração das variáveis (os valores vêm do TFC)
+# Declaração das variáveis (os valores vêm do TFC)
 variable "AWS_REGION_PRIMARY" {}
 variable "AWS_REGION_SECONDARY" {}
 variable "ARM_PRIMARY_REGION" {}
-variable "ARM_SECONDARY_REGION" {} 
+variable "ARM_SECONDARY_REGION" {}
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 variable "GCP_PROJECT" {}
 variable "ARM_SUBSCRIPTION_ID" {}
 variable "ARM_TENANT_ID" {}
+variable "GOOGLE_CREDENTIALS_B64" {}
 
 # Random suffix para evitar conflitos de nomes (coloque no TOPO)
 resource "random_id" "suffix" {
