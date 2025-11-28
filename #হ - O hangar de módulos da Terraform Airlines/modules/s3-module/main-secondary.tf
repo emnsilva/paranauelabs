@@ -1,4 +1,5 @@
 resource "aws_s3_bucket" "secondary" {
+  provider_alias = "secondary"
   bucket        = var.bucket_name
   force_destroy = var.force_destroy
   tags          = var.tags
