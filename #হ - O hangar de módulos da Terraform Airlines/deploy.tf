@@ -1,53 +1,5 @@
 # deploy.tf - Orquestrando todos os módulos da Terraform Airlines
 
-# Declaração das variáveis (os valores vêm do TFC)
-variable "AWS_REGION_PRIMARY" {}
-variable "AWS_REGION_SECONDARY" {}
-variable "ARM_PRIMARY_REGION" {}
-variable "ARM_SECONDARY_REGION" {}
-variable "GCP_PRIMARY_REGION" {}
-variable "GCP_SECONDARY_REGION" {}
-variable "GCP_PROJECT" {}
-variable "ARM_SUBSCRIPTION_ID" {
-  default = "temp-subscription-id"  # ← Remove depois que funcionar
-}
-
-variable "ARM_TENANT_ID" {
-  default = "temp-tenant-id"        # ← Remove depois que funcionar
-}
-variable "GOOGLE_CREDENTIALS_B64" {}
-
-# CONFIGURAÇÃO DOS PROVIDERS (ADICIONE ISSO!)
-provider "aws" {
-  alias  = "primary"
-  region = var.AWS_REGION_PRIMARY
-}
-
-provider "aws" {
-  alias  = "secondary"  
-  region = var.AWS_REGION_SECONDARY
-}
-
-provider "azurerm" {
-  alias           = "primary"
-  subscription_id = var.ARM_SUBSCRIPTION_ID
-  features {}
-}
-
-provider "azurerm" {
-  alias           = "secondary"
-  subscription_id = var.ARM_SUBSCRIPTION_ID
-  features {}
-}
-
-provider "google" {
-  alias = "primary"
-}
-
-provider "google" {
-  alias = "secondary"
-}
-
 # Random suffix para evitar conflitos de nomes (coloque no TOPO)
 resource "random_id" "suffix" {
   byte_length = 4
