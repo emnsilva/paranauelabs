@@ -1,5 +1,20 @@
 # deploy.tf - Orquestrando todos os módulos da Terraform Airlines
 
+variable "AWS_REGION_PRIMARY" {}
+variable "AWS_REGION_SECONDARY" {}
+variable "ARM_PRIMARY_REGION" {}
+variable "ARM_SECONDARY_REGION" {}
+variable "GCP_PRIMARY_REGION" {}
+variable "GCP_SECONDARY_REGION" {}
+variable "GCP_PROJECT" {}
+variable "ARM_SUBSCRIPTION_ID" {
+  default = "temp"  # ← Temporário
+}
+variable "ARM_TENANT_ID" {
+  default = "temp"  # ← Temporário
+}
+variable "GOOGLE_CREDENTIALS_B64" {}
+
 # Random suffix para evitar conflitos de nomes (coloque no TOPO)
 resource "random_id" "suffix" {
   byte_length = 4
