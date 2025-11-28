@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+  }
+}
+
 # Módulo AWS - Buckets S3 em duas regiões
 
 variable "primary_region" {

@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+    }
+  }
+}
+
 # Módulo Azure - Storage Accounts e Containers em duas regiões
 
 variable "primary_region" {

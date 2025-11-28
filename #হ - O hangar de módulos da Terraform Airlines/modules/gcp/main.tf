@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
 # Módulo GCP - Buckets de Storage em duas regiões
 
 variable "project_id" {
