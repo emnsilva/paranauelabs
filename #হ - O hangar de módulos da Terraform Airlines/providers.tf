@@ -22,3 +22,36 @@ terraform {
     }
   }
 }
+
+# AWS Providers
+provider "aws" {
+  alias  = "primary"
+  region = var.AWS_REGION_PRIMARY
+}
+
+provider "aws" {
+  alias  = "secondary"  
+  region = var.AWS_REGION_SECONDARY
+}
+
+# Azure Providers  
+provider "azurerm" {
+  alias           = "primary"
+  subscription_id = var.ARM_SUBSCRIPTION_ID
+  features {}
+}
+
+provider "azurerm" {
+  alias           = "secondary"
+  subscription_id = var.ARM_SUBSCRIPTION_ID
+  features {}
+}
+
+# GCP Providers
+provider "google" {
+  alias = "primary"
+}
+
+provider "google" {
+  alias = "secondary"
+}
