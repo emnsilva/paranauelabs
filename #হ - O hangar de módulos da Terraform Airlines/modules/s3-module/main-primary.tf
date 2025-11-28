@@ -1,13 +1,13 @@
-resource "aws_s3_bucket" "this" {
-  provider      = aws[var.provider_alias]
+resource "aws_s3_bucket" "primary" {
+  provider      = aws.primary
   bucket        = var.bucket_name
   force_destroy = var.force_destroy
   tags          = var.tags
 }
 
-resource "aws_s3_bucket_public_access_block" "this" {
-  provider = aws[var.provider_alias]
-  bucket   = aws_s3_bucket.this.id
+resource "aws_s3_bucket_public_access_block" "primary" {
+  provider = aws.primary
+  bucket   = aws_s3_bucket.primary.id
 
   block_public_acls       = true
   block_public_policy     = true
