@@ -8,12 +8,6 @@ variable "location" {
   type        = string
 }
 
-variable "storage_class" {
-  description = "Classe de armazenamento (STANDARD, NEARLINE, COLDLINE, ARCHIVE)"
-  type        = string
-  default     = "STANDARD"
-}
-
 variable "force_destroy" {
   description = "Forçar destruição do bucket mesmo com objetos internos."
   type        = bool
