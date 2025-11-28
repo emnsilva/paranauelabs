@@ -8,12 +8,8 @@ variable "ARM_SECONDARY_REGION" {}
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 variable "GCP_PROJECT" {}
-variable "ARM_SUBSCRIPTION_ID" {
-  default = "temp-fix"
-}
-variable "ARM_TENANT_ID" {
-  default = "temp-fix"
-}
+variable "ARM_SUBSCRIPTION_ID" {default = "temp-fix"}
+variable "ARM_TENANT_ID" {default = "temp-fix"}
 variable "GOOGLE_CREDENTIALS_B64" {}
 
 # Random suffix para evitar conflitos de nomes (coloque no TOPO)
