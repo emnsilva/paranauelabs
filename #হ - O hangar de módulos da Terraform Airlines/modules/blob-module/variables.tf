@@ -1,43 +1,45 @@
-variable "storage_account_name" {
-  description = "Nome único global para a storage account (somente letras minúsculas e números)"
+# variables.tf - Especificações do módulo Azure Blob Storage
+
+variable "location" {
+  description = "Região do Azure onde os recursos serão criados."
   type        = string
 }
 
 variable "resource_group_name" {
-  description = "Nome do resource group"
+  description = "Nome do Resource Group."
   type        = string
 }
 
-variable "location" {
-  description = "Região Azure onde os recursos serão criados"
+variable "storage_account_name" {
+  description = "Nome único global para a Storage Account (letras minúsculas e números)."
+  type        = string
+}
+
+variable "container_name" {
+  description = "Nome do container dentro da Storage Account."
   type        = string
 }
 
 variable "account_tier" {
-  description = "Tier da storage account (Standard/Premium)"
+  description = "Tier da Storage Account (Standard ou Premium)."
   type        = string
   default     = "Standard"
 }
 
 variable "replication_type" {
-  description = "Tipo de replicação (LRS, GRS, ZRS)"
+  description = "Tipo de replicação da Storage Account (ex: LRS, GRS)."
   type        = string
   default     = "LRS"
 }
 
-variable "container_name" {
-  description = "Nome do container blob"
-  type        = string
-}
-
 variable "container_access_type" {
-  description = "Tipo de acesso do container (private, blob, container)"
+  description = "Nível de acesso do container (ex: private, blob, container)."
   type        = string
   default     = "private"
 }
 
 variable "tags" {
-  description = "Tags para organização e custos"
+  description = "Tags para organização e custos."
   type        = map(string)
   default     = {}
 }
