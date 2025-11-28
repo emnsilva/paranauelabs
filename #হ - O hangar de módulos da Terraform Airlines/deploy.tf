@@ -1,75 +1,143 @@
 # deploy.tf - Orquestrando todos os módulos da Terraform Airlines
-
-# Random suffix para evitar conflitos de nomes (coloque no TOPO)
-resource "random_id" "suffix" {
-  byte_length = 4
+# Provider AWS
+provider "aws" {
+  alias  = "primary"
+  region = var.AWS_REGION_PRIMARY
 }
 
-# AWS storage modules
-module "aws_primary_storage" {
-  source         = "./modules/s3-module"
-  bucket_name    = "primary-bucket-${random_id.suffix.hex}"
-  provider_alias = "primary"
-  region         = var.AWS_REGION_PRIMARY
-  force_destroy  = false
+provider "aws" {
+  alias  = "secondary"
+  region = var.AWS_REGION_SECONDARY
+}
+
+# Provider GCP
+provider "google" {
+  alias       = "primary"
+  project     = var.GCP_PROJECT
+  region      = var.GCP_PRIMARY_REGION
+  credentials = base64decode(var.GOOGLE_CREDENTIALS_B64)
+}
+
+provider "google" {
+  alias       = "secondary"
+  project     = var.GCP_PROJECT
+  region      = var.GCP_SECONDARY_REGION
+  credentials = base64decode(var.GOOGLE_CREDENTIALS_B64)
+}
+
+# Provider Azure
+provider "azurerm" {
+  alias           = "primary"
+  features {}
+  region          = var.ARM_PRIMARY_REGION
+}
+
+provider "azurerm" {
+  alias           = "secondary"
+  features {}
+  region          = var.ARM_SECONDARY_REGION
+}
+
+
+# Criação de recursos usando módulos
+#Módulo s3
+
+module "s3_primary_bucket" {
+  source = "./modules/s3-module"
+
+  # Passando o provedor explicitamente para o módulo
+  providers = {
+    aws = aws.primary
+  }
+
+  bucket_name   = "paranauelabs-bucket-primary-modular"
+  force_destroy = true
   tags = {
-    Ambiente     = "production"
-    Projeto      = "terraform-airlines"
-    Componente   = "s3"
+    Environment = "Lab"
+    Project     = "Terraform Airlines"
+    Region      = "Primary"
   }
 }
 
-module "aws_secondary_storage" {
-  source         = "./modules/s3-module" 
-  bucket_name    = "secondary-bucket-${random_id.suffix.hex}"
-  provider_alias = "secondary"
-  region         = var.AWS_REGION_SECONDARY
-  force_destroy  = true
+module "s3_secondary_bucket" {
+  source = "./modules/s3-module"
+  providers = {
+    aws = aws.secondary
+  }
+
+  bucket_name   = "paranauelabs-bucket-secondary-modular"
+  force_destroy = true
   tags = {
-    Ambiente     = "backup"
-    Projeto      = "terraform-airlines"
-    Componente   = "s3"
+    Environment = "Lab"
+    Project     = "Terraform Airlines"
+    Region      = "Secondary"
   }
 }
 
-# Azure storage modules  
-module "azure_primary_storage" {
-  source                = "./modules/blob-module"
-  storage_account_name  = "primarystor${random_id.suffix.hex}" # Azure requer nome sem hífen
-  resource_group_name   = "primary-blob-storage-${random_id.suffix.hex}"
-  location              = var.ARM_PRIMARY_REGION
-  account_tier          = "Standard"
-  replication_type      = "LRS"
-  container_name        = "primary-container"
-  container_access_type = "private"
+#Módulo GCS storage
+module "gcs_primary_bucket" {
+  source = "./modules/gcs-module"
+  providers = {
+    google = google.primary
+  }
+
+  bucket_name = "paranauelabs-gcs-primary-modular"
+  location    = var.GCP_PRIMARY_REGION
+  force_destroy = true
+  tags = {
+    environment = "lab"
+    project     = "terraform-airlines"
+    region      = "primary"
+  }
 }
 
-module "azure_secondary_storage" {
-  source                = "./modules/blob-module"
-  storage_account_name  = "secondarystor${random_id.suffix.hex}" # Azure requer nome sem hífen
-  resource_group_name   = "secondary-blob-storage-${random_id.suffix.hex}" 
-  location              = var.ARM_SECONDARY_REGION
-  account_tier          = "Standard"
-  replication_type      = "LRS"
-  container_name        = "secondary-container"
-  container_access_type = "private"
+module "gcs_secondary_bucket" {
+  source = "./modules/gcs-module"
+  providers = {
+    google = google.secondary
+  }
+
+  bucket_name = "paranauelabs-gcs-secondary-modular"
+  location    = var.GCP_SECONDARY_REGION
+  force_destroy = true
+  tags = {
+    environment = "lab"
+    project     = "terraform-airlines"
+    region      = "secondary"
+  }
 }
 
-# GCP storage modules
-module "gcp_primary_storage" {
-  source         = "./modules/gcs-module" 
-  bucket_name    = "primary-storage-${random_id.suffix.hex}"
-  provider_alias = "primary"
-  location       = var.GCP_PRIMARY_REGION
-  storage_class  = "STANDARD"
-  project        = var.GCP_PROJECT
+#Módulo blob storage
+module "blob_primary" {
+  source = "./modules/blob-module"
+  providers = {
+    azurerm = azurerm.primary
+  }
+
+  location             = var.ARM_PRIMARY_REGION
+  resource_group_name  = "paranauelabs-rg-primary-modular"
+  storage_account_name = "paranauelabssaprimarymod"
+  container_name       = "data"
+  tags = {
+    Environment = "Lab"
+    Project     = "Terraform Airlines"
+    Region      = "Primary"
+  }
 }
 
-module "gcp_secondary_storage" {
-  source         = "./modules/gcs-module"
-  bucket_name    = "secondary-storage-${random_id.suffix.hex}"
-  provider_alias = "secondary" 
-  location       = var.GCP_SECONDARY_REGION
-  storage_class  = "STANDARD"
-  project        = var.GCP_PROJECT
+module "blob_secondary" {
+  source = "./modules/blob-module"
+  providers = {
+    azurerm = azurerm.secondary
+  }
+
+  location             = var.ARM_SECONDARY_REGION
+  resource_group_name  = "paranauelabs-rg-secondary-modular"
+  storage_account_name = "paranauelabssasecondarymod"
+  container_name       = "data"
+  tags = {
+    Environment = "Lab"
+    Project     = "Terraform Airlines"
+    Region      = "Secondary"
+  }
 }
