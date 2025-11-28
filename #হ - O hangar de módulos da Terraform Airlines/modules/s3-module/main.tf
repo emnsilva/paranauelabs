@@ -11,10 +11,6 @@ terraform {
   }
 }
 
-# Adiciona uma configuração vazia para o provedor aws.
-# Isso informa ao Terraform que a configuração deste provedor será passada pelo módulo raiz (root module).
-provider "aws" {}
-
 resource "aws_s3_bucket" "bucket" {
   provider      = aws
   bucket        = var.bucket_name
