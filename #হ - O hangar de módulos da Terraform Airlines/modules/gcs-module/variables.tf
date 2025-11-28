@@ -1,16 +1,10 @@
 variable "bucket_name" {
-  description = "Nome único para o bucket GCS"
+  description = "Nome único global para o bucket GCS."
   type        = string
-}
-
-variable "provider_alias" {
-  description = "Alias do provider GCP (primary/secondary)"
-  type        = string
-  default     = "primary"
 }
 
 variable "location" {
-  description = "Região GCP onde o bucket será criado"
+  description = "Região GCP onde o bucket será criado."
   type        = string
 }
 
@@ -20,12 +14,13 @@ variable "storage_class" {
   default     = "STANDARD"
 }
 
-variable "project" {
-  description = "ID do projeto GCP"
-  type        = string
+variable "force_destroy" {
+  description = "Forçar destruição do bucket mesmo com objetos internos."
+  type        = bool
+  default     = false
 }
 
-variable "labels" {
+variable "tags" {
   description = "Labels para organização e custos"
   type        = map(string)
   default     = {}
