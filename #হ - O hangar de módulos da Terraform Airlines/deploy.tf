@@ -8,8 +8,13 @@ variable "ARM_SECONDARY_REGION" {}
 variable "GCP_PRIMARY_REGION" {}
 variable "GCP_SECONDARY_REGION" {}
 variable "GCP_PROJECT" {}
-variable "ARM_SUBSCRIPTION_ID" {}
-variable "ARM_TENANT_ID" {}
+variable "ARM_SUBSCRIPTION_ID" {
+  default = "temp-subscription-id"  # ← Remove depois que funcionar
+}
+
+variable "ARM_TENANT_ID" {
+  default = "temp-tenant-id"        # ← Remove depois que funcionar
+}
 variable "GOOGLE_CREDENTIALS_B64" {}
 
 # CONFIGURAÇÃO DOS PROVIDERS (ADICIONE ISSO!)
