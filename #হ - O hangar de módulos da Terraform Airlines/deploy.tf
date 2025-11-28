@@ -6,8 +6,7 @@ module "aws_storage" {
   source = "./modules/aws"
 
   providers = {
-    aws.primary   = aws.primary
-    aws.secondary = aws.secondary
+    aws = aws.primary
   }
 
   primary_region   = var.AWS_REGION_PRIMARY
@@ -19,8 +18,7 @@ module "azure_storage" {
   source = "./modules/azure"
 
   providers = {
-    azurerm.primary   = azurerm.primary
-    azurerm.secondary = azurerm.secondary
+    azurerm = azurerm.primary
   }
 
   primary_region   = var.ARM_PRIMARY_REGION
@@ -32,8 +30,7 @@ module "gcp_storage" {
   source = "./modules/gcp"
 
   providers = {
-    google.primary   = google.primary
-    google.secondary = google.secondary
+    google = google.primary
   }
 
   project_id       = var.GCP_PROJECT
