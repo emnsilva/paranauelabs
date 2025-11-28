@@ -29,13 +29,11 @@ provider "google" {
 provider "azurerm" {
   alias           = "primary"
   features {}
-  region          = var.ARM_PRIMARY_REGION
 }
 
 provider "azurerm" {
   alias           = "secondary"
   features {}
-  region          = var.ARM_SECONDARY_REGION
 }
 
 
