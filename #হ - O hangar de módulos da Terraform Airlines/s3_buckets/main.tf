@@ -1,7 +1,14 @@
 # Cria buckets S3 em regiões primária e secundária
 
-# Este bloco vazio diz: "Eu aceito qualquer configuração de provider"
-terraform {}
+# Configuração de providers exigindo aliases esperados pelo módulo
+terraform {
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      configuration_aliases = [aws, aws.secondary]
+    }
+  }
+}
 
 # Bucket S3 primário
 resource "aws_s3_bucket" "primary" {

@@ -1,5 +1,15 @@
 # Cria storage accounts e containers em regiões primária e secundária
 
+# Configuração de providers exigindo aliases esperados pelo módulo
+terraform {
+  required_providers {
+    azurerm = {
+      source                = "hashicorp/azurerm"
+      configuration_aliases = [azurerm, azurerm.secondary]
+    }
+  }
+}
+
 # Resource group primário
 resource "azurerm_resource_group" "primary" {
   name     = "rg-${var.prefixo}-${var.ambiente}-primary"

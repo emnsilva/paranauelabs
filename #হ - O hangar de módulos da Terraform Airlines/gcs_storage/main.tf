@@ -1,5 +1,15 @@
 # Cria buckets Cloud Storage em regiões primária e secundária
 
+# Configuração de providers exigindo aliases esperados pelo módulo
+terraform {
+  required_providers {
+    google = {
+      source                = "hashicorp/google"
+      configuration_aliases = [google, google.secondary]
+    }
+  }
+}
+
 # Storage GCP primário
 resource "google_storage_bucket" "primary" {
   name          = "${var.project_id}-${var.ambiente}-primary"
