@@ -11,25 +11,25 @@ terraform {}
 
 # Bucket S3 primário
 resource "aws_s3_bucket" "primary" {
-  bucket = "${var.prefixo_projeto}-${var.ambiente}-primary"
-  force_destroy = var.ambiente == "dev" ? true : false
-  tags = var.tags_globais
+  bucket = "${var.PREFIXO_PROJETO}-${var.ENVIRONMENT}-primary"
+  force_destroy = var.ENVIRONMENT == "dev" ? true : false
+  tags = var.TAGS_GLOBAIS
 }
 
 # Bucket S3 secundário
 resource "aws_s3_bucket" "secondary" {
   provider = aws.secondary
-  bucket = "${var.prefixo_projeto}-${var.ambiente}-secondary"
-  force_destroy = var.ambiente == "dev" ? true : false
-  tags = var.tags_globais  # ⬅️ APENAS TAGS GLOBAIS
+  bucket = "${var.PREFIXO_PROJETO}-${var.ENVIRONMENT}-secondary"
+  force_destroy = var.ENVIRONMENT == "dev" ? true : false
+  tags = var.TAGS_GLOBAIS
 }
 
 # Versionamento de objetos
 resource "aws_s3_bucket_versioning" "versionamento" {
-  for_each = var.habilitar_versionamento ? {
+  for_each = {
     primary   = aws_s3_bucket.primary
     secondary = aws_s3_bucket.secondary
-  } : {}
+  }
   
   bucket = each.value.id
   versioning_configuration { status = "Enabled" }
@@ -53,7 +53,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "criptografia" {
 
 # Políticas de lifecycle
 resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
-  for_each = length(var.regras_lifecycle) > 0 ? {
+  for_each = var.ENVIRONMENT == "prod" ? {
     primary   = aws_s3_bucket.primary
     secondary = aws_s3_bucket.secondary
   } : {}
@@ -61,7 +61,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
   bucket = each.value.id
   
   dynamic "rule" {
-    for_each = var.regras_lifecycle
+    for_each = {
+      logs = { dias_expiracao = 90, prefixo = "logs/" }
+      temp = { dias_expiracao = 7,  prefixo = "temp/" }
+    }
+    
     content {
       id     = rule.key
       status = "Enabled"
