@@ -30,9 +30,9 @@ resource "google_storage_bucket" "primary" {
       
       condition {
         age                   = lifecycle_rule.value.condicao_idade
-        with_state           = lifecycle_rule.value.condicao_estado
+        with_state            = lifecycle_rule.value.condicao_estado
         matches_storage_class = lifecycle_rule.value.condicao_classe
-        num_newer_versions   = lifecycle_rule.value.condicao_versoes_novas
+        num_newer_versions    = lifecycle_rule.value.condicao_versoes_novas
       }
     }
   }
@@ -69,9 +69,9 @@ resource "google_storage_bucket" "secondary" {
       
       condition {
         age                   = lifecycle_rule.value.condicao_idade
-        with_state           = lifecycle_rule.value.condicao_estado
+        with_state            = lifecycle_rule.value.condicao_estado
         matches_storage_class = lifecycle_rule.value.condicao_classe
-        num_newer_versions   = lifecycle_rule.value.condicao_versoes_novas
+        num_newer_versions    = lifecycle_rule.value.condicao_versoes_novas
       }
     }
   }
