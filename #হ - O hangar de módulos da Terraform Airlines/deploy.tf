@@ -3,34 +3,89 @@
 # Módulo AWS: Buckets S3 com configurações padrão
 module "aws_s3" {
   source = "./modules/s3_buckets"
-
-  # Configuração de provedores por região
+  
   providers = {
-    aws.primary   = aws.primary       # Região primária
-    aws.secondary = aws.secondary     # Região secundária  
+    aws.primary   = aws.primary
+    aws.secondary = aws.secondary
   }
+  
+  # Variáveis que o módulo AWS precisa
+  PREFIXO_PROJETO           = var.PREFIXO_PROJETO
+  ENVIRONMENT               = var.ENVIRONMENT
+  TAGS_GLOBAIS              = var.TAGS_GLOBAIS
+  
+  # Valores específicos do módulo AWS
+  habilitar_versionamento   = true
+  permitir_destruicao_rapida = var.ENVIRONMENT == "dev"
+  
+  # Lifecycle condicional
+  regras_lifecycle = var.ENVIRONMENT == "prod" ? {
+    logs = {
+      dias_expiracao = 90
+      prefixo        = "logs/"
+    }
+    temp = {
+      dias_expiracao = 7
+      prefixo        = "temp/"
+    }
+  } : {}
 }
 
 # Módulo AZURE: Storage accounts e containers
 module "azure_blob_storage" {
   source = "./modules/blob_storage"
-
-  # Configuração de provedores por região
-   providers = {
+  
+  providers = {
     azurerm.primary   = azurerm.primary
     azurerm.secondary = azurerm.secondary
   }
+  
+  # Variáveis que o módulo Azure precisa
+  prefixo              = substr(var.PREFIXO_PROJETO, 0, 10)  # Azure tem limite de chars
+  ambiente             = var.ENVIRONMENT
+  tags_globais         = var.TAGS_GLOBAIS
+  primary_region       = var.ARM_PRIMARY_REGION
+  secondary_region     = var.ARM_SECONDARY_REGION
+  
+  # Configurações específicas do Azure
+  tipo_conta            = var.ENVIRONMENT == "prod" ? "Premium" : "Standard"
+  tipo_replicacao       = var.ENVIRONMENT == "prod" ? "GRS" : "LRS"
+  tipo_acesso_container = "private"
+  nomes_containers      = ["dados", "logs", "backup"]
 }
 
 # Módulo GCP: Cloud storage buckets
-module "armazenamento_gcp" {
+module "gcp_storage" {
   source = "./modules/gcs_storage"
-
-  # Configuração de provedores por região
+  
   providers = {
     google.primary   = google.primary
     google.secondary = google.secondary
   }
+  
+  # Variáveis que o módulo GCP precisa
+  project_id           = var.GCP_PROJECT
+  ambiente             = var.ENVIRONMENT
+  tags_globais         = var.TAGS_GLOBAIS
+  primary_region       = var.GCP_PRIMARY_REGION
+  secondary_region     = var.GCP_SECONDARY_REGION
+  
+  # Configurações específicas do GCP
+  classe_armazenamento    = "STANDARD"
+  habilitar_versionamento = true
+  acesso_uniforme         = true
+  
+  # Lifecycle condicional
+  regras_lifecycle = var.ENVIRONMENT == "prod" ? {
+    autoArchive = {
+      acao_tipo              = "SetStorageClass"
+      acao_classe            = "ARCHIVE"
+      condicao_idade         = 365
+      condicao_estado        = "ANY"
+      condicao_classe        = ["STANDARD", "NEARLINE"]
+      condicao_versoes_novas = null
+    }
+  } : {}
 }
 
 # Outputs consolidados
