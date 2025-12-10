@@ -1,11 +1,5 @@
 # Cria storage accounts e containers em regiões primária e secundária
 
-# Variáveis de configuração
-# Define as regiões AZURE onde os buckets serão criados
-# São como "configurações" que você precisa fornecer antes de executar
-variable "ARM_PRIMARY_REGION" {}       # Região primária (ex: eastus)
-variable "ARM_SECONDARY_REGION" {}     # Região secundária (ex: westus)
-
 # Resource group primário
 resource "azurerm_resource_group" "primary" {
   name     = "rg-${var.prefixo}-${var.ambiente}-primary"
