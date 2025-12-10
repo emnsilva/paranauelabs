@@ -1,11 +1,5 @@
 # Cria buckets S3 em regiões primária e secundária
 
-# Variáveis de configuração
-# Define as regiões AWS onde os buckets serão criados
-# São como "configurações" que você precisa fornecer antes de executar
-variable "AWS_REGION_PRIMARY" {}
-variable "AWS_REGION_SECONDARY" {}
-
 # Este bloco vazio diz: "Eu aceito qualquer configuração de provider"
 terraform {}
 
