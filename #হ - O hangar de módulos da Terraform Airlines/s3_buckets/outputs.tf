@@ -33,6 +33,6 @@ output "configuracoes_aplicadas" {
     versionamento  = var.habilitar_versionamento ? "habilitado" : "desabilitado"
     criptografia   = "AES256"
     total_regras_lifecycle = length(var.regras_lifecycle)
-    ambiente       = var.ambiente
+    ambiente       = var.ENVIRONMENT
   }
 }

@@ -3,20 +3,60 @@
 # Módulo AWS: Buckets S3 com configurações padrão
 module "aws_s3" {
   source = "./s3_buckets"
-  
-  providers = { aws.primary = aws.primary, aws.secondary = aws.secondary }
+
+  providers = {
+    aws           = aws.primary
+    aws.secondary = aws.secondary
+  }
+
+  PREFIXO_PROJETO        = var.PREFIXO_PROJETO
+  ENVIRONMENT            = var.ENVIRONMENT
+  TAGS_GLOBAIS           = var.TAGS_GLOBAIS
+  habilitar_versionamento = true
+  regras_lifecycle = {
+    logs = { dias_expiracao = 90, prefixo = "logs/" }
+    temp = { dias_expiracao = 7,  prefixo = "temp/" }
+  }
 }
 
 # Módulo AZURE: Storage accounts e containers
 module "azure_blob_storage" {
   source = "./blob_storage"
-  providers = { azurerm.primary = azurerm.primary, azurerm.secondary = azurerm.secondary }
+
+  providers = {
+    azurerm           = azurerm.primary
+    azurerm.secondary = azurerm.secondary
+  }
+
+  prefixo            = var.PREFIXO_PROJETO
+  ambiente           = var.ENVIRONMENT
+  primary_region     = var.ARM_PRIMARY_REGION
+  secondary_region   = var.ARM_SECONDARY_REGION
+  tags_globais       = var.TAGS_GLOBAIS
+  nomes_containers   = ["app", "logs"]
+  tipo_conta         = "Standard"
+  tipo_replicacao    = "LRS"
+  tipo_acesso_container = "private"
 }
 
 # Módulo GCP: Cloud storage buckets
 module "gcp_storage" {
   source = "./gcs_storage"
-  providers = { google.primary = google.primary, google.secondary = google.secondary }
+
+  providers = {
+    google           = google.primary
+    google.secondary = google.secondary
+  }
+
+  project_id             = var.GCP_PROJECT
+  ambiente               = var.ENVIRONMENT
+  primary_region         = var.GCP_PRIMARY_REGION
+  secondary_region       = var.GCP_SECONDARY_REGION
+  tags_globais           = var.TAGS_GLOBAIS
+  classe_armazenamento   = "STANDARD"
+  habilitar_versionamento = true
+  acesso_uniforme        = true
+  regras_lifecycle       = {}
   }
 
 # Outputs consolidados
@@ -25,25 +65,25 @@ output "dashboard_armazenamento_multi_cloud" {
   value = {
     aws = {
       buckets = {
-        primario   = module.armazenamento_aws.bucket_primario.nome
-        secundario = module.armazenamento_aws.bucket_secundario.nome
+        primario   = module.aws_s3.bucket_primario.nome
+        secundario = module.aws_s3.bucket_secundario.nome
       }
-      urls = module.armazenamento_aws.urls_acesso
+      urls = module.aws_s3.urls_acesso
     }
     azure = {
       storage_accounts = {
-        primaria   = module.armazenamento_azure.conta_primaria.nome
-        secundaria = module.armazenamento_azure.conta_secundaria.nome
+        primaria   = module.azure_blob_storage.storage_primaria.nome
+        secundaria = module.azure_blob_storage.storage_secundaria.nome
       }
       resource_groups = {
-        primario   = module.armazenamento_azure.rg_primario.nome
-        secundario = module.armazenamento_azure.rg_secundario.nome
+        primario   = module.azure_blob_storage.rg_primario.nome
+        secundario = module.azure_blob_storage.rg_secundario.nome
       }
     }
     gcp = {
       buckets = {
-        primario   = module.armazenamento_gcp.bucket_primario.nome
-        secundario = module.armazenamento_gcp.bucket_secundario.nome
+        primario   = module.gcp_storage.bucket_primario.nome
+        secundario = module.gcp_storage.bucket_secundario.nome
       }
       projeto = var.GCP_PROJECT
     }
@@ -53,11 +93,11 @@ output "dashboard_armazenamento_multi_cloud" {
 output "urls_acesso_rapido" {
   description = "URLs de acesso direto aos principais recursos"
   value = {
-    aws_primary    = module.armazenamento_aws.urls_acesso.primario
-    aws_secondary  = module.armazenamento_aws.urls_acesso.secundario
-    gcp_primary    = "https://console.cloud.google.com/storage/browser/${module.armazenamento_gcp.bucket_primario.nome}"
-    gcp_secondary  = "https://console.cloud.google.com/storage/browser/${module.armazenamento_gcp.bucket_secundario.nome}"
-    azure_primary  = "https://portal.azure.com/#@/resource${module.armazenamento_azure.conta_primaria.id}/overview"
+    aws_primary    = module.aws_s3.urls_acesso.primario
+    aws_secondary  = module.aws_s3.urls_acesso.secundario
+    gcp_primary    = "https://console.cloud.google.com/storage/browser/${module.gcp_storage.bucket_primario.nome}"
+    gcp_secondary  = "https://console.cloud.google.com/storage/browser/${module.gcp_storage.bucket_secundario.nome}"
+    azure_primary  = "https://portal.azure.com/#@/resource${module.azure_blob_storage.storage_primaria.nome}/overview"
   }
   sensitive = false
 }
