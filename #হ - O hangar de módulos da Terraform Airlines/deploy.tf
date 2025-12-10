@@ -17,7 +17,7 @@ module "azure_blob_storage" {
 module "gcp_storage" {
   source = "./gcs_storage"
   providers = { google.primary = google.primary, google.secondary = google.secondary }
-  } : {}
+  }
 
 # Outputs consolidados
 output "dashboard_armazenamento_multi_cloud" {
