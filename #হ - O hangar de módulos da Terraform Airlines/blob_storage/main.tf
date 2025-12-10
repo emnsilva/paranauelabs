@@ -25,8 +25,8 @@ resource "azurerm_storage_account" "primary" {
   account_kind             = "StorageV2"
   
   # Segurança
-  enable_https_traffic_only = true
-  min_tls_version           = "TLS1_2"
+  https_traffic_only_enabled = true
+  min_tls_version            = "TLS1_2"
   allow_nested_items_to_be_public = false
   tags = var.tags_globais
 }
@@ -42,8 +42,8 @@ resource "azurerm_storage_account" "secondary" {
   account_kind             = "StorageV2"
   
   # Segurança
-  enable_https_traffic_only = true
-  min_tls_version           = "TLS1_2"
+  https_traffic_only_enabled = true
+  min_tls_version            = "TLS1_2"
   allow_nested_items_to_be_public = false
   tags = var.tags_globais
 }
