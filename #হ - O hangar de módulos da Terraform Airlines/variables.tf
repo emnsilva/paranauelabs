@@ -41,7 +41,7 @@ variable "TAGS_GLOBAIS" {
     # Metadados do projeto
     artigo      = "hangar-modulos"
     versao      = "1.0.0"
-    criado-em   = formatdate("YYYY-MM-DD", timestamp())
+    criado-em   = ""
     
     # Gestão
     custo       = "infraestrutura"

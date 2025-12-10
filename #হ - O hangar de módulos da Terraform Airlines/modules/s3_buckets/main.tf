@@ -7,6 +7,9 @@
 variable "AWS_REGION_PRIMARY" {}
 variable "AWS_REGION_SECONDARY" {}
 
+# Este bloco vazio diz: "Eu aceito qualquer configuração de provider"
+terraform {}
+
 # Bucket S3 primário
 resource "aws_s3_bucket" "primary" {
   bucket = "${var.prefixo_projeto}-${var.ambiente}-primary"
