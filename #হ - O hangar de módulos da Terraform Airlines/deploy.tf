@@ -36,7 +36,7 @@ module "aws_s3" {
 
 # Módulo AZURE: Storage accounts e containers
 module "azure_blob_storage" {
-  source = "./blob_storage"
+  source = "./modules/blob_storage"
 
   # Configuração de provedores por região
   providers = {
