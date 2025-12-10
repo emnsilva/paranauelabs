@@ -1,5 +1,4 @@
-# Cria buckets S3 em regiões primária e secundária com configurações
-# padronizadas e segurança embutida.
+# Cria buckets S3 em regiões primária e secundária
 
 # Variáveis de configuração
 # Define as regiões AWS onde os buckets serão criados
