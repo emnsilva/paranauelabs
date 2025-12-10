@@ -1,4 +1,4 @@
-# Outputs do módulo S3 Bucket com replicação entre regiões
+# Outputs do módulo Blob storage com replicação entre regiões
 # Informações úteis para consumo por outros módulos ou usuários
 
 output "rg_primario" {
@@ -20,29 +20,29 @@ output "rg_secundario" {
 output "storage_primaria" {
   description = "Informações da storage account primária"
   value = {
-    nome          = azurerm_storage_account.primary.name
+    nome           = azurerm_storage_account.primary.name
     resource_group = azurerm_resource_group.primary.name
-    location      = azurerm_storage_account.primary.location
-    tipo_conta    = azurerm_storage_account.primary.account_tier
-    replicacao    = azurerm_storage_account.primary.account_replication_type
+    location       = azurerm_storage_account.primary.location
+    tipo_conta     = azurerm_storage_account.primary.account_tier
+    replicacao     = azurerm_storage_account.primary.account_replication_type
   }
 }
 
 output "storage_secundaria" {
   description = "Informações da storage account secundária"
   value = {
-    nome          = azurerm_storage_account.secondary.name
+    nome           = azurerm_storage_account.secondary.name
     resource_group = azurerm_resource_group.secondary.name
-    location      = azurerm_storage_account.secondary.location
-    tipo_conta    = azurerm_storage_account.secondary.account_tier
-    replicacao    = azurerm_storage_account.secondary.account_replication_type
+    location       = azurerm_storage_account.secondary.location
+    tipo_conta     = azurerm_storage_account.secondary.account_tier
+    replicacao     = azurerm_storage_account.secondary.account_replication_type
   }
 }
 
 output "containers_criados" {
   description = "Containers criados em cada storage account"
   value = {
-    primaria = [for c in azurerm_storage_container.primary_containers : c.name]
+    primaria   = [for c in azurerm_storage_container.primary_containers : c.name]
     secundaria = [for c in azurerm_storage_container.secondary_containers : c.name]
   }
 }
