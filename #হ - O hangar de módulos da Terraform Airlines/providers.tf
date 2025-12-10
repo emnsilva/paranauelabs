@@ -7,6 +7,7 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 6.25.0"      # Versão mais recente até o momento
+      configuration_aliases = [aws.primary, aws.secondary]
     }
     azurerm = {
       source  = "hashicorp/azurerm"
