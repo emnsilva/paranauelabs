@@ -38,7 +38,7 @@ provider "aws" {
 
 provider "azurerm" {
   alias   = "primary"                   # Canal primário
-  features {}                         # Configuração padrão do Azure
+  features {}                           # Configuração padrão do Azure
 }
 
 provider "azurerm" {
