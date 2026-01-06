@@ -14,8 +14,8 @@ case $ID in
     ubuntu|debian)
     # 1. Configuração de repositório
     echo "Configurando repositório Kubernetes..."
-    K8S_VERSION="v1.30"
-    [ "$VERSION_ID" = "24.04" ] || K8S_VERSION="v1.29"
+    K8S_VERSION="v1.35"
+    [ "$VERSION_ID" = "24.04" ] || K8S_VERSION="v1.34"
     curl -fsSL "https://pkgs.k8s.io/core:/stable:/$K8S_VERSION/deb/Release.key" | \
         gpg --dearmor -o /usr/share/keyrings/kubernetes-keyring.gpg
     echo "deb [signed-by=/usr/share/keyrings/kubernetes-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$K8S_VERSION/deb/ /" \
