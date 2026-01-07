@@ -1,142 +1,74 @@
 #!/bin/bash
-# uninstallparanaue.sh - Remove completamente o Kubernetes e limpa todos os rastros
+# uninstallparanaue.sh - Remove Kubernetes completamente
 
-echo "Limpando completamente o terreno do Kubernetes..."
-echo "-------------------------------------------"
-
-[ -f /etc/os-release ] && . /etc/os-release || { echo "ERRO: Não foi possível detectar a distro"; exit 1; }
+echo "🧹 NUCLEAR: Removendo Kubernetes..."
 [ "$(id -u)" -ne 0 ] && exec sudo "$0" "$@"
 
-# 1. Parar e desabilitar todos os serviços
-echo "Parando serviços..."
-for service in kubelet containerd docker; do
-    systemctl stop $service 2>/dev/null
-    systemctl disable $service 2>/dev/null
-    systemctl mask $service 2>/dev/null 2>/dev/null
-done
-
-# 2. Remover containers e imagens
-echo "Removendo containers e imagens..."
+# 1. PARAR TUDO
+echo "⏹️  Parando serviços..."
+systemctl stop kubelet containerd docker 2>/dev/null || true
+kubeadm reset -f 2>/dev/null
 crictl rm -f $(crictl ps -aq 2>/dev/null) 2>/dev/null
-crictl rmi -f $(crictl images -q 2>/dev/null) 2>/dev/null
-docker rm -f $(docker ps -aq 2>/dev/null) 2>/dev/null
-docker rmi -f $(docker images -q 2>/dev/null) 2>/dev/null
 
-# 3. Remover pacotes Kubernetes
-echo "Removendo Kubernetes..."
+# 2. REMOVER KUBERNETES
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case $ID in
+        ubuntu|debian)
+            apt-mark unhold kubelet kubeadm kubectl 2>/dev/null
+            apt-get purge -y kubelet kubeadm kubectl kubernetes-cni cri-tools
+            apt-get autoremove -y --purge
+            rm -f /etc/apt/sources.list.d/kubernetes.list
+            rm -f /usr/share/keyrings/kubernetes-keyring.gpg
+            ;;
+        rhel|centos)
+            yum remove -y kubelet kubeadm kubectl kubernetes-cni cri-tools
+            yum autoremove -y
+            rm -f /etc/yum.repos.d/kubernetes.repo
+            ;;
+    esac
+fi
+
+# 3. REMOVER CONTAINERD/DOCKER
 case $ID in
     ubuntu|debian)
-        apt-mark unhold kubelet kubeadm kubectl 2>/dev/null
-        apt-get purge -y kubelet kubeadm kubectl kubernetes-cni cri-tools
-        apt-get autoremove -y --purge
-        rm -f /etc/apt/sources.list.d/kubernetes.list
-        rm -f /usr/share/keyrings/kubernetes-keyring.gpg
+        apt-get purge -y containerd.io docker-ce docker-ce-cli runc
+        rm -f /etc/apt/sources.list.d/docker.list
         ;;
     rhel|centos)
-        yum remove -y kubelet kubeadm kubectl kubernetes-cni cri-tools
-        yum autoremove -y
-        rm -f /etc/yum.repos.d/kubernetes.repo
-        ;;
-esac
-
-# 4. Remover container runtime
-echo "Removendo container runtime..."
-case $ID in
-    ubuntu|debian)
-        apt-get purge -y containerd runc
-        apt-get autoremove -y --purge
-        ;;
-    rhel|centos)
-        yum remove -y containerd.io runc docker-ce docker-ce-cli
+        yum remove -y containerd.io docker-ce docker-ce-cli runc
         rm -f /etc/yum.repos.d/docker-ce.repo
         ;;
 esac
 
-# 5. Remover dependências específicas
-echo "Removendo dependências..."
-case $ID in
-    rhel|centos)
-        yum remove -y yum-utils device-mapper-persistent-data lvm2
-        ;;
-esac
+# 4. LIMPEZA NUCLEAR DE DIRETÓRIOS
+echo "🗑️  Apagando diretórios..."
+rm -rf /etc/kubernetes /var/lib/kubelet /var/lib/etcd /var/lib/cni /etc/cni
+rm -rf ~/.kube /root/.kube /home/*/.kube 2>/dev/null
+rm -rf /var/lib/containerd /var/lib/docker /run/containerd /run/docker
+rm -rf /etc/containerd /etc/docker
 
-# 6. Limpeza nuclear de diretórios
-echo "Limpando diretórios do Kubernetes..."
-rm -rf /etc/kubernetes
-rm -rf /var/lib/kubelet
-rm -rf /var/lib/etcd
-rm -rf /var/lib/cni
-rm -rf /etc/cni
-rm -rf ~/.kube
-rm -rf /root/.kube
-rm -rf /home/*/.kube 2>/dev/null
-
-echo "Limpando diretórios de containers..."
-rm -rf /var/run/containerd
-rm -rf /var/lib/containerd
-rm -rf /var/run/docker
-rm -rf /var/lib/docker
-rm -rf /etc/docker
-
-# 7. Reverter configurações de sistema
-echo "Revertendo configurações..."
-rm -f /etc/containerd/config.toml
-rm -f /etc/default/kubelet
-rm -f /etc/sysctl.d/k8s.conf
-rm -f /etc/modules-load.d/k8s.conf
-
-echo "Reativando swap..."
+# 5. REVERTER CONFIGURAÇÕES
+echo "↩️  Revertendo configurações..."
+rm -f /etc/default/kubelet /etc/sysctl.d/k8s.conf /etc/modules-load.d/k8s.conf
 sed -i '/ swap / s/^#//g' /etc/fstab 2>/dev/null
+[ "$ID" = "rhel" ] || [ "$ID" = "centos" ] && \
+    sed -i 's/SELINUX=permissive/SELINUX=enforcing/' /etc/selinux/config 2>/dev/null
 
-echo "Revertendo SELinux..."
-if [ "$ID" = "rhel" ] || [ "$ID" = "centos" ]; then
-    sed -i 's/^SELINUX=permissive$/SELINUX=enforcing/' /etc/selinux/config 2>/dev/null
-fi
+# 6. REMOVER ALIASES
+echo "🚮 Removendo aliases..."
+sed -i '/alias k=kubectl/d' ~/.bashrc /root/.bashrc /home/*/.bashrc 2>/dev/null
+rm -f /etc/profile.d/k8s-aliases.sh
 
-# 8. Limpar caches e dados temporários
-echo "Limpando caches..."
-case $ID in
-    ubuntu|debian)
-        apt-get clean
-        apt-get autoclean
-        ;;
-    rhel|centos)
-        yum clean all
-        ;;
-esac
-
-rm -rf /var/cache/apt/* 2>/dev/null
-rm -rf /var/cache/yum/* 2>/dev/null
-
-# 9. Remover módulos do kernel (opcional)
-echo "Removendo módulos do kernel..."
-rmmod br_netfilter 2>/dev/null
-rmmod overlay 2>/dev/null
-
-# 10. Recarregar sysctl
-echo "Recarregando configurações do kernel..."
-sysctl --system 2>/dev/null || true
-
-# 11. Remover arquivos de configuração do usuário
-echo "Limpando configurações de usuário..."
-find /home -name "kube" -type d -exec rm -rf {} + 2>/dev/null
-find /root -name "kube" -type d -exec rm -rf {} + 2>/dev/null
-
-# 12. Limpar logs
-echo "Limpando logs relacionados..."
-find /var/log -name "*kube*" -exec rm -f {} + 2>/dev/null
-find /var/log -name "*docker*" -exec rm -f {} + 2>/dev/null
-find /var/log -name "*containerd*" -exec rm -f {} + 2>/dev/null
+# 7. LIMPAR CACHE
+echo "🧼 Limpando cache..."
+apt-get clean 2>/dev/null || yum clean all 2>/dev/null
 journalctl --vacuum-time=1h 2>/dev/null
+
+# 8. RECARREGAR
+systemctl daemon-reload
+sysctl --system 2>/dev/null || true
 
 sudo reboot now
 
-echo "-------------------------------------------"
-echo "LIMPESA COMPLETA CONCLUÍDA!"
-echo ""
-echo "Sistema limpo. Para remoção total:"
-echo "1. Após reboot, verifique com:"
-echo "   - kubeadm version (deve falhar)"
-echo "   - kubectl version (deve falhar)"
-echo "   - systemctl status containerd (não deve existir)"
-echo "-------------------------------------------"
+echo "✅ REMOÇÃO COMPLETA!"

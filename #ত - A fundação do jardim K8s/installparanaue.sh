@@ -1,101 +1,89 @@
 #!/bin/bash
-# installparanaue.sh - Instala as ferramentas para o cluster Kubernetes
+# installparanaue.sh - Instala Kubernetes
 
-echo "Preparando o solo do Kubernetes..."
-echo "-------------------------------------------"
-
-# Detecta distribuição
-[ -f /etc/os-release ] && . /etc/os-release || { echo "ERRO: Não foi possível detectar a distro"; exit 1; }
+echo "Preparando o Kubernetes..."
+[ -f /etc/os-release ] && . /etc/os-release || exit 1
 [ "$(id -u)" -ne 0 ] && exec sudo "$0" "$@"
 export DEBIAN_FRONTEND=noninteractive
 
-# Instalação por distro
-case $ID in
-    ubuntu|debian)
-    # 1. Configuração de repositório
-    echo "Configurando repositório Kubernetes..."
-    K8S_VERSION="v1.35"
-    [ "$VERSION_ID" = "24.04" ] || K8S_VERSION="v1.34"
-    curl -fsSL "https://pkgs.k8s.io/core:/stable:/$K8S_VERSION/deb/Release.key" | \
-        gpg --dearmor -o /usr/share/keyrings/kubernetes-keyring.gpg
-    echo "deb [signed-by=/usr/share/keyrings/kubernetes-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$K8S_VERSION/deb/ /" \
+# Ubuntu/Debian
+if [[ "$ID" =~ ubuntu|debian ]]; then
+    echo "Instalando K8s v1.35..."
+    
+    # Docker repo
+    sudo apt-get install -y ca-certificates curl
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+        https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+        > /etc/apt/sources.list.d/docker.list
+    
+    # Kubernetes repo
+    sudo curl -fsSL "https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key" \
+        -o /etc/apt/keyrings/kubernetes.asc
+    sudo chmod a+r /etc/apt/keyrings/kubernetes.asc
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes.asc] \
+        https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /" \
         > /etc/apt/sources.list.d/kubernetes.list
     
-    # 2. Container runtime e Kubernetes
-    echo "Instalando Kubernetes e dependências..."
-    apt-get update -y -q && apt-get upgrade -y -q
-    apt-get install -y containerd kubelet kubeadm kubectl
+    apt-get update
+    apt-get install -y containerd.io kubelet kubeadm kubectl
     apt-mark hold kubelet kubeadm kubectl
-    ;;
-        
-    rhel|centos)
-    # 1. Atualização e configuração básica
-    echo "Atualizando sistema e configurando SELinux..."
+
+# RHEL/CentOS
+elif [[ "$ID" =~ rhel|centos ]]; then
+    echo "Instalando K8s v1.35..."
     yum update -y
-    setenforce 0
-    sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
     
-    # 2. Container runtime
-    echo "Instalando containerd..."
-    yum install -y yum-utils device-mapper-persistent-data lvm2
+    setenforce 0
+    sed -i 's/SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config
+    
+    yum install -y yum-utils
     yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     yum install -y containerd.io
     
-    # 3. Kubernetes
-    echo "Configurando repositório Kubernetes..."
-    cat > /etc/yum.repos.d/kubernetes.repo <<EOF
+    cat > /etc/yum.repos.d/kubernetes.repo <<'EOF'
 [kubernetes]
 name=Kubernetes
-baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.35/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.35/rpm/repodata/repomd.xml.key
 EOF
     
-    echo "Instalando Kubernetes..."
     yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
     systemctl enable --now kubelet
-    ;;
-esac
+else
+    echo "Distro não suportada"
+    exit 1
+fi
 
-# Configuração comum
-echo "Configurando containerd..."
+# Configuração do containerd
 mkdir -p /etc/containerd
+cat > /etc/containerd/config.toml <<'EOF'
+version = 2
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+  SystemdCgroup = true
+EOF
 
-# DESMASCARAR o serviço se estiver mascarado
-systemctl unmask containerd 2>/dev/null || true
-containerd config default 2>/dev/null | \
-    sed 's/SystemdCgroup = false/SystemdCgroup = true/' > /etc/containerd/config.toml
-systemctl restart containerd && systemctl enable containerd
+systemctl restart containerd
+systemctl enable containerd
 
-echo "Ajustando sistema..."
+# Ajustes do sistema
 swapoff -a
 sed -i '/ swap / s/^/#/' /etc/fstab
 
-cat > /etc/sysctl.d/k8s.conf <<EOF
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
+cat > /etc/sysctl.d/k8s.conf <<'EOF'
 net.ipv4.ip_forward = 1
 EOF
 sysctl --system >/dev/null
 
-modprobe br_netfilter overlay
-cat > /etc/modules-load.d/k8s.conf <<EOF
-br_netfilter
-overlay
-EOF
-
 echo 'KUBELET_EXTRA_ARGS="--cgroup-driver=systemd"' > /etc/default/kubelet
-systemctl daemon-reload
 systemctl restart kubelet 2>/dev/null
 
-# Resumo
-echo "-------------------------------------------"
-echo "Instalação concluída!"
-echo ""
-echo "Ferramentas instaladas:"
-command -v containerd >/dev/null && echo "✓ containerd" || echo "✗ containerd"
-command -v kubelet >/dev/null && echo "✓ kubelet"       || echo "✗ kubelet"
-command -v kubeadm >/dev/null && echo "✓ kubeadm"       || echo "✗ kubeadm"
-command -v kubectl >/dev/null && echo "✓ kubectl"       || echo "✗ kubectl"
-echo "-------------------------------------------"
+# Alias k=kubectl
+echo 'alias k=kubectl' >> ~/.bashrc
+source ~/.bashrc 2>/dev/null || true
+
+echo "Pronto! Execute: sudo kubeadm init --pod-network-cidr=192.168.0.0/16"
