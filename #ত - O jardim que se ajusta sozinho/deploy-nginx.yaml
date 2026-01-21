@@ -1,0 +1,19 @@
+apiVersion: apps/v1            # Versão da API para aplicações (Deployments)
+kind: Deployment               # Tipo: SISTEMA DE PLANTIO INTELIGENTE
+metadata:                      # Metadados do sistema de plantio
+  name: nginx                  # Nome do sistema de plantio
+spec:                          # Como o sistema deve funcionar
+  replicas: 3                  # QUANTIDADE DE VASOS: sempre tenha 3 vasos idênticos
+  selector:                    # Como encontrar os vasos que este sistema gerencia
+    matchLabels:               # Procure vasos com estas etiquetas:
+      app: nginx               # "Todos os vasos marcados como NGINX"
+  template:                    # MODELO/MOLDE para criar novos vasos
+    metadata:                  # Metadados dos vasos que serão criados
+      labels:                  # Etiquetas que cada vaso receberá
+        app: nginx             # "Todo vaso criado terá esta etiqueta"
+    spec:                      # Especificação IDÊNTICA ao Pod
+      containers:              # ( mesma configuração do Pod anterior )
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
