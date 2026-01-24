@@ -17,30 +17,30 @@ A centralização foi escolhida baseada nos seguintes fatores:<br>
 **4.** Escalabilidade: Facilita a abertura de novas filiais sem necessidade de infraestrutura local complexa.<br>
 **5.** Custo Total de Propriedade: Apesar do investimento inicial maior, reduz custos recorrentes de manutenção distribuída.<br>
 
-## **Alternativas Consideradas<br>
-**Alternativa 1: Manutenção do Modelo Atual (Distribuído)**<br>
+## **Alternativas Consideradas**<br>
+***Alternativa 1: Manutenção do Modelo Atual (Distribuído)***<br>
 **Vantagens:** Independência por filial, menor impacto em falhas de WAN<br>
 **Desvantagens:** Alto custo de manutenção, inconsistência de dados, complexidade de suporte<br>
 **Rejeitada:** Devido aos custos operacionais crescentes e riscos de inconsistência de dados<br>
 
-**Alternativa 2: Híbrido (Dados Críticos Centralizados)**<br>
+***Alternativa 2: Híbrido (Dados Críticos Centralizados)***<br>
 **Vantagens:** Balanceamento entre performance local e controle central<br>
 **Desvantagens:** Complexidade aumentada, necessidade de sincronização bidirecional<br>
 **Rejeitada:** Mantém complexidade de sincronização que queremos eliminar<br>
 
-**Alternativa 3: Cloud Puro**<br>
+***Alternativa 3: Cloud Puro***<br>
 **Vantagens:** Escalabilidade elástica, OPEX em vez de CAPEX<br>
 **Desvantagens:** Dependência de internet, custo recorrente alto, latência potencial<br>
 **Rejeitada:** Custo recorrente muito alto para o volume de dados e necessidade de baixa latência<br>
 
 ## **Consequências<br>
-**Positivas**<br>
+***Positivas***<br>
 **Operacional:** Suporte remoto possível para 90% dos casos<br>
 **Financeiro:** Redução de custos com deslocamentos em ~80%<br>
 **Dados:** Eliminação de janelas de inconsistência<br>
 **Segurança:** Políticas de backup e acesso unificadas<br>
 
-**Negativas**<br>
+***Negativas***<br>
 **Dependência de WAN:** Filiais ficam inoperantes se a conexão cair<br>
 **Investimento Inicial:** CAPEX significativo em infraestrutura de matriz<br>
 **Latência:** Potencial impacto na performance para filiais mais distantes<br>
