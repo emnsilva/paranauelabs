@@ -33,7 +33,7 @@ A centralização foi escolhida baseada nos seguintes fatores:<br>
 **Desvantagens:** Dependência de internet, custo recorrente alto, latência potencial<br>
 **Rejeitada:** Custo recorrente muito alto para o volume de dados e necessidade de baixa latência<br>
 
-## **Consequências<br>
+## **Consequências**<br>
 ***Positivas***<br>
 **Operacional:** Suporte remoto possível para 90% dos casos<br>
 **Financeiro:** Redução de custos com deslocamentos em ~80%<br>
