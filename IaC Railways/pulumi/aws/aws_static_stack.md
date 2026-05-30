@@ -1,3 +1,7 @@
+values:
+  # Variável interna do ESC usada para centralizar a região
+  regionDefault: "sa-east-1"
+
 aws:
     login:
       fn::open::aws-login:
