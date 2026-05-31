@@ -1,4 +1,4 @@
-name: IaC Railways
+name: aws_ec2_yaml
 description: "Infraestrutura de rede e computação AWS em múltiplas regiões com OIDC"
 runtime: yaml
 
