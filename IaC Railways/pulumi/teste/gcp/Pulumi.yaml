@@ -26,8 +26,7 @@ resources:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
       accessToken:
-        fn::secret:
-          fn::getEnv: GOOGLE_OAUTH_ACCESS_TOKEN
+        fn::env: GOOGLE_OAUTH_ACCESS_TOKEN
 
   gcp-secondary:
     type: pulumi:providers:gcp
@@ -35,8 +34,7 @@ resources:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
       accessToken:
-        fn::secret:
-          fn::getEnv: GOOGLE_OAUTH_ACCESS_TOKEN
+        fn::env: GOOGLE_OAUTH_ACCESS_TOKEN
 
   # Recursos da região primária
   # Rede VPC Global (Compartilhada entre as regiões)
@@ -123,5 +121,5 @@ resources:
 
 # EXPORTS (Informa os IPs públicos gerados)
 outputs:
-  primaryIp: ${server_primary.networkInterfaces.accessConfigs.natIp}
-  secondaryIp: ${server_secondary.networkInterfaces.accessConfigs.natIp}
+  primaryIp: ${server_primary.networkInterfaces[0].accessConfigs[0].natIp}
+  secondaryIp: ${server_secondary.networkInterfaces[0].accessConfigs[0].natIp}
