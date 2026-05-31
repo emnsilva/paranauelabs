@@ -1,8 +1,11 @@
-values:
-  # Variável interna do ESC usada para centralizar a região
-  regionDefault: "sa-east-1"
+# Copie e cole esse modelo pra sua environment
+# Substitua accessKeyId e secretAccessKey pelas suas chaves
 
-aws:
+values:
+  regionA: "sa-east-1"
+  regionB: "us-east-1"
+
+  aws:
     login:
       fn::open::aws-login:
         static:
@@ -10,11 +13,10 @@ aws:
           secretAccessKey: "Chave secreta do usuário IAM"
 
   environmentVariables:
-    # Variáveis globais que qualquer CLI ou SDK da AWS lê por padrão
     AWS_ACCESS_KEY_ID: ${aws.login.accessKeyId}
     AWS_SECRET_ACCESS_KEY: ${aws.login.secretAccessKey}
-    AWS_DEFAULT_REGION: ${regionDefault}
 
   pulumiConfig:
-    # Configuração oficial do provedor AWS do Pulumi (válida para todas as linguagens)
-    aws:region: ${regionDefault}
+    # Usamos o nome do seu projeto para expor as duas variáveis de forma abrangente
+    seu_projeto:regionPrimary: ${regionA}
+    seu_projeto:regionSecondary: ${regionB}
