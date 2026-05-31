@@ -22,14 +22,17 @@ config:
 # Busca dinamicamente a imagem (AMI) do Amazon Linux 2023 em tempo de execução
 variables:
   # Como a busca por AMIs varia por região, precisamos fazer duas consultas distintas
+  variables:
   ami_primary:
     fn::invoke:
       function: aws:ec2:getAmi
       arguments:
         filters:
           - name: name
-            values: ["al2023-ami-2023.*-x86_64"]
-        owners: ["amazon"]
+            values: 
+              - "al2023-ami-2023.*-x86_64"
+        owners: 
+          - "amazon"
         mostRecent: true
       return: id
 
@@ -39,13 +42,15 @@ variables:
       arguments:
         filters:
           - name: name
-            values: ["al2023-ami-2023.*-x86_64"]
-        owners: ["amazon"]
+            values: 
+              - "al2023-ami-2023.*-x86_64"
+        owners: 
+          - "amazon"
         mostRecent: true
       return: id
 
   # Script de inicialização do servidor HTTP (User Data)
-  userData: |
+   userData: |
     #!/bin/bash
     echo "Hello, World from Pulumi!" > index.html
     nohup python3 -m http.server 80 &
@@ -118,12 +123,14 @@ resources:
         - fromPort: 80
           toPort: 80
           protocol: tcp
-          cidrBlocks: ["0.0.0.0/0"]
+          cidrBlocks: 
+            - 0.0.0.0/0
       egress:
         - fromPort: 0
           toPort: 0
           protocol: "-1"
-          cidrBlocks: ["0.0.0.0/0"]
+          cidrBlocks: 
+            - 0.0.0.0/0
 
   server_primary:
     type: aws:ec2:Instance
@@ -132,14 +139,14 @@ resources:
     properties:
       instanceType: ${instanceType}
       subnetId: ${subnet_primary.id}
-      vpcSecurityGroupIds: [${sec_group_primary.id}]
+      vpcSecurityGroupIds: 
+        - ${sec_group_primary.id}
       userData: ${userData}
       ami: ${ami_primary}
       tags:
         Name: webserver-primary
 
-  
-  # Recursos da região secundária
+    # Recursos da região secundária
 
   vpc_secondary:
     type: aws:ec2:Vpc
@@ -195,12 +202,14 @@ resources:
         - fromPort: 80
           toPort: 80
           protocol: tcp
-          cidrBlocks: ["0.0.0.0/0"]
+          cidrBlocks: 
+            - 0.0.0.0/0
       egress:
         - fromPort: 0
           toPort: 0
           protocol: "-1"
-          cidrBlocks: ["0.0.0.0/0"]
+          cidrBlocks: 
+            - 0.0.0.0/0
 
   server_secondary:
     type: aws:ec2:Instance
@@ -209,7 +218,8 @@ resources:
     properties:
       instanceType: ${instanceType}
       subnetId: ${subnet_secondary.id}
-      vpcSecurityGroupIds: [${sec_group_secondary.id}]
+      vpcSecurityGroupIds: 
+        - ${sec_group_secondary.id}
       userData: ${userData}
       ami: ${ami_secondary}
       tags:
