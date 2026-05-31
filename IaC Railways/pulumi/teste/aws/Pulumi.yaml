@@ -55,12 +55,12 @@ variables:
 
 # Configura conexões com a AWS em duas regiões diferentes
 resources:
-  aws.primary:
+  aws-primary:
     type: pulumi:providers:aws
     properties:
       region: ${AWS_REGION_PRIMARY}
 
-  aws.secondary:
+  aws-secondary:
     type: pulumi:providers:aws
     properties:
       region: ${AWS_REGION_SECONDARY}
@@ -70,7 +70,7 @@ resources:
   vpc_primary:
     type: aws:ec2:Vpc
     options:
-      provider: ${aws.primary}
+      provider: ${aws-primary}
     properties:
       cidrBlock: ${vpcNetworkCidr}
       enableDnsHostnames: true
@@ -79,14 +79,14 @@ resources:
   gateway_primary:
     type: aws:ec2:InternetGateway
     options:
-      provider: ${aws.primary}
+      provider: ${aws-primary}
     properties:
       vpcId: ${vpc_primary.id}
 
   subnet_primary:
     type: aws:ec2:Subnet
     options:
-      provider: ${aws.primary}
+      provider: ${aws-primary}
     properties:
       vpcId: ${vpc_primary.id}
       cidrBlock: 10.0.1.0/24
@@ -95,7 +95,7 @@ resources:
   route_table_primary:
     type: aws:ec2:RouteTable
     options:
-      provider: ${aws.primary}
+      provider: ${aws-primary}
     properties:
       vpcId: ${vpc_primary.id}
       routes:
@@ -105,7 +105,7 @@ resources:
   route_association_primary:
     type: aws:ec2:RouteTableAssociation
     options:
-      provider: ${aws.primary}
+      provider: ${aws-primary}
     properties:
       subnetId: ${subnet_primary.id}
       routeTableId: ${route_table_primary.id}
@@ -113,7 +113,7 @@ resources:
   sec_group_primary:
     type: aws:ec2:SecurityGroup
     options:
-      provider: ${aws.primary}
+      provider: ${aws-primary}
     properties:
       description: Enable HTTP access
       vpcId: ${vpc_primary.id}
@@ -133,7 +133,7 @@ resources:
   server_primary:
     type: aws:ec2:Instance
     options:
-      provider: ${aws.primary}
+      provider: ${aws-primary}
     properties:
       instanceType: ${instanceType}
       subnetId: ${subnet_primary.id}
@@ -149,7 +149,7 @@ resources:
   vpc_secondary:
     type: aws:ec2:Vpc
     options:
-      provider: ${aws.secondary}
+      provider: ${aws-secondary}
     properties:
       cidrBlock: ${vpcNetworkCidr}
       enableDnsHostnames: true
@@ -158,14 +158,14 @@ resources:
   gateway_secondary:
     type: aws:ec2:InternetGateway
     options:
-      provider: ${aws.secondary}
+      provider: ${aws-secondary}
     properties:
       vpcId: ${vpc_secondary.id}
 
   subnet_secondary:
     type: aws:ec2:Subnet
     options:
-      provider: ${aws.secondary}
+      provider: ${aws-secondary}
     properties:
       vpcId: ${vpc_secondary.id}
       cidrBlock: 10.0.1.0/24
@@ -174,7 +174,7 @@ resources:
   route_table_secondary:
     type: aws:ec2:RouteTable
     options:
-      provider: ${aws.secondary}
+      provider: ${aws-secondary}
     properties:
       vpcId: ${vpc_secondary.id}
       routes:
@@ -184,7 +184,7 @@ resources:
   route_association_secondary:
     type: aws:ec2:RouteTableAssociation
     options:
-      provider: ${aws.secondary}
+      provider: ${aws-secondary}
     properties:
       subnetId: ${subnet_secondary.id}
       routeTableId: ${route_table_secondary.id}
@@ -192,7 +192,7 @@ resources:
   sec_group_secondary:
     type: aws:ec2:SecurityGroup
     options:
-      provider: ${aws.secondary}
+      provider: ${aws-secondary}
     properties:
       description: Enable HTTP access
       vpcId: ${vpc_secondary.id}
@@ -212,7 +212,7 @@ resources:
   server_secondary:
     type: aws:ec2:Instance
     options:
-      provider: ${aws.secondary}
+      provider: ${aws-secondary}
     properties:
       instanceType: ${instanceType}
       subnetId: ${subnet_secondary.id}
