@@ -1,4 +1,4 @@
-name: gcp-vm-yaml
+name: gcp_vm_yaml
 description: "Infraestrutura de rede e computação GCP em múltiplas regiões"
 runtime: yaml
 
