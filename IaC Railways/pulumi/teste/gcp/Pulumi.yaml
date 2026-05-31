@@ -38,7 +38,7 @@ resources:
     properties:
       autoCreateSubnetworks: false
 
-  subnet_primary:
+  subnet-primary:
     type: gcp:compute:Subnetwork
     options:
       provider: ${gcp-primary}
@@ -47,7 +47,7 @@ resources:
       ipCidrRange: 10.0.1.0/24
       region: ${GCP_REGION_PRIMARY}
 
-  firewall_primary:
+  firewall-primary:
     type: gcp:compute:Firewall
     options:
       provider: ${gcp-primary}
@@ -59,7 +59,7 @@ resources:
       sourceRanges: ["0.0.0.0/0"]
       targetTags: ["http-server"]
 
-  server_primary:
+  server-primary:
     type: gcp:compute:Instance
     options:
       provider: ${gcp-primary}
@@ -71,14 +71,14 @@ resources:
         initializeParams:
           image: "debian-cloud/debian-11"
       networkInterfaces:
-        - subnetwork: ${subnet_primary.id}
+        - subnetwork: ${subnet-primary.id}
           accessConfigs: [{}]
       metadataStartupScript: |
         #!/bin/bash
         echo "Hello, World from Pulumi GCP Primary!" > index.html
         nohup python3 -m http.server 80 &
 
-  subnet_secondary:
+  subnet-secondary:
     type: gcp:compute:Subnetwork
     options:
       provider: ${gcp-secondary}
@@ -87,7 +87,7 @@ resources:
       ipCidrRange: 10.0.2.0/24
       region: ${GCP_REGION_SECONDARY}
 
-  server_secondary:
+  server-secondary:
     type: gcp:compute:Instance
     options:
       provider: ${gcp-secondary}
@@ -99,7 +99,7 @@ resources:
         initializeParams:
           image: "debian-cloud/debian-11"
       networkInterfaces:
-        - subnetwork: ${subnet_secondary.id}
+        - subnetwork: ${subnet-secondary.id}
           accessConfigs: [{}]
       metadataStartupScript: |
         #!/bin/bash
@@ -107,5 +107,5 @@ resources:
         nohup python3 -m http.server 80 &
 
 outputs:
-  primaryIp: ${server_primary.networkInterfaces[0].accessConfigs[0].natIp}
-  secondaryIp: ${server_secondary.networkInterfaces[0].accessConfigs[0].natIp}
+  primaryIp: ${server-primary.networkInterfaces[0].accessConfigs[0].natIp}
+  secondaryIp: ${server-secondary.networkInterfaces[0].accessConfigs[0].natIp}
