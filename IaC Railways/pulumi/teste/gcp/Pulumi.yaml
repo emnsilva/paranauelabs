@@ -15,6 +15,10 @@ config:
   machineType:
     type: string
     default: e2-micro
+  # A credencial será definida como segredo via CLI
+  gcp:credentials:
+    type: string
+    secret: true
 
 resources:
   gcp-primary:
@@ -22,14 +26,16 @@ resources:
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
+      credentials: ${gcp:credentials}
 
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
+      credentials: ${gcp:credentials}
 
-  vpc_network:
+  vpc-network:
     type: gcp:compute:Network
     options:
       provider: ${gcp-primary}
@@ -41,7 +47,7 @@ resources:
     options:
       provider: ${gcp-primary}
     properties:
-      network: ${vpc_network.id}
+      network: ${vpc-network.id}
       ipCidrRange: 10.0.1.0/24
       region: ${GCP_REGION_PRIMARY}
 
@@ -50,7 +56,7 @@ resources:
     options:
       provider: ${gcp-primary}
     properties:
-      network: ${vpc_network.name}
+      network: ${vpc-network.name}
       allows:
         - protocol: tcp
           ports: ["80"]
@@ -81,7 +87,7 @@ resources:
     options:
       provider: ${gcp-secondary}
     properties:
-      network: ${vpc_network.id}
+      network: ${vpc-network.id}
       ipCidrRange: 10.0.2.0/24
       region: ${GCP_REGION_SECONDARY}
 
