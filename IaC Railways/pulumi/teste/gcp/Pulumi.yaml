@@ -25,16 +25,14 @@ resources:
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
-      accessToken:
-        fn::env: GOOGLE_OAUTH_ACCESS_TOKEN
+      accessToken: ${ENV_GOOGLE_OAUTH_ACCESS_TOKEN}
 
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
-      accessToken:
-        fn::env: GOOGLE_OAUTH_ACCESS_TOKEN
+      accessToken: ${ENV_GOOGLE_OAUTH_ACCESS_TOKEN}
 
   # Recursos da região primária
   # Rede VPC Global (Compartilhada entre as regiões)
