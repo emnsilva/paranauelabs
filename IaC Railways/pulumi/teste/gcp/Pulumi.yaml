@@ -15,10 +15,6 @@ config:
   machineType:
     type: string
     default: e2-micro
-  # A credencial será definida como segredo via CLI
-  gcp:credentials:
-    type: string
-    secret: true
 
 resources:
   gcp-primary:
