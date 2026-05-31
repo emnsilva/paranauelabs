@@ -1,0 +1,49 @@
+name: ${PROJECT}
+description: ${DESCRIPTION}
+runtime: yaml
+
+# VARIÁVEIS DE CONFIGURAÇÃO
+# Define as regiões AWS onde os buckets serão criados
+config:
+  AWS_REGION_PRIMARY:
+    type: string
+    default: sa-east-1
+  AWS_REGION_SECONDARY:
+    type: string
+    default: us-east-1
+
+# Configura conexões com a AWS em duas regiões diferentes
+# Cada provider é como um "canal de comunicação" com uma região específica
+resources:
+  # Provedor padrão (primary) - O Pulumi usa a configuração "aws:region" de forma nativa por padrão,
+  aws.primary:
+    type: pulumi:providers:aws
+    properties:
+      region: ${AWS_REGION_PRIMARY}
+
+  aws.secondary:
+    type: pulumi:providers:aws
+    properties:
+      region: ${AWS_REGION_SECONDARY}
+
+  # Cria buckets de armazenamento em cada região
+  primary_bucket:
+    type: aws:s3:main_bucket
+    options:
+      provider: ${aws.primary}           # Usa o provider da região primária
+    properties:
+      bucket: primary-bucket             # Nome único do bucket (⚠️ mude este nome)
+      forceDestroy: true                 # Permite deletar mesmo com arquivos dentro
+
+  secondary_bucket:
+    type: aws:s3:backup_bucket
+    options:
+      provider: ${aws.secondary}         # Usa o provider da região secundária
+    properties:
+      bucket: backup-bucket              # Nome único do bucket (⚠️ mude este nome)
+      forceDestroy: true                 # Permite deletar mesmo com arquivos dentro
+
+# EXPORTS (Equivalente aos Outputs do Terraform)
+outputs:
+  primaryBucketName: ${primary_bucket.id}
+  secondaryBucketName: ${secondary_bucket.id}
