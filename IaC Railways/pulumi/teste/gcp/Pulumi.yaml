@@ -17,27 +17,24 @@ config:
     type: string
     default: e2-micro
 
-# Variáveis internas mapeadas do ambiente
-variables:
-  gcpToken:
-    fn::env: GOOGLE_OAUTH_ACCESS_TOKEN
-
 # Provedores GCP
-# Configura dois canais de comunicação explicitamente apontados para regiões diferentes
+# Configura dois canais de comunicação explicitamente apontados para regiões differentes
 resources:
   gcp-primary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
-      accessToken: ${gcpToken}
+      # Puxa o token injetado no ambiente de forma direta e limpa como texto puro
+      accessToken: ${GOOGLE_OAUTH_ACCESS_TOKEN}
 
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
-      accessToken: ${gcpToken}
+      # Puxa o token injetado no ambiente de forma direta e limpa como texto puro
+      accessToken: ${GOOGLE_OAUTH_ACCESS_TOKEN}
 
   # Recursos da região primária
   # Rede VPC Global (Compartilhada entre as regiões)
@@ -124,5 +121,5 @@ resources:
 
 # EXPORTS (Informa os IPs públicos gerados)
 outputs:
-  primaryIp: ${server_primary.networkInterfaces.accessConfigs.natIp}
-  secondaryIp: ${server_secondary.networkInterfaces.accessConfigs.natIp}
+  primaryIp: ${server_primary.networkInterfaces[0].accessConfigs[0].natIp}
+  secondaryIp: ${server_secondary.networkInterfaces[0].accessConfigs[0].natIp}
