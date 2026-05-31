@@ -117,5 +117,5 @@ resources:
 
 # EXPORTS (Informa os IPs públicos gerados)
 outputs:
-  primaryIp: ${server_primary.networkInterfaces[0].accessConfigs[0].natIp}
-  secondaryIp: ${server_secondary.networkInterfaces[0].accessConfigs[0].natIp}
+  primaryIp: ${server_primary.networkInterfaces.accessConfigs.natIp}
+  secondaryIp: ${server_secondary.networkInterfaces.accessConfigs.natIp}
