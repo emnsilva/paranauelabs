@@ -21,7 +21,6 @@ config:
 
 # Busca dinamicamente a imagem (AMI) do Amazon Linux 2023 em tempo de execução
 variables:
-  # Como a busca por AMIs varia por região, precisamos fazer duas consultas distintas
   ami_primary:
     fn::invoke:
       function: aws:ec2:getAmi
