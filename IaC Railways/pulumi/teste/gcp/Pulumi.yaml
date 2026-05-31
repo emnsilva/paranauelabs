@@ -1,0 +1,127 @@
+name: gcp_vm_yaml
+description: "Infraestrutura de rede e computação GCP em múltiplas regiões"
+runtime: yaml
+
+# VARIÁVEIS DE CONFIGURAÇÃO
+config:
+  GCP_PROJECT:
+    type: string
+    default: woven-goal-469100-q2 # Subsitua pelo ID real do seu projeto GCP
+  GCP_REGION_PRIMARY:
+    type: string
+    default: southamerica-east1
+  GCP_REGION_SECONDARY:
+    type: string
+    default: us-east1
+  machineType:
+    type: string
+    default: e2-micro
+
+# PROVEDORES GCP
+# Configura dois canais de comunicação explicitamente apontados para regiões diferentes
+resources:
+  gcp-primary:
+    type: pulumi:providers:gcp
+    properties:
+      project: ${GCP_PROJECT}
+      region: ${GCP_REGION_PRIMARY}
+
+  gcp-secondary:
+    type: pulumi:providers:gcp
+    properties:
+      project: ${GCP_PROJECT}
+      region: ${GCP_REGION_SECONDARY}
+
+  # =========================================================================
+  # RECURSOS DA REGIÃO PRIMÁRIA (SÃO PAULO)
+  # =========================================================================
+
+  # Rede VPC Global (Compartilhada entre as regiões)
+  vpc_network:
+    type: gcp:compute:Network
+    options:
+      provider: ${gcp-primary}
+    properties:
+      autoCreateSubnetworks: false # Desliga a criação automática para criarmos manualmente
+
+  # Subrede em São Paulo
+  subnet_primary:
+    type: gcp:compute:Subnetwork
+    options:
+      provider: ${gcp-primary}
+    properties:
+      network: ${vpc_network.id}
+      ipCidrRange: 10.0.1.0/24
+      region: ${GCP_REGION_PRIMARY}
+
+  # Regra de Firewall para permitir tráfego HTTP na porta 80
+  firewall_primary:
+    type: gcp:compute:Firewall
+    options:
+      provider: ${gcp-primary}
+    properties:
+      network: ${vpc_network.name}
+      allows:
+        - protocol: tcp
+          ports: ["80"]
+      sourceRanges: ["0.0.0.0/0"]
+      targetTags: ["http-server"]
+
+  # Instância de Computação (VM) na Região Primária
+  server_primary:
+    type: gcp:compute:Instance
+    options:
+      provider: ${gcp-primary}
+    properties:
+      machineType: ${machineType}
+      zone: southamerica-east1-a
+      tags: ["http-server"]
+      bootDisk:
+        initializeParams:
+          image: "debian-cloud/debian-11"
+      networkInterfaces:
+        - subnetwork: ${subnet_primary.id}
+          accessConfigs: [{}] # Garante IP público para a VM
+      metadataStartupScript: |
+        #!/bin/bash
+        echo "Hello, World from Pulumi GCP Primary!" > index.html
+        nohup python3 -m http.server 80 &
+
+  # =========================================================================
+  # RECURSOS DA REGIÃO SECUNDÁRIA (EUA)
+  # =========================================================================
+
+  # Subrede nos EUA vinculada à mesma rede VPC
+  subnet_secondary:
+    type: gcp:compute:Subnetwork
+    options:
+      provider: ${gcp-secondary}
+    properties:
+      network: ${vpc_network.id}
+      ipCidrRange: 10.0.2.0/24
+      region: ${GCP_REGION_SECONDARY}
+
+  # Instância de Computação (VM) na Região Secundária
+  server_secondary:
+    type: gcp:compute:Instance
+    options:
+      provider: ${gcp-secondary}
+    properties:
+      machineType: ${machineType}
+      zone: us-east1-b
+      tags: ["http-server"]
+      bootDisk:
+        initializeParams:
+          image: "debian-cloud/debian-11"
+      networkInterfaces:
+        - subnetwork: ${subnet_secondary.id}
+          accessConfigs: [{}] # Garante IP público para a VM
+      metadataStartupScript: |
+        #!/bin/bash
+        echo "Hello, World from Pulumi GCP Secondary!" > index.html
+        nohup python3 -m http.server 80 &
+
+# EXPORTS (Informa os IPs públicos gerados)
+outputs:
+  primaryIp: ${server_primary.networkInterfaces[0].accessConfigs[0].natIp}
+  secondaryIp: ${server_secondary.networkInterfaces[0].accessConfigs[0].natIp}
