@@ -18,23 +18,19 @@ config:
     default: e2-micro
 
 # Provedores GCP
-# Configura dois canais de comunicação explicitamente apontados para regiões differentes
+# Configura dois canais de comunicação explicitamente apontados para regiões diferentes
 resources:
   gcp-primary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
-      # Puxa o token injetado no ambiente de forma direta e limpa como texto puro
-      accessToken: ${GOOGLE_OAUTH_ACCESS_TOKEN}
 
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
-      # Puxa o token injetado no ambiente de forma direta e limpa como texto puro
-      accessToken: ${GOOGLE_OAUTH_ACCESS_TOKEN}
 
   # Recursos da região primária
   # Rede VPC Global (Compartilhada entre as regiões)
