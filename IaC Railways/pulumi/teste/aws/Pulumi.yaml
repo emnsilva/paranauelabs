@@ -1,5 +1,5 @@
-name: ${PROJECT}
-description: ${DESCRIPTION}
+name: IaC Railways
+description: "Um YAML para deploy do S3 na AWS com Pulumi"
 runtime: yaml
 
 # VARIÁVEIS DE CONFIGURAÇÃO
