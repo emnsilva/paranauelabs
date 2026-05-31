@@ -1,6 +1,22 @@
-name: gcp_vm_yaml
+name: gcp-vm-yaml
 description: "Infraestrutura de rede e computação GCP em múltiplas regiões"
 runtime: yaml
+
+template:
+  description: "Deploy duas VMs em duas regiões do GCP (primária e secundária) com uma VPC compartilhada"
+  config:
+    GCP_PROJECT:
+      description: "O ID do projeto do Google Cloud"
+      default: woven-goal-469100-q2
+    GCP_REGION_PRIMARY:
+      description: "Região primária (ex: southamerica-east1)"
+      default: southamerica-east1
+    GCP_REGION_SECONDARY:
+      description: "Região secundária (ex: us-east1)"
+      default: us-east1
+    machineType:
+      description: "Tipo de máquina virtual do GCP para as VMs"
+      default: e2-micro
 
 config:
   GCP_PROJECT:
@@ -16,21 +32,34 @@ config:
     type: string
     default: e2-micro
 
+variables:
+  # Script de inicialização para a VM primária
+  startupScriptPrimary: |
+    #!/bin/bash
+    echo "Hello, World from Pulumi GCP Primary!" > index.html
+    nohup python3 -m http.server 80 &
+  # Script para a VM secundária
+  startupScriptSecondary: |
+    #!/bin/bash
+    echo "Hello, World from Pulumi GCP Secondary!" > index.html
+    nohup python3 -m http.server 80 &
+
 resources:
+  # Provedor para a região primária (usa credenciais do ambiente)
   gcp-primary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
-      credentials: ${gcp:credentials}
 
+  # Provedor para a região secundária
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
-      credentials: ${gcp:credentials}
 
+  # Rede VPC compartilhada (criada na região primária)
   vpc-network:
     type: gcp:compute:Network
     options:
@@ -38,6 +67,7 @@ resources:
     properties:
       autoCreateSubnetworks: false
 
+  # Sub-rede na região primária
   subnet-primary:
     type: gcp:compute:Subnetwork
     options:
@@ -47,6 +77,7 @@ resources:
       ipCidrRange: 10.0.1.0/24
       region: ${GCP_REGION_PRIMARY}
 
+  # Firewall para liberar HTTP na região primária
   firewall-primary:
     type: gcp:compute:Firewall
     options:
@@ -59,6 +90,7 @@ resources:
       sourceRanges: ["0.0.0.0/0"]
       targetTags: ["http-server"]
 
+  # VM na região primária
   server-primary:
     type: gcp:compute:Instance
     options:
@@ -73,11 +105,9 @@ resources:
       networkInterfaces:
         - subnetwork: ${subnet-primary.id}
           accessConfigs: [{}]
-      metadataStartupScript: |
-        #!/bin/bash
-        echo "Hello, World from Pulumi GCP Primary!" > index.html
-        nohup python3 -m http.server 80 &
+      metadataStartupScript: ${startupScriptPrimary}
 
+  # Sub-rede na região secundária
   subnet-secondary:
     type: gcp:compute:Subnetwork
     options:
@@ -87,6 +117,7 @@ resources:
       ipCidrRange: 10.0.2.0/24
       region: ${GCP_REGION_SECONDARY}
 
+  # VM na região secundária
   server-secondary:
     type: gcp:compute:Instance
     options:
@@ -101,10 +132,7 @@ resources:
       networkInterfaces:
         - subnetwork: ${subnet-secondary.id}
           accessConfigs: [{}]
-      metadataStartupScript: |
-        #!/bin/bash
-        echo "Hello, World from Pulumi GCP Secondary!" > index.html
-        nohup python3 -m http.server 80 &
+      metadataStartupScript: ${startupScriptSecondary}
 
 outputs:
   primaryIp: ${server-primary.networkInterfaces[0].accessConfigs[0].natIp}
