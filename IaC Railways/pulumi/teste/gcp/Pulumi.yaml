@@ -2,7 +2,7 @@ name: gcp_vm_yaml
 description: "Infraestrutura de rede e computação GCP em múltiplas regiões"
 runtime: yaml
 
-# VARIÁVEIS DE CONFIGURAÇÃO
+# Variáveis de configuração
 config:
   GCP_PROJECT:
     type: string
@@ -17,7 +17,7 @@ config:
     type: string
     default: e2-micro
 
-# PROVEDORES GCP
+# Provedores GCP
 # Configura dois canais de comunicação explicitamente apontados para regiões diferentes
 resources:
   gcp-primary:
@@ -25,17 +25,20 @@ resources:
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
+      accessToken:
+        fn::secret:
+          fn::getEnv: GOOGLE_OAUTH_ACCESS_TOKEN
 
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
+      accessToken:
+        fn::secret:
+          fn::getEnv: GOOGLE_OAUTH_ACCESS_TOKEN
 
-  # =========================================================================
-  # RECURSOS DA REGIÃO PRIMÁRIA (SÃO PAULO)
-  # =========================================================================
-
+  # Recursos da região primária
   # Rede VPC Global (Compartilhada entre as regiões)
   vpc_network:
     type: gcp:compute:Network
@@ -87,10 +90,7 @@ resources:
         echo "Hello, World from Pulumi GCP Primary!" > index.html
         nohup python3 -m http.server 80 &
 
-  # =========================================================================
-  # RECURSOS DA REGIÃO SECUNDÁRIA (EUA)
-  # =========================================================================
-
+  # Recursos da região secundária
   # Subrede nos EUA vinculada à mesma rede VPC
   subnet_secondary:
     type: gcp:compute:Subnetwork
@@ -123,5 +123,5 @@ resources:
 
 # EXPORTS (Informa os IPs públicos gerados)
 outputs:
-  primaryIp: ${server_primary.networkInterfaces[0].accessConfigs[0].natIp}
-  secondaryIp: ${server_secondary.networkInterfaces[0].accessConfigs[0].natIp}
+  primaryIp: ${server_primary.networkInterfaces.accessConfigs.natIp}
+  secondaryIp: ${server_secondary.networkInterfaces.accessConfigs.natIp}
