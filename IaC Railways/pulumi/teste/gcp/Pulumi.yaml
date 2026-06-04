@@ -32,6 +32,7 @@ resources:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
+      credentials: ${gcp:credentials}
 
   # 2. PROVIDERS REGIONAIS
   gcp-primary:
@@ -39,12 +40,14 @@ resources:
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
+      credentials: ${gcp:credentials}
 
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
+      credentials: ${gcp:credentials}
 
   # 3. RECURSOS GLOBAIS (Usam o gcp-global)
   vpc-network:
@@ -82,7 +85,7 @@ resources:
       provider: ${gcp-primary}
     properties:
       machineType: ${machineType}
-      zone: southamerica-east1-a # Hardcoded para garantir uma zona válida na região primária
+      zone: southamerica-east1-a
       tags: ["http-server"]
       bootDisk:
         initializeParams:
@@ -108,7 +111,7 @@ resources:
       provider: ${gcp-secondary}
     properties:
       machineType: ${machineType}
-      zone: us-east1-b # Hardcoded para garantir uma zona válida na região secundária
+      zone: us-east1-b
       tags: ["http-server"]
       bootDisk:
         initializeParams:
