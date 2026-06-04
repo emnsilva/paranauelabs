@@ -31,9 +31,6 @@ config:
   machineType:
     type: string
     default: e2-micro
-  gcp:credentials:
-    type: string
-    secret: true
 
 variables:
   startupScriptPrimary: |
