@@ -1,4 +1,4 @@
-name: gcp_vm_yaml
+name: gcp-vm-yaml
 description: "Infraestrutura de rede e computação GCP em múltiplas regiões"
 runtime: yaml
 
@@ -31,35 +31,35 @@ config:
   machineType:
     type: string
     default: e2-micro
+  gcp:credentials:
+    type: string
+    secret: true
 
 variables:
-  # Script de inicialização para a VM primária
   startupScriptPrimary: |
     #!/bin/bash
     echo "Hello, World from Pulumi GCP Primary!" > index.html
     nohup python3 -m http.server 80 &
-  # Script para a VM secundária
   startupScriptSecondary: |
     #!/bin/bash
     echo "Hello, World from Pulumi GCP Secondary!" > index.html
     nohup python3 -m http.server 80 &
 
 resources:
-  # Provedor para a região primária (usa credenciais do ambiente)
   gcp-primary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
+      credentials: ${gcp:credentials}
 
-  # Provedor para a região secundária
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
+      credentials: ${gcp:credentials}
 
-  # Rede VPC compartilhada (criada na região primária)
   vpc-network:
     type: gcp:compute:Network
     options:
@@ -67,7 +67,6 @@ resources:
     properties:
       autoCreateSubnetworks: false
 
-  # Sub-rede na região primária
   subnet-primary:
     type: gcp:compute:Subnetwork
     options:
@@ -77,7 +76,6 @@ resources:
       ipCidrRange: 10.0.1.0/24
       region: ${GCP_REGION_PRIMARY}
 
-  # Firewall para liberar HTTP na região primária
   firewall-primary:
     type: gcp:compute:Firewall
     options:
@@ -90,7 +88,6 @@ resources:
       sourceRanges: ["0.0.0.0/0"]
       targetTags: ["http-server"]
 
-  # VM na região primária
   server-primary:
     type: gcp:compute:Instance
     options:
@@ -107,7 +104,6 @@ resources:
           accessConfigs: [{}]
       metadataStartupScript: ${startupScriptPrimary}
 
-  # Sub-rede na região secundária
   subnet-secondary:
     type: gcp:compute:Subnetwork
     options:
@@ -117,7 +113,6 @@ resources:
       ipCidrRange: 10.0.2.0/24
       region: ${GCP_REGION_SECONDARY}
 
-  # VM na região secundária
   server-secondary:
     type: gcp:compute:Instance
     options:
