@@ -1,0 +1,78 @@
+name: gcp_vm_yaml
+description: A Pulumi YAML program to deploy a virtual machine on Google Cloud
+runtime: yaml
+# Import the program's configuration settings.
+config:
+  machineType:
+    type: string
+    default: f1-micro
+  osImage:
+    type: string
+    default: debian-11
+  instanceTag:
+    type: string
+    default: webserver
+  servicePort:
+    type: string
+    default: "80"
+  pulumi:tags:
+    value:
+      pulumi:template: tree/HEAD/vm-gcp-yaml
+variables:
+  # Define a script to be run when the VM starts up.
+  metadataStartupScript: "#!/bin/bash\necho '<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <title>Hello, world!</title>\n</head>\n<body>\n    <h1>Hello, world! \U0001F44B</h1>\n    <p>Deployed with \U0001F49C by <a href=\"https://pulumi.com/\">Pulumi</a>.</p>\n</body>\n</html>' > index.html\nsudo python3 -m http.server ${servicePort} &\n"
+resources:
+  # Create a new network for the virtual machine.
+  network:
+    type: gcp:compute:Network
+    properties:
+      autoCreateSubnetworks: false
+  # Create a subnet on the network.
+  subnet:
+    type: gcp:compute:Subnetwork
+    properties:
+      ipCidrRange: 10.0.1.0/24
+      network: ${network.id}
+  # Create a firewall allowing inbound access over ports 80 (for HTTP) and 22 (for SSH).
+  firewall:
+    type: gcp:compute:Firewall
+    properties:
+      network: ${network.selfLink}
+      allows:
+        - protocol: tcp
+          ports:
+            - "22"
+            - ${servicePort}
+      direction: INGRESS
+      sourceRanges:
+        - 0.0.0.0/0
+      targetTags:
+        - ${instanceTag}
+  # Create the virtual machine.
+  instance:
+    type: gcp:compute:Instance
+    properties:
+      machineType: ${machineType}
+      bootDisk:
+        initializeParams:
+          image: ${osImage}
+      networkInterfaces:
+        - network: ${network.id}
+          subnetwork: ${subnet.id}
+          accessConfigs:
+            - {}
+      serviceAccount:
+        scopes:
+          - https://www.googleapis.com/auth/cloud-platform
+      allowStoppingForUpdate: true
+      metadataStartupScript: ${metadataStartupScript}
+      tags:
+        - ${instanceTag}
+    options:
+      dependsOn:
+        - ${firewall}
+# Export the instance's name, public IP address, and HTTP URL.
+outputs:
+  name: ${instance.name}
+  ip: ${instance.networkInterfaces[0].accessConfigs[0].natIp}
+  url: http://${instance.networkInterfaces[0].accessConfigs[0].natIp}:${servicePort}
