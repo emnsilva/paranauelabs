@@ -32,7 +32,6 @@ resources:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
-      credentials: ${gcp:credentials}
 
   # 2. PROVIDERS REGIONAIS
   gcp-primary:
@@ -40,14 +39,12 @@ resources:
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
-      credentials: ${gcp:credentials}
 
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
-      credentials: ${gcp:credentials}
 
   # 3. RECURSOS GLOBAIS (Usam o gcp-global)
   vpc-network:
