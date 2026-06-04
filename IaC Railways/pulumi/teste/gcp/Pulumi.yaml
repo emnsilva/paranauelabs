@@ -11,7 +11,7 @@ config:
     default: southamerica-east1
   GCP_REGION_SECONDARY:
     type: string
-    default: us-east1
+    default: us-east-1
   machineType:
     type: string
     default: e2-micro
@@ -27,13 +27,13 @@ variables:
     nohup python3 -m http.server 80 &
 
 resources:
-  # 1. PROVIDER GLOBAL (Sem região! Usado para VPC e Firewall)
+  # PROVIDER GLOBAL
   gcp-global:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
 
-  # 2. PROVIDERS REGIONAIS
+  # PROVIDERS REGIONAIS
   gcp-primary:
     type: pulumi:providers:gcp
     properties:
@@ -46,7 +46,7 @@ resources:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
 
-  # 3. RECURSOS GLOBAIS (Usam o gcp-global)
+  # RECURSOS GLOBAIS
   vpc-network:
     type: gcp:compute:Network
     options:
@@ -66,7 +66,7 @@ resources:
       sourceRanges: ["0.0.0.0/0"]
       targetTags: ["http-server"]
 
-  # 4. RECURSOS REGIONAIS PRIMÁRIOS (Usam o gcp-primary)
+  # RECURSOS REGIONAIS PRIMÁRIOS
   subnet-primary:
     type: gcp:compute:Subnetwork
     options:
@@ -92,7 +92,7 @@ resources:
           accessConfigs: [{}]
       metadataStartupScript: ${startupScriptPrimary}
 
-  # 5. RECURSOS REGIONAIS SECUNDÁRIOS (Usam o gcp-secondary)
+  # RECURSOS REGIONAIS SECUNDÁRIOS
   subnet-secondary:
     type: gcp:compute:Subnetwork
     options:
