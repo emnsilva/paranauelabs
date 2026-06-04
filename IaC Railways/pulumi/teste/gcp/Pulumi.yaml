@@ -1,22 +1,6 @@
-name: gcp-vm-yaml
+name: gcp_vm_yaml
 description: "Infraestrutura de rede e computação GCP em múltiplas regiões"
 runtime: yaml
-
-template:
-  description: "Deploy duas VMs em duas regiões do GCP (primária e secundária) com uma VPC compartilhada"
-  config:
-    GCP_PROJECT:
-      description: "O ID do projeto do Google Cloud"
-      default: woven-goal-469100-q2
-    GCP_REGION_PRIMARY:
-      description: "Região primária (ex: southamerica-east1)"
-      default: southamerica-east1
-    GCP_REGION_SECONDARY:
-      description: "Região secundária (ex: us-east1)"
-      default: us-east1
-    machineType:
-      description: "Tipo de máquina virtual do GCP para as VMs"
-      default: e2-micro
 
 config:
   GCP_PROJECT:
@@ -33,42 +17,56 @@ config:
     default: e2-micro
 
 variables:
-  # Script de inicialização para a VM primária
   startupScriptPrimary: |
     #!/bin/bash
     echo "Hello, World from Pulumi GCP Primary!" > index.html
     nohup python3 -m http.server 80 &
-  # Script para a VM secundária
   startupScriptSecondary: |
     #!/bin/bash
     echo "Hello, World from Pulumi GCP Secondary!" > index.html
     nohup python3 -m http.server 80 &
 
 resources:
-  # Provedor para a região primária
+  # 1. PROVIDER GLOBAL (Sem região! Usado para VPC e Firewall)
+  gcp-global:
+    type: pulumi:providers:gcp
+    properties:
+      project: ${GCP_PROJECT}
+
+  # 2. PROVIDERS REGIONAIS
   gcp-primary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_PRIMARY}
-      # A chave foi removida, pois o provider agora usa a GOOGLE_CREDENTIALS do ambiente
 
-  # Provedor para a região secundária
   gcp-secondary:
     type: pulumi:providers:gcp
     properties:
       project: ${GCP_PROJECT}
       region: ${GCP_REGION_SECONDARY}
 
-  # Rede VPC compartilhada (criada na região primária)
+  # 3. RECURSOS GLOBAIS (Usam o gcp-global)
   vpc-network:
     type: gcp:compute:Network
     options:
-      provider: ${gcp-primary}
+      provider: ${gcp-global}
     properties:
       autoCreateSubnetworks: false
 
-  # Sub-rede na região primária
+  firewall-primary:
+    type: gcp:compute:Firewall
+    options:
+      provider: ${gcp-global}
+    properties:
+      network: ${vpc-network.name}
+      allows:
+        - protocol: tcp
+          ports: ["80"]
+      sourceRanges: ["0.0.0.0/0"]
+      targetTags: ["http-server"]
+
+  # 4. RECURSOS REGIONAIS PRIMÁRIOS (Usam o gcp-primary)
   subnet-primary:
     type: gcp:compute:Subnetwork
     options:
@@ -78,27 +76,13 @@ resources:
       ipCidrRange: 10.0.1.0/24
       region: ${GCP_REGION_PRIMARY}
 
-  # Firewall para liberar HTTP na região primária
-  firewall-primary:
-    type: gcp:compute:Firewall
-    options:
-      provider: ${gcp-primary}
-    properties:
-      network: ${vpc-network.name}
-      allows:
-        - protocol: tcp
-          ports: ["80"]
-      sourceRanges: ["0.0.0.0/0"]
-      targetTags: ["http-server"]
-
-  # VM na região primária
   server-primary:
     type: gcp:compute:Instance
     options:
       provider: ${gcp-primary}
     properties:
       machineType: ${machineType}
-      zone: southamerica-east1-a
+      zone: southamerica-east1-a # Hardcoded para garantir uma zona válida na região primária
       tags: ["http-server"]
       bootDisk:
         initializeParams:
@@ -108,7 +92,7 @@ resources:
           accessConfigs: [{}]
       metadataStartupScript: ${startupScriptPrimary}
 
-  # Sub-rede na região secundária
+  # 5. RECURSOS REGIONAIS SECUNDÁRIOS (Usam o gcp-secondary)
   subnet-secondary:
     type: gcp:compute:Subnetwork
     options:
@@ -118,14 +102,13 @@ resources:
       ipCidrRange: 10.0.2.0/24
       region: ${GCP_REGION_SECONDARY}
 
-  # VM na região secundária
   server-secondary:
     type: gcp:compute:Instance
     options:
       provider: ${gcp-secondary}
     properties:
       machineType: ${machineType}
-      zone: us-east1-b
+      zone: us-east1-b # Hardcoded para garantir uma zona válida na região secundária
       tags: ["http-server"]
       bootDisk:
         initializeParams:
