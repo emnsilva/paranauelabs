@@ -1,0 +1,29 @@
+# Configuração de environment para credenciais estáticas no GCP
+# Altere as regiões para as regiões do seu projeto
+values:
+  regionA: "southamerica-east1"
+  regionB: "us-east-1"
+  # A barra vertical | é OBRIGATÓRIA para o ESC não tentar ler o JSON como código dele
+  gcpKey: |
+    {
+      "type": "service_account",
+      "project_id": "ID do projeto no GCP",
+      "private_key_id": "ID da chave privada do serviço no GCP",
+      "private_key": "Chave privada do serviço no GCP",
+      "client_email": "Email do serviço no GCP",
+      "client_id": "ID do cliente do serviço no GCP",
+      "auth_uri": "URI de autenticação do serviço no GCP",
+      "token_uri": "URI de token do serviço no GCP",
+      "auth_provider_x509_cert_url": "URI do certificado de autenticação do serviço no GCP",
+      "client_x509_cert_url": "URI do certificado do serviço no GCP",
+      "universe_domain": "Dominio do serviço no GCP"
+    }
+  environmentVariables:
+    GOOGLE_PROJECT: "woven-goal-469100-q2"
+    # Injeta o texto puro do JSON direto na variável que o GCP lê
+    GOOGLE_CREDENTIALS: ${gcpKey}
+  pulumiConfig:
+    # ATENÇÃO: Use o nome EXATO do seu projeto (gcp_vm_yaml) como prefixo!
+    gcp_vm_yaml:GCP_PROJECT: "woven-goal-469100-q2"
+    gcp_vm_yaml:GCP_REGION_PRIMARY: ${regionA}
+    gcp_vm_yaml:GCP_REGION_SECONDARY: ${regionB}

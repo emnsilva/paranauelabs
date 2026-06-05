@@ -1,7 +1,0 @@
-config:
-  aws:region: sa-east-1
-  aws_ec2_yaml:instanceType: t3.micro
-  aws_ec2_yaml:vpcNetworkCidr: 10.0.0.0/16
-  pulumi:template: https://github.com/pulumi/templates/tree/head/vm-aws-yaml
-environment:
-  - static_vars/aws_static_vars

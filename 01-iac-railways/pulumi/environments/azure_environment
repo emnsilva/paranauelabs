@@ -1,0 +1,15 @@
+# Configuração de environment para credenciais estáticas na Azure
+# Altere as regiões para as regiões do seu projeto
+values:
+  regionA: "brazilsouth"
+  regionB: "eastus"
+  environmentVariables:
+    # O Pulumi lê essas variáveis e autentica no Azure automaticamente
+    ARM_CLIENT_ID: "ID do application do Azure (clientID)"
+    ARM_CLIENT_SECRET: "Senha do application do Azure (password)"
+    ARM_SUBSCRIPTION_ID: "ID da subscription do Azure (subscriptionId)"
+    ARM_TENANT_ID: "ID do tenant do Azure (tenant)"
+  pulumiConfig:
+    # Lembre-se: use o nome exato do seu projeto como prefixo!
+    azure_blob_yaml:ARM_PRIMARY_REGION: ${regionA} # Região primária (brazilsouth)
+    azure_blob_yaml:ARM_SECONDARY_REGION: ${regionB} # Região secundária (eastus)

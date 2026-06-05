@@ -1,0 +1,9 @@
+# Arquivos de configuração de Stack do Pulumi (contém dados do seu ambiente)
+Pulumi.*.yaml
+
+# Porém, NÃO ignore o arquivo principal de código
+!Pulumi.yaml
+
+# Se você baixou chaves JSON do GCP para testar localmente, nunca suba elas
+*.json
+!package.json
