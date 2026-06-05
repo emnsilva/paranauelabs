@@ -80,7 +80,6 @@ resources:
         domainNameLabel: ${dnsName}
       sku:
         name: Standard
-      publicIPAllocationMethod: Static
   # Create a security group allowing inbound access over ports 80 (for HTTP) and 22 (for SSH)
   security-group:
     type: azure-native:network:NetworkSecurityGroup
