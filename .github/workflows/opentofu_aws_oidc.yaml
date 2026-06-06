@@ -39,12 +39,10 @@ jobs:
 
       # 5. Roda o plan para mostrar o que vai acontecer nos logs
       - name: OpenTofu Plan
-        env:
-          TF_VAR_AWS_REGION_PRIMARY: "sa-east-1"
-          TF_VAR_AWS_REGION_SECONDARY: "us-east-1"
-        run: tofu plan -input=false -no-color
+        run: tofu plan -input=false -no-color -var-file="terraform.tfvars"
         working-directory: 01-iac-railways/opentofu/teste/aws
 
       # 6. Aplica a infraestrutura na nuvem
       # - name: OpenTofu Apply
-      # run: tofu apply -auto-approve
+      # if: github.ref == 'refs/heads/main'
+      # run: tofu apply -auto-approve -input=false -var-file="terraform.tfvars"
