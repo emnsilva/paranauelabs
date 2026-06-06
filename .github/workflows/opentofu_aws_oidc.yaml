@@ -39,10 +39,10 @@ jobs:
 
       # 5. Roda o plan para mostrar o que vai acontecer nos logs
       - name: OpenTofu Plan
-        run: tofu plan -input=false -no-color -var-file="terraform.tfvars"
+        run: tofu plan -input=false -no-color -var-file="tofu.tfvars"
         working-directory: 01-iac-railways/opentofu/teste/aws
 
       # 6. Aplica a infraestrutura na nuvem
       # - name: OpenTofu Apply
       # if: github.ref == 'refs/heads/main'
-      # run: tofu apply -auto-approve -input=false -var-file="terraform.tfvars"
+      # run: tofu apply -auto-approve -input=false -var-file="tofu.tfvars"
