@@ -1,4 +1,4 @@
-name: OpenTofu Deploy AWS
+name: OpenTofu Deploy AWS (OIDC)
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_RUN_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION_PRIMARY }}
 
       - name: Setup OpenTofu
