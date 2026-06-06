@@ -39,6 +39,9 @@ jobs:
 
       # 5. Roda o plan para mostrar o que vai acontecer nos logs
       - name: OpenTofu Plan
+        env:
+          TF_VAR_AWS_REGION_PRIMARY: "sa-east-1"
+          TF_VAR_AWS_REGION_SECONDARY: "us-east-1"
         run: tofu plan -input=false -no-color
         working-directory: 01-iac-railways/opentofu/teste/aws
 
