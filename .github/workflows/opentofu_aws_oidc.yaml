@@ -39,7 +39,7 @@ jobs:
 
       # 5. Roda o plan para mostrar o que vai acontecer nos logs
       - name: OpenTofu Plan
-        run: tofu plan
+        run: tofu plan -input=false -no-color
         working-directory: 01-iac-railways/opentofu/teste/aws
 
       # 6. Aplica a infraestrutura na nuvem
