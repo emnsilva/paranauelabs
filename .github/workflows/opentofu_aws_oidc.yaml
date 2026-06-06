@@ -1,4 +1,4 @@
-name: OpenTofu Deploy AWS (OIDC)
+name: OpenTofu Deploy AWS
 
 on:
   push:
