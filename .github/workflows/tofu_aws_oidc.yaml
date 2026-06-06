@@ -1,0 +1,45 @@
+name: OpenTofu Deploy AWS (OIDC)
+
+# Define quando esse trem vai partir (ex: ao fazer push na branch main)
+on:
+  push:
+    branches:
+      - main
+
+# PERMISSÃO VITAL: Sem essa linha, o GitHub não gera o token OIDC!
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Baixa o código do seu repositório
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. A MÁGICA DO OIDC: O GitHub pede o bilhete para a AWS
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # O ARN da Role que criamos lá no IAM com a Trust Policy do GitHub
+          role-to-assume: arn:aws:iam::136333049477:role/opentofu_oidc_auth
+          aws-region: sa-east-1
+
+      # 3. Instala o OpenTofu no servidor do GitHub
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      # 4. Roda o init exatamente como você faria no terminal
+      - name: OpenTofu Init
+        run: tofu init
+
+      # 5. Roda o plan para mostrar o que vai acontecer nos logs
+      - name: OpenTofu Plan
+        run: tofu plan
+
+      # 6. Aplica a infraestrutura na nuvem
+      # - name: OpenTofu Apply
+      # run: tofu apply -auto-approve
