@@ -1,12 +1,10 @@
 name: OpenTofu Deploy AWS (OIDC)
 
-# Define quando esse trem vai partir (ex: ao fazer push na branch main)
 on:
   push:
     branches:
       - main
 
-# PERMISSÃO VITAL: Sem essa linha, o GitHub não gera o token OIDC!
 permissions:
   id-token: write
   contents: read
@@ -14,35 +12,35 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-      # 1. Baixa o código do seu repositório
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. A MÁGICA DO OIDC: O GitHub pede o bilhete para a AWS
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # O ARN da Role que criamos lá no IAM com a Trust Policy do GitHub
-          role-to-assume: arn:aws:iam::136333049477:role/opentofu_oidc_auth
-          aws-region: sa-east-1
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION_PRIMARY }}
 
-      # 3. Instala o OpenTofu no servidor do GitHub
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
 
-      # 4. Roda o init exatamente como você faria no terminal
       - name: OpenTofu Init
         run: tofu init
         working-directory: 01-iac-railways/opentofu/teste/aws
 
-      # 5. Roda o plan para mostrar o que vai acontecer nos logs
       - name: OpenTofu Plan
-        run: tofu plan -input=false -no-color -var-file="tofu.tfvars"
+        env:
+          TF_VAR_AWS_REGION_PRIMARY: ${{ vars.AWS_REGION_PRIMARY }}
+          TF_VAR_AWS_REGION_SECONDARY: ${{ vars.AWS_REGION_SECONDARY }}
+          # Adicione aqui quaisquer outras variáveis que seu código use
+        run: tofu plan -input=false -no-color
         working-directory: 01-iac-railways/opentofu/teste/aws
 
-      # 6. Aplica a infraestrutura na nuvem
       # - name: OpenTofu Apply
-      # if: github.ref == 'refs/heads/main'
-      # run: tofu apply -auto-approve -input=false -var-file="tofu.tfvars"
+      #   if: github.ref == 'refs/heads/main'
+      #   env:
+      #     TF_VAR_AWS_REGION_PRIMARY: ${{ vars.AWS_REGION_PRIMARY }}
+      #     TF_VAR_AWS_REGION_SECONDARY: ${{ vars.AWS_REGION_SECONDARY }}
+      #   run: tofu apply -auto-approve -input=false
+      #   working-directory: 01-iac-railways/opentofu/teste/aws
