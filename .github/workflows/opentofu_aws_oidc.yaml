@@ -35,12 +35,12 @@ jobs:
       # 4. Roda o init exatamente como você faria no terminal
       - name: OpenTofu Init
         run: tofu init
-        working-directory: paranauelabs/01-iac-railways/opentofu/teste/aws
+        working-directory: 01-iac-railways/opentofu/teste/aws
 
       # 5. Roda o plan para mostrar o que vai acontecer nos logs
       - name: OpenTofu Plan
         run: tofu plan
-        working-directory: paranauelabs/01-iac-railways/opentofu/teste/aws
+        working-directory: 01-iac-railways/opentofu/teste/aws
 
       # 6. Aplica a infraestrutura na nuvem
       # - name: OpenTofu Apply
