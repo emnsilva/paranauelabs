@@ -1,0 +1,36 @@
+name: OpenTofu Azure OIDC
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write   # necessário para OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}   # appId do App Registration
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Tofu Init
+        run: tofu init
+
+      - name: Tofu Plan
+        run: tofu plan -input=false -no-color -var-file="tofu.tfvars"
+
+      - name: Tofu Apply (opcional)
+        if: github.ref == 'refs/heads/main'
+        run: tofu apply -auto-approve -input=false -var-file="tofu.tfvars"
