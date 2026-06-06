@@ -28,8 +28,8 @@ jobs:
         run: tofu init
 
       - name: OpenTofu Plan
-        run: tofu plan -input=false -no-color -var-file="tofu.tfvars"
+        run: tofu plan -input=false -no-color
 
-      - name: OpenTofu Apply (opcional)
-        if: github.ref == 'refs/heads/main'
-        run: tofu apply -auto-approve -input=false -var-file="tofu.tfvars"
+      # - name: OpenTofu Apply (opcional)
+      #  if: github.ref == 'refs/heads/main'
+      #  run: tofu apply -auto-approve -input=false
