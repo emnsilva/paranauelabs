@@ -1,0 +1,35 @@
+name: OpenTofu GCP OIDC
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write   # necessário para OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: OpenTofu Init
+        run: tofu init
+
+      - name: OpenTofu Plan
+        run: tofu plan -input=false -no-color -var-file="tofu.tfvars"
+
+      - name: OpenTofu Apply (opcional)
+        if: github.ref == 'refs/heads/main'
+        run: tofu apply -auto-approve -input=false -var-file="tofu.tfvars"
