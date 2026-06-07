@@ -29,15 +29,15 @@ jobs:
 
       - name: Tofu Plan
         env:
-          TF_VAR_location_primary: ${{ vars.ARM_PRIMARY_REGION }}
-          TF_VAR_location_secondary: ${{ vars.ARM_SECONDARY_REGION }}
+          TF_VAR_ARM_PRIMARY_REGION: ${{ vars.ARM_PRIMARY_REGION }}
+          TF_VAR_ARM_SECONDARY_REGION: ${{ vars.ARM_SECONDARY_REGION }}
         run: tofu plan -input=false -no-color
         working-directory: 01-iac-railways/opentofu/teste/azure
 
      # - name: Tofu Apply
      #   if: github.ref == 'refs/heads/main'
      #   env:
-     #    TF_VAR_location_primary: ${{ vars.ARM_PRIMARY_REGION }}
-     #    TF_VAR_location_secondary: ${{ vars.ARM_SECONDARY_REGION }}
+     #    TF_VAR_ARM_PRIMARY_REGION: ${{ vars.ARM_PRIMARY_REGION }}
+     #    TF_VAR_ARM_SECONDARY_REGION: ${{ vars.ARM_SECONDARY_REGION }}
      #   run: tofu apply -auto-approve -input=false
      #   working-directory: 01-iac-railways/opentofu/teste/azure
