@@ -31,8 +31,8 @@ jobs:
       - name: OpenTofu Plan
         env:
          TF_VAR_GCP_PROJECT: ${{ vars.GCP_PROJECT }}
-         TF_VAR_GCP_PRIMARY_REGION: ${{ vars.GCP_REGION_PRIMARY }}
-         TF_VAR_GCP_SECONDARY_REGION: ${{ vars.GCP_REGION_SECONDARY }}
+         TF_VAR_GCP_PRIMARY_REGION: ${{ vars.GCP_PRIMARY_REGION }}
+         TF_VAR_GCP_SECONDARY_REGION: ${{ vars.GCP_SECONDARY_REGION }}
           # Não precisa do GOOGLE_CREDENTIALS_B64 porque o OIDC já provê credenciais automáticas
         run: tofu plan -input=false -no-color
         working-directory: 01-iac-railways/opentofu/teste/gcp
