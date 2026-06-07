@@ -17,9 +17,9 @@ jobs:
       - name: Azure login via OIDC
         uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ vars.ARM_CLIENT_ID }}
+          tenant-id: ${{ vars.ARM_TENANT_ID }}
+          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
 
       - uses: opentofu/setup-opentofu@v1
 
@@ -39,5 +39,5 @@ jobs:
      #   run: tofu apply -auto-approve -input=false
      #   working-directory: 01-iac-railways/opentofu/teste/azure
      #   env:
-     #     TF_VAR_location_primary: ${{ vars.AZURE_LOCATION_PRIMARY }}
-     #     TF_VAR_location_secondary: ${{ vars.AZURE_LOCATION_SECONDARY }}
+     #     TF_VAR_location_primary: ${{ vars.ARM_PRIMARY_REGION }}
+     #     TF_VAR_location_secondary: ${{ vars.ARM_SECONDARY_REGION }}
