@@ -41,4 +41,3 @@ jobs:
      #    TF_VAR_location_secondary: ${{ vars.ARM_SECONDARY_REGION }}
      #   run: tofu apply -auto-approve -input=false
      #   working-directory: 01-iac-railways/opentofu/teste/azure
-     
