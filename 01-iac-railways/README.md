@@ -86,18 +86,17 @@ pulumi/        → Programas YAML para VMs + templates de environment
 | [Pulumi CLI](https://www.pulumi.com/docs/install/) | 3.x | Exemplos em `pulumi/` |
 | Conta cloud | — | AWS, Azure e/ou GCP com permissões de criação de recursos |
 
-### Terraform — armazenamento local
+### Terraform — armazenamento (Terraform Cloud)
 
 ```bash
 cd terraform/teste/aws   # ou azure/ ou gcp/
 
-# Configure credenciais do provedor (veja seção Provedores)
-export AWS_ACCESS_KEY_ID="..."
-export AWS_SECRET_ACCESS_KEY="..."
-export TF_VAR_AWS_REGION_PRIMARY="sa-east-1"
-export TF_VAR_AWS_REGION_SECONDARY="us-east-1"
-
+terraform login
 terraform init
+
+# Configure as variáveis no workspace do Terraform Cloud
+# (veja seção Configuração → Terraform)
+
 terraform plan
 terraform apply
 ```
@@ -137,9 +136,61 @@ Outputs:
 
 ## Configuração
 
-Toda configuração é feita via variáveis de ambiente ou arquivos de stack Pulumi. **Nunca commite credenciais reais.**
+**Nunca commite credenciais reais.** Cada ferramenta usa seu próprio mecanismo de configuração — veja a subseção correspondente abaixo.
 
-### AWS
+### Terraform
+
+As variáveis abaixo são definidas no **workspace do Terraform Cloud**. Regiões e IDs de projeto usam o tipo *terraform*; credenciais e flags OIDC usam o tipo *env*.
+
+> No CLI local, variáveis do tipo *terraform* exigem o prefixo `TF_VAR_` (ex.: `TF_VAR_AWS_REGION_PRIMARY`).
+
+#### AWS
+
+| Variável | Descrição | Tipo |
+|---|---|---|
+| `AWS_REGION_PRIMARY` | Região primária dos recursos | terraform |
+| `AWS_REGION_SECONDARY` | Região secundária dos recursos | terraform |
+| `TFC_AWS_PROVIDER_AUTH` | `true` para ativar autenticação OIDC | env |
+| `TFC_DEFAULT_AWS_RUN_ROLE_ARN` | ARN da role a ser assumida | env |
+| `AWS_ACCESS_KEY_ID` | Chave de acesso do usuário IAM | env |
+| `AWS_SECRET_ACCESS_KEY` | Chave secreta do usuário IAM | env |
+
+**Recursos criados**: dois buckets S3 (`primary-bucket-*` e `secondary-bucket-*`) em regiões distintas, com `force_destroy = true`.
+
+#### Azure
+
+| Variável | Descrição | Tipo |
+|---|---|---|
+| `ARM_PRIMARY_REGION` | Região primária dos recursos | terraform |
+| `ARM_SECONDARY_REGION` | Região secundária dos recursos | terraform |
+| `ARM_SUBSCRIPTION_ID` | ID da assinatura do Azure | terraform |
+| `TFC_AZURE_PROVIDER_AUTH` | `true` para ativar autenticação OIDC | env |
+| `TFC_DEFAULT_AZURE_RUN_CLIENT_ID` | Client ID do app (OIDC) | env |
+| `ARM_TENANT_ID` | Tenant ID — do app (OIDC) ou do Service Principal (estática) | env |
+| `ARM_CLIENT_ID` | App ID do Service Principal (estática) | env |
+| `ARM_CLIENT_SECRET` | Senha do Service Principal (estática) | env |
+
+**Recursos criados**: dois resource groups, duas storage accounts e dois containers Blob privados.
+
+#### GCP
+
+| Variável | Descrição | Tipo |
+|---|---|---|
+| `GCP_PRIMARY_REGION` | Região primária | terraform |
+| `GCP_SECONDARY_REGION` | Região secundária | terraform |
+| `GCP_PROJECT` | ID do projeto GCP | terraform |
+| `TFC_GCP_PROVIDER_AUTH` | `true` para ativar autenticação OIDC | env |
+| `TFC_DEFAULT_GCP_RUN_SERVICE_ACCOUNT_EMAIL` | E-mail da service account (OIDC) | env |
+| `TFC_DEFAULT_GCP_WORKLOAD_PROVIDER_NAME` | Nome do workload provider (OIDC) | env |
+| `GOOGLE_CREDENTIALS_B64` | Arquivo JSON da service account em Base64 (estática) | env |
+
+**Recursos criados**: dois buckets GCS (`primary-storage-*` e `secondary-storage-*`) em regiões distintas.
+
+### OpenTofu
+
+Toda configuração é feita via variáveis de ambiente no arquivo `.env` local. Credenciais do provedor não usam prefixo; variáveis do código exigem `TF_VAR_`.
+
+#### AWS
 
 | Variável | Descrição | Obrigatória |
 |---|---|---|
@@ -148,9 +199,7 @@ Toda configuração é feita via variáveis de ambiente ou arquivos de stack Pul
 | `TF_VAR_AWS_REGION_PRIMARY` | Região do bucket primário | Sim |
 | `TF_VAR_AWS_REGION_SECONDARY` | Região do bucket secundário | Sim |
 
-**Recursos criados**: dois buckets S3 (`primary-bucket-*` e `secondary-bucket-*`) em regiões distintas, com `force_destroy = true`.
-
-### Azure
+#### Azure
 
 | Variável | Descrição | Obrigatória |
 |---|---|---|
@@ -161,9 +210,7 @@ Toda configuração é feita via variáveis de ambiente ou arquivos de stack Pul
 | `TF_VAR_ARM_PRIMARY_REGION` | Região primária (ex: `brazilsouth`) | Sim |
 | `TF_VAR_ARM_SECONDARY_REGION` | Região secundária (ex: `eastus`) | Sim |
 
-**Recursos criados**: dois resource groups, duas storage accounts e dois containers Blob privados.
-
-### GCP
+#### GCP
 
 | Variável | Descrição | Obrigatória |
 |---|---|---|
@@ -172,35 +219,33 @@ Toda configuração é feita via variáveis de ambiente ou arquivos de stack Pul
 | `TF_VAR_GCP_PRIMARY_REGION` | Região primária (ex: `southamerica-east1`) | Sim |
 | `TF_VAR_GCP_SECONDARY_REGION` | Região secundária (ex: `us-east1`) | Sim |
 
-**Recursos criados**: dois buckets GCS (`primary-storage-*` e `secondary-storage-*`) em regiões distintas.
-
 > No CI com OIDC, o GCP não precisa de `GOOGLE_CREDENTIALS_B64` — o workflow injeta credenciais automaticamente via Workload Identity Federation.
 
 ## Provedores
 
 ### AWS
 
-Os exemplos Terraform/OpenTofu provisionam armazenamento S3 multi-região. O exemplo Pulumi (`pulumi/teste/aws/`) sobe uma VPC completa com EC2 `t3.micro`, security group liberando porta 80 e um servidor HTTP via `userData`.
+**Terraform** (`terraform/teste/aws/`): provisiona armazenamento S3 multi-região via Terraform Cloud. Autenticação estática com `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`, ou OIDC com `TFC_AWS_PROVIDER_AUTH` + `TFC_DEFAULT_AWS_RUN_ROLE_ARN`.
 
-**Autenticação local**: chaves IAM estáticas via variáveis de ambiente.
+**OpenTofu** (`opentofu/teste/aws/`): mesmo cenário de armazenamento. Autenticação local com chaves IAM; na CI, OIDC via `aws-actions/configure-aws-credentials` assumindo `AWS_RUN_ROLE_ARN`.
 
-**Autenticação CI**: OIDC com `aws-actions/configure-aws-credentials` assumindo uma IAM Role (`AWS_RUN_ROLE_ARN`).
+**Pulumi** (`pulumi/teste/aws/`): VPC completa com EC2 `t3.micro`, security group na porta 80 e servidor HTTP via `userData`.
 
 ### Azure
 
-Os exemplos Terraform/OpenTofu criam contas de armazenamento Blob com replicação LRS. O Pulumi (`pulumi/teste/azure/`) provisiona uma VM Debian com IP público, NSG (portas 80 e 22) e chave SSH gerada automaticamente.
+**Terraform** (`terraform/teste/azure/`): contas de armazenamento Blob com replicação LRS. Autenticação estática com Service Principal (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `ARM_TENANT_ID`), ou OIDC com `TFC_AZURE_PROVIDER_AUTH` + `TFC_DEFAULT_AZURE_RUN_CLIENT_ID`.
 
-**Autenticação local**: Service Principal via `ARM_*`.
+**OpenTofu** (`opentofu/teste/azure/`): mesmo cenário de armazenamento. Autenticação local via `ARM_*`; na CI, OIDC com `azure/login@v2`.
 
-**Autenticação CI**: OIDC com `azure/login@v2` usando `ARM_CLIENT_ID`, `ARM_TENANT_ID` e `ARM_SUBSCRIPTION_ID` como GitHub Variables.
+**Pulumi** (`pulumi/teste/azure/`): VM Debian com IP público, NSG (portas 80 e 22) e chave SSH gerada automaticamente.
 
 ### GCP
 
-Os exemplos Terraform/OpenTofu criam buckets GCS com `storage_class = STANDARD`. O Pulumi (`pulumi/teste/gcp/`) sobe uma instância `f1-micro` com firewall, subnet e servidor HTTP na inicialização.
+**Terraform** (`terraform/teste/gcp/`): buckets GCS com `storage_class = STANDARD`. Autenticação estática com `GOOGLE_CREDENTIALS_B64`, ou OIDC com `TFC_GCP_PROVIDER_AUTH`, `TFC_DEFAULT_GCP_RUN_SERVICE_ACCOUNT_EMAIL` e `TFC_DEFAULT_GCP_WORKLOAD_PROVIDER_NAME`.
 
-**Autenticação local**: Service Account JSON codificado em Base64 (`TF_VAR_GOOGLE_CREDENTIALS_B64`) ou `GOOGLE_CREDENTIALS` no ESC.
+**OpenTofu** (`opentofu/teste/gcp/`): mesmo cenário de armazenamento. Autenticação local com JSON em Base64; na CI, Workload Identity Federation via `google-github-actions/auth@v2`.
 
-**Autenticação CI**: Workload Identity Federation via `google-github-actions/auth@v2`.
+**Pulumi** (`pulumi/teste/gcp/`): instância `f1-micro` com firewall, subnet e servidor HTTP na inicialização. Credenciais via `GOOGLE_CREDENTIALS` no ESC.
 
 ## Pulumi Environments
 
@@ -310,15 +355,6 @@ Contribuições são bem-vindas!
 Este repositório não pretende ser um template de produção. Ele existe para que você **experimente, compare e entenda** como diferentes ferramentas e provedores se comportam com os mesmos conceitos — regiões, providers com alias, autenticação federada e pipelines de IaC.
 
 A diferença entre um lab e um ambiente real está nos detalhes: backends de estado remotos, políticas de `apply` protegidas, módulos reutilizáveis, testes com `terratest` ou `policy-as-code`, e segredos gerenciados por vaults dedicados. Use este projeto como ponto de partida e evolua a partir daí.
-
-## Agradecimentos
-
-Este laboratório é possível graças a projetos open-source fundamentais:
-
-- [Terraform](https://www.terraform.io/) e [OpenTofu](https://opentofu.org/) pela base declarativa de IaC
-- [Pulumi](https://www.pulumi.com/) pela abordagem imperativa com linguagens familiares
-- [HashiCorp Providers](https://registry.terraform.io/) (AWS, AzureRM, Google) pelos plugins oficiais
-- [GitHub Actions](https://github.com/features/actions) pelos workflows de CI com OIDC
 
 ---
 
