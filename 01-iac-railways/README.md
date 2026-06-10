@@ -142,8 +142,6 @@ Outputs:
 
 As variáveis abaixo são definidas no **workspace do Terraform Cloud**. Regiões e IDs de projeto usam o tipo *terraform*; credenciais e flags OIDC usam o tipo *env*.
 
-> No CLI local, variáveis do tipo *terraform* exigem o prefixo `TF_VAR_` (ex.: `TF_VAR_AWS_REGION_PRIMARY`).
-
 #### AWS
 
 | Variável | Descrição | Tipo |
