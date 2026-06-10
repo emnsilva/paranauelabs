@@ -1,9 +1,64 @@
-# Arquivos de configuração de Stack do Pulumi (contém dados do seu ambiente)
-Pulumi.*.yaml
+# Credenciais e variáveis de ambiente
+# Arquivos .env com chaves reais (os .env.example são versionados)
+.env
+.env.*
+!.env.example
 
-# Porém, NÃO ignore o arquivo principal de código
-!Pulumi.yaml
-
-# Se você baixou chaves JSON do GCP para testar localmente, nunca suba elas
+# Chaves JSON de service accounts (GCP, AWS, etc.)
 *.json
 !package.json
+
+# Certificados e chaves privadas
+*.pem
+*.p12
+*.key
+id_rsa*
+*.ppk
+
+# Terraform / OpenTofu
+# Diretório de providers e módulos baixados
+.terraform/
+
+# Estado local — nunca versionar (use backend remoto em produção)
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+# Arquivos de variáveis com valores sensíveis
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Overrides locais (não compartilhados)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Saída de plan e logs de crash
+*.tfplan
+crash.log
+crash.*.log
+
+# Configuração pessoal do CLI
+.terraformrc
+terraform.rc
+
+# Pulumi
+# Stacks locais com config e segredos do ambiente
+Pulumi.*.yaml
+
+# Programa principal do projeto (deve ser versionado)
+!Pulumi.yaml
+
+# Cache e metadados locais do CLI
+.pulumi/
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
