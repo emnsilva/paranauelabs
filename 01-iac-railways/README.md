@@ -55,19 +55,27 @@ pulumi/        → Programas YAML para VMs + templates de environment
 
 ```
 01-iac-railways/
-├── terraform/teste/
-│   ├── aws/example_s3.tf
-│   ├── azure/example_blob.tf
-│   └── gcp/example_storage.tf
-├── opentofu/teste/
-│   ├── aws/          # tofu_s3.tf + .env.example
-│   ├── azure/        # tofu_blob.tf + .env.example
-│   └── gcp/          # tofu_storage.tf + .env.example
+├── terraform/
+│   ├── aws/
+│   │   ├── example_s3.tf
+│   │   └── backend.tf
+│   ├── azure/
+│   │   ├── example_blob.tf
+│   │   └── backend.tf
+│   └── gcp/
+│       ├── example_storage.tf
+│       └── backend.tf
+├── opentofu/
+│   ├── aws/                # tofu_s3.tf + .env.example
+│   ├── azure/              # tofu_blob.tf + .env.example
+│   └── gcp/                # tofu_storage.tf + .env.example
 ├── pulumi/
-│   ├── teste/
-│   │   ├── aws/Pulumi.yaml    # EC2 + VPC
-│   │   ├── azure/Pulumi.yaml  # VM Debian
-│   │   └── gcp/Pulumi.yaml    # Compute Instance
+│   ├── aws/
+│   │   └── Pulumi.yaml     # EC2 + VPC
+│   ├── azure/
+│   │   └── Pulumi.yaml     # VM Debian
+│   ├── gcp/
+│   │   └── Pulumi.yaml     # Compute Instance
 │   └── environments/
 │       ├── aws_environment
 │       ├── azure_environment
