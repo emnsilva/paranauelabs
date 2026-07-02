@@ -1,0 +1,14 @@
+# Ambiente
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Dados sensíveis / runtime
+data/*.db
+data/*.log
+data/incidents/
+
+# IDEs
+.vscode/
+.idea/
