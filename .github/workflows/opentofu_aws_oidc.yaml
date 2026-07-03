@@ -25,7 +25,7 @@ jobs:
 
       - name: OpenTofu Init
         run: tofu init
-        working-directory: 01-iac-railways/opentofu/teste/aws
+        working-directory: 01-iac-railways/opentofu/aws
 
       - name: OpenTofu Plan
         env:
