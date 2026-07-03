@@ -1,9 +1,7 @@
 name: OpenTofu Deploy AWS (OIDC)
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   id-token: write
