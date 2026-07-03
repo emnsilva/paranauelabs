@@ -33,7 +33,7 @@ jobs:
           TF_VAR_AWS_REGION_SECONDARY: ${{ vars.AWS_REGION_SECONDARY }}
           # Adicione aqui quaisquer outras variáveis que seu código use
         run: tofu plan -input=false -no-color
-        working-directory: 01-iac-railways/opentofu/teste/aws
+        working-directory: 01-iac-railways/opentofu/aws
 
       # - name: OpenTofu Apply
       #   if: github.ref == 'refs/heads/main'
@@ -41,4 +41,4 @@ jobs:
       #     TF_VAR_AWS_REGION_PRIMARY: ${{ vars.AWS_REGION_PRIMARY }}
       #     TF_VAR_AWS_REGION_SECONDARY: ${{ vars.AWS_REGION_SECONDARY }}
       #   run: tofu apply -auto-approve -input=false
-      #   working-directory: 01-iac-railways/opentofu/teste/aws
+      #   working-directory: 01-iac-railways/opentofu/aws

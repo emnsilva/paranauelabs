@@ -24,7 +24,7 @@ jobs:
 
       - name: Tofu Init
         run: tofu init
-        working-directory: 01-iac-railways/opentofu/teste/azure
+        working-directory: 01-iac-railways/opentofu/azure
 
       - name: Tofu Plan
         env:
@@ -39,4 +39,4 @@ jobs:
      #    TF_VAR_ARM_PRIMARY_REGION: ${{ vars.ARM_PRIMARY_REGION }}
      #    TF_VAR_ARM_SECONDARY_REGION: ${{ vars.ARM_SECONDARY_REGION }}
      #   run: tofu apply -auto-approve -input=false
-     #   working-directory: 01-iac-railways/opentofu/teste/azure
+     #   working-directory: 01-iac-railways/opentofu/azure

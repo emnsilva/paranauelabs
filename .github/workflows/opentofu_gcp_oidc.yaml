@@ -34,7 +34,7 @@ jobs:
          TF_VAR_GCP_SECONDARY_REGION: ${{ vars.GCP_SECONDARY_REGION }}
           # Não precisa do GOOGLE_CREDENTIALS_B64 porque o OIDC já provê credenciais automáticas
         run: tofu plan -input=false -no-color
-        working-directory: 01-iac-railways/opentofu/teste/gcp
+        working-directory: 01-iac-railways/opentofu/gcp
 
       # - name: OpenTofu Apply
       #   if: github.ref == 'refs/heads/main'
@@ -43,4 +43,4 @@ jobs:
       #     TF_VAR_GCP_PRIMARY_REGION: ${{ vars.GCP_REGION_PRIMARY }}
       #     TF_VAR_GCP_SECONDARY_REGION: ${{ vars.GCP_REGION_SECONDARY }}
       #   run: tofu apply -auto-approve -input=false
-      #   working-directory: 01-iac-railways/opentofu/teste/gcp
+      #   working-directory: 01-iac-railways/opentofu/gcp
