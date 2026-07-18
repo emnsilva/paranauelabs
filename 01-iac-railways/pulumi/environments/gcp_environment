@@ -19,11 +19,11 @@ values:
       "universe_domain": "Dominio do serviço no GCP"
     }
   environmentVariables:
-    GOOGLE_PROJECT: "woven-goal-469100-q2"
+    GOOGLE_PROJECT: "ID do projeto no GCP"
     # Injeta o texto puro do JSON direto na variável que o GCP lê
     GOOGLE_CREDENTIALS: ${gcpKey}
   pulumiConfig:
     # ATENÇÃO: Use o nome EXATO do seu projeto (gcp_vm_yaml) como prefixo!
-    gcp_vm_yaml:GCP_PROJECT: "woven-goal-469100-q2"
+    gcp_vm_yaml:GCP_PROJECT: "ID do projeto no GCP"
     gcp_vm_yaml:GCP_REGION_PRIMARY: ${regionA}
     gcp_vm_yaml:GCP_REGION_SECONDARY: ${regionB}
