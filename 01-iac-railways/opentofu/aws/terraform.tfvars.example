@@ -1,0 +1,6 @@
+# Copie este arquivo para 'terraform.tfvars' e ajuste os valores se for rodar localmente.
+# No pipeline de CI/CD, o GitLab injeta essas variáveis automaticamente.
+
+AWS_REGION_PRIMARY   = "sa-east-1"
+AWS_REGION_SECONDARY = "us-east-1"
+environment          = "dev"
