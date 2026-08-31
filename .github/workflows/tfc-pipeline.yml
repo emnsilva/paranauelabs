@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     
     # A MÁGICA DO GITHUB: Ele injeta as Secrets e Variables do ambiente escolhido (ex: deploy-dev)
-    environment: deploy-${{ github.event.inputs.environment }}
+    environment: ${{ github.event.inputs.environment }}
     
     # Define a pasta padrão para todos os comandos "run" deste job (Monorepo)
     defaults:
