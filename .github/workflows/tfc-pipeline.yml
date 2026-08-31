@@ -1,0 +1,72 @@
+# Nome do Workflow que aparece na aba "Actions" do GitHub
+name: Terraform Pipeline (AWS)
+
+# Gatilhos do pipeline
+on:
+  workflow_dispatch: # O pipeline SÓ roda manualmente, via botão "Run workflow"
+    inputs:
+      environment: # Cria um dropdown para escolher o ambiente
+        description: 'Qual ambiente fazer deploy?'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action: # Cria um dropdown para escolher o que fazer
+        description: 'Qual ação executar?'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+jobs:
+  terraform:
+    # O job roda num servidor Ubuntu fornecido pelo GitHub (Runner SaaS)
+    runs-on: ubuntu-latest
+    
+    # A MÁGICA DO GITHUB: Ele injeta as Secrets e Variables do ambiente escolhido (ex: deploy-dev)
+    environment: deploy-${{ github.event.inputs.environment }}
+    
+    # Define a pasta padrão para todos os comandos "run" deste job (Monorepo)
+    defaults:
+      run:
+        working-directory: 01-iac-railways/terraform/aws
+
+    steps:
+      # 1. Baixa o código do repositório para o Runner
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 2. Instala o binário do Terraform na versão fixada (ADR-003)
+      - name: Configurar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.8
+
+      # 3. Inicializa o Terraform, conectando no Terraform Cloud (TFC)
+      - name: Terraform Init
+        run: terraform init
+        env:
+          # Pega o Token do TFC salvo nas Secrets do ambiente
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+          # Pega o nome do Workspace salvo nas Variables do ambiente (ex: dev_aws_oidc)
+          TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+
+      # 4. Executa a ação escolhida no dropdown (plan, apply ou destroy)
+      - name: Terraform ${{ github.event.inputs.action }}
+        run: |
+          # Se for plan, roda sem o -auto-approve (apenas simula)
+          if [ "${{ github.event.inputs.action }}" == "plan" ]; then
+            terraform plan
+          else
+            # Se for apply ou destroy, roda automatico
+            terraform ${{ github.event.inputs.action }} -auto-approve
+          fi
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+          TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+          # Injeta o nome do ambiente para as tags de FinOps (ex: Environment=dev)
+          TF_VAR_environment: ${{ github.event.inputs.environment }}

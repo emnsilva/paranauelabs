@@ -1,0 +1,79 @@
+# Nome do Workflow que aparece na aba "Actions" do GitHub
+name: OpenTofu Pipeline (AWS)
+
+# Gatilhos do pipeline (Idêntico ao do Terraform)
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Qual ambiente fazer deploy?'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action:
+        description: 'Qual ação executar?'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+jobs:
+  opentofu:
+    runs-on: ubuntu-latest
+    # Injeta as Secrets e Variables do ambiente escolhido
+    environment: deploy-${{ github.event.inputs.environment }}
+    
+    # Permissões necessárias para o GitHub emitir o token OIDC (Zero Trust)
+    permissions:
+      id-token: write 
+      contents: read
+      
+    # Define a pasta padrão dos comandos (Monorepo)
+    defaults:
+      run:
+        working-directory: 01-iac-railways/opentofu/aws
+
+    steps:
+      # 1. Baixa o código do repositório
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 2. Instala o binário do OpenTofu
+      - name: Configurar OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.6.0
+
+      # 3. Configura as credenciais da AWS usando o OIDC do próprio GitHub
+      # Diferente do TFC, aqui o Runner do GitHub fala direto com a AWS.
+      # Ele usa o ARN da Role salvo nas Variables para assumir a identidade.
+      - name: Configurar Credenciais AWS (OIDC GitHub)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: sa-east-1
+
+      # 4. Inicializa o OpenTofu, conectando no Terraform Cloud (TFC)
+      - name: OpenTofu Init
+        run: tofu init
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+          TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+
+      # 5. Executa a ação escolhida (plan, apply ou destroy)
+      - name: OpenTofu ${{ github.event.inputs.action }}
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "plan" ]; then
+            tofu plan
+          else
+            tofu ${{ github.event.inputs.action }} -auto-approve
+          fi
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+          TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+          TF_VAR_environment: ${{ github.event.inputs.environment }}
