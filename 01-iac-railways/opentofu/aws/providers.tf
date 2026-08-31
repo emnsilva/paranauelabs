@@ -18,7 +18,7 @@ provider "aws" {
     tags = {
       Project     = "Paranauê Labs"
       Environment = var.environment
-      ManagedBy   = "Terraform"
+      ManagedBy   = "OpenTofu"
       Owner       = "Emershow"
       CostCenter  = "SRE"
       Region      = "primary"
@@ -36,7 +36,7 @@ provider "aws" {
     tags = {
       Project     = "Paranauê Labs"
       Environment = var.environment
-      ManagedBy   = "Terraform"
+      ManagedBy   = "OpenTofu"
       Owner       = "Emershow"
       CostCenter  = "SRE"
       Region      = "secondary"
