@@ -2,21 +2,21 @@ name: Terraform Pipeline (AWS)
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Qual ambiente fazer deploy?'
-        required: true
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
 
 jobs:
-  # Job 1: Valida o código (Roda automático)
-  validate:
+  # Job 1: A Porta de Aprovação (GMUD)
+  approval_gate:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: dev # Pausa aqui esperando você aprovar
+    steps:
+      - name: Aguardando Aprovação
+        run: echo "Deploy aprovado pelo Tech Lead. Iniciando esteira..."
+
+  # Job 2: Validate (Roda automático após a aprovação)
+  validate:
+    needs: approval_gate
+    runs-on: ubuntu-latest
+    environment: dev # Puxa as secrets, mas NÃO pede aprovação de novo
     defaults:
       run:
         working-directory: 01-iac-railways/terraform/aws
@@ -33,11 +33,11 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-  # Job 2: Roda o Plano (Roda automático logo após o validate)
+  # Job 3: Plan (Roda automático após o validate)
   plan:
     needs: validate
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: dev # Puxa as secrets, mas NÃO pede aprovação de novo
     defaults:
       run:
         working-directory: 01-iac-railways/terraform/aws
@@ -54,14 +54,13 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
         env:
-          TF_VAR_environment: ${{ github.event.inputs.environment }}
+          TF_VAR_environment: 'dev'
 
-  # Job 3: Deploy (Pausa esperando clique de aprovação)
+  # Job 4: Apply (Roda automático após o plan)
   apply:
     needs: plan
     runs-on: ubuntu-latest
-    # O GitHub vai pausar aqui se o Environment tiver "Required reviewers" marcado
-    environment: ${{ github.event.inputs.environment }}
+    environment: dev # Puxa as secrets, mas NÃO pede aprovação de novo
     defaults:
       run:
         working-directory: 01-iac-railways/terraform/aws
@@ -78,4 +77,4 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
         env:
-          TF_VAR_environment: ${{ github.event.inputs.environment }}
+          TF_VAR_environment: 'dev'
