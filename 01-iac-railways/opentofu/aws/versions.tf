@@ -9,6 +9,7 @@ terraform {
   }
 
   cloud {
+    hostname     = "app.terraform.io"
     organization = "ParanaueLabs"
   
     workspaces {
