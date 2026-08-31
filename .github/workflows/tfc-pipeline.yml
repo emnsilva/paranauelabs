@@ -44,7 +44,7 @@ jobs:
       - name: Configurar Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.5.8
+          terraform_version: 1.16.0
 
       # 3. Inicializa o Terraform, conectando no Terraform Cloud (TFC)
       - name: Terraform Init
