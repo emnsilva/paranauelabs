@@ -2,24 +2,36 @@ name: Terraform Pipeline (AWS)
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Qual ambiente?'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action:
+        description: 'O que voce quer fazer?'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - destroy
 
 jobs:
-  # Job 1: A Porta de Aprovação (GMUD)
-  approval_gate:
-    runs-on: ubuntu-latest
-    environment: dev # Pausa aqui esperando você aprovar
-    steps:
-      - name: Aguardando Aprovação
-        run: echo "Deploy aprovado pelo Tech Lead. Iniciando esteira..."
-
-  # Job 2: Validate (Roda automático após a aprovação)
+  # Etapa de Deploy (Validate -> Plan -> Apply)
   validate:
-    needs: approval_gate
+    if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
-    environment: dev # Puxa as secrets, mas NÃO pede aprovação de novo
+    environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
         working-directory: 01-iac-railways/terraform/aws
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -27,20 +39,21 @@ jobs:
           terraform_version: 1.16.0
       - name: Terraform Init
         run: terraform init
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
-          TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
       - name: Terraform Validate
         run: terraform validate
 
-  # Job 3: Plan (Roda automático após o validate)
   plan:
     needs: validate
+    if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
-    environment: dev # Puxa as secrets, mas NÃO pede aprovação de novo
+    environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
         working-directory: 01-iac-railways/terraform/aws
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -48,22 +61,21 @@ jobs:
           terraform_version: 1.16.0
       - name: Terraform Init
         run: terraform init
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
-          TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
       - name: Terraform Plan
         run: terraform plan
-        env:
-          TF_VAR_environment: 'dev'
 
-  # Job 4: Apply (Roda automático após o plan)
   apply:
     needs: plan
+    if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
-    environment: dev # Puxa as secrets, mas NÃO pede aprovação de novo
+    environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
         working-directory: 01-iac-railways/terraform/aws
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -71,10 +83,27 @@ jobs:
           terraform_version: 1.16.0
       - name: Terraform Init
         run: terraform init
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
-          TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
       - name: Terraform Apply
         run: terraform apply -auto-approve
-        env:
-          TF_VAR_environment: 'dev'
+
+  # Etapa de Destroy
+  destroy:
+    if: ${{ github.event.inputs.action == 'destroy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/terraform/aws
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.0
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
