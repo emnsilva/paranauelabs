@@ -19,7 +19,7 @@ variable "GCP_SECONDARY_REGION" {
   default     = "us-east1"
 }
 
-variable "GCP_PROJECT_ID" {
+variable "GCP_PROJECT" {
   description = "ID do Projeto do GCP onde a infraestrutura será criada."
   type        = string
   default     = "ID do projeto" # Ajuste para o seu Project ID real

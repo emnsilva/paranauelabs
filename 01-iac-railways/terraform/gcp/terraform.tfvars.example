@@ -4,5 +4,5 @@
 ENVIRONMENT          = "dev"
 GCP_REGION_PRIMARY   = "southamerica-east1"
 GCP_REGION_SECONDARY = "us-east1"
-GCP_PROJECT_ID       = "ID do projeto"
+GCP_PROJECT       = "ID do projeto"
 BILLING_ACCOUNT_ID   = "XXXXXX-XXXXXX-XXXXXX"

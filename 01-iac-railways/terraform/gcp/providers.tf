@@ -7,7 +7,7 @@
 # O TFC assume a Workload Identity configurada.
 
 provider "google" {
-  project = var.GCP_PROJECT_ID
+  project = var.GCP_PROJECT
   region  = var.GCP_PRIMARY_REGION
 
   # default_labels aplica tags automaticamente em TODOS os recursos
