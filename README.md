@@ -15,11 +15,15 @@ Documentação Viva: Decisões arquiteturais são registradas via ADRs (Architec
 A estrutura de pastas isola cada laboratório para garantir que dependências, código e pipelines não se misturem:
 ```
 paranauelabs/
-├── Jenkinsfile                     # Raiz: Roteia para o lab correto
+├── Jenkinsfile                                # Raiz: Roteia para o lab correto
+├── .github/                                   # Raiz: Roteia para o lab correto
+│   └── workflows/                             # Orquestrador do Lab: Faz os "includes"
+│       ├── tfc-pipeline.yml                   # Pipeline Terraform (AWS)
+│       └── tofu-pipeline.yml                  # Pipeline OpenTofu (AWS)
 ├── 01-iac-railways/
-│   └── Jenkinsfile                 # Orquestrador do Lab: Faz os "includes"
+│   └── Jenkinsfile                            # Orquestrador do Lab: Faz os "includes"
 └── 02-futuro-lab/
-    └── Jenkinsfile                 # Orquestrador do Lab: Faz os "includes"
+    └── Jenkinsfile                            # Orquestrador do Lab: Faz os "includes"
 ```
 
 ## ⚙️ Estratégia de CI/CD (GitLab)
