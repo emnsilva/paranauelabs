@@ -1,0 +1,108 @@
+name: Terraform Pipeline (GCP)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Qual ambiente?'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action:
+        description: 'O que voce quer fazer?'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - destroy
+
+jobs:
+  validate:
+    if: ${{ github.event.inputs.action == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/terraform/gcp
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      # Variável maiúscula para bater com o código HCL
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.0
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Validate
+        run: terraform validate
+
+  plan:
+    needs: validate
+    if: ${{ github.event.inputs.action == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/terraform/gcp
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.0
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Plan
+        run: terraform plan
+
+  apply:
+    needs: plan
+    if: ${{ github.event.inputs.action == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/terraform/gcp
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.0
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+  destroy:
+    if: ${{ github.event.inputs.action == 'destroy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/terraform/gcp
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.0
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
