@@ -30,7 +30,7 @@ jobs:
         working-directory: 01-iac-railways/terraform/aws
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
-      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
         working-directory: 01-iac-railways/terraform/aws
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
-      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +74,7 @@ jobs:
         working-directory: 01-iac-railways/terraform/aws
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
-      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +96,7 @@ jobs:
         working-directory: 01-iac-railways/terraform/aws
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
-      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_AWS }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
