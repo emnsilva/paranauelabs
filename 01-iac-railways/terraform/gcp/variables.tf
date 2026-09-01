@@ -7,13 +7,13 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "GCP_REGION_PRIMARY" {
+variable "GCP_PRIMARY_REGION" {
   description = "Região primária do GCP onde os recursos serão provisionados."
   type        = string
   default     = "southamerica-east1"
 }
 
-variable "GCP_REGION_SECONDARY" {
+variable "GCP_SECONDARY_REGION" {
   description = "Região secundária do GCP para Disaster Recovery (DR)."
   type        = string
   default     = "us-east1"

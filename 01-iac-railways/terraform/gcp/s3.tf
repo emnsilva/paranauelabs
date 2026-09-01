@@ -4,7 +4,7 @@
 # Bucket na Região Primária
 resource "google_storage_bucket" "bucket_primary" {
   name          = "paranauelabs-iac-railways-${var.environment}-gcp-primary"
-  location      = var.GCP_REGION_PRIMARY
+  location      = var.GCP_PRIMARY_REGION
   force_destroy = true
 
   uniform_bucket_level_access = true
@@ -16,7 +16,7 @@ resource "google_storage_bucket" "bucket_primary" {
 # Bucket na Região Secundária
 resource "google_storage_bucket" "bucket_secondary" {
   name          = "paranauelabs-iac-railways-${var.environment}-gcp-secondary"
-  location      = var.GCP_REGION_SECONDARY
+  location      = var.GCP_SECONDARY_REGION
   force_destroy = true
 
   uniform_bucket_level_access = true

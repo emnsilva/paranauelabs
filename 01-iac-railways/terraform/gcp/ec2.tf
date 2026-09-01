@@ -10,7 +10,7 @@ data "google_compute_image" "debian" {
 resource "google_compute_instance" "vm_instance_primary" {
   name         = "vm-primary-${var.environment}"
   machine_type = "e2-micro"
-  zone         = "${var.GCP_REGION_PRIMARY}-b"
+  zone         = "${var.GCP_PRIMARY_REGION}-b"
 
   boot_disk {
     initialize_params {
@@ -34,7 +34,7 @@ resource "google_compute_instance" "vm_instance_primary" {
 resource "google_compute_instance" "vm_instance_secondary" {
   name         = "vm-secondary-${var.environment}"
   machine_type = "e2-micro"
-  zone         = "${var.GCP_REGION_SECONDARY}-b"
+  zone         = "${var.GCP_SECONDARY_REGION}-b"
 
   boot_disk {
     initialize_params {

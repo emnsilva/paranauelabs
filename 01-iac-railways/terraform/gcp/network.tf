@@ -11,7 +11,7 @@ resource "google_compute_network" "vpc_network" {
 resource "google_compute_subnetwork" "subnet_primary" {
   name          = "subnet-primary-${var.environment}"
   ip_cidr_range = "10.0.1.0/24"
-  region        = var.GCP_REGION_PRIMARY
+  region        = var.GCP_PRIMARY_REGION
   network       = google_compute_network.vpc_network.id
 }
 
@@ -19,7 +19,7 @@ resource "google_compute_subnetwork" "subnet_primary" {
 resource "google_compute_subnetwork" "subnet_secondary" {
   name          = "subnet-secondary-${var.environment}"
   ip_cidr_range = "10.1.1.0/24"
-  region        = var.GCP_REGION_SECONDARY
+  region        = var.GCP_SECONDARY_REGION
   network       = google_compute_network.vpc_network.id
 }
 
