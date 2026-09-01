@@ -30,7 +30,6 @@ jobs:
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
       TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
-      # Variável maiúscula para bater com o código HCL
       TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
