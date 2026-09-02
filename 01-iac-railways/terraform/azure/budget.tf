@@ -10,10 +10,9 @@ resource "azurerm_consumption_budget_subscription" "paranauelabs" {
   amount     = 5
   time_grain = "Monthly"
 
-  time_period {
-    start_date = "2026-09-02T00:00s:00Z"
+    time_period {
+    start_date = "2026-09-02T00:00:00Z"
   }
-
   notification {
     enabled   = true
     threshold = 80.0
