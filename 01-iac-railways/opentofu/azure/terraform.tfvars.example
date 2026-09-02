@@ -1,0 +1,6 @@
+# Copie este arquivo para 'terraform.tfvars' e ajuste os valores se for rodar localmente.
+# No pipeline de CI/CD, o GitHub injeta essas variáveis automaticamente.
+
+environment           = "dev"
+AZURE_PRIMARY_REGION  = "eastus"
+AZURE_SECONDARY_REGION = "westus"

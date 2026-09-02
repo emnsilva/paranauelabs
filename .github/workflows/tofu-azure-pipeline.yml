@@ -1,0 +1,111 @@
+name: OpenTofu Pipeline (Azure)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Qual ambiente?'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action:
+        description: 'O que voce quer fazer?'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - destroy
+
+jobs:
+  validate:
+    if: ${{ github.event.inputs.action == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/opentofu/azure
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.12.6
+      - name: OpenTofu Init
+        run: tofu init
+      - name: OpenTofu Validate
+        run: tofu validate
+
+  plan:
+    needs: validate
+    if: ${{ github.event.inputs.action == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/opentofu/azure
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.12.6
+      - name: OpenTofu Init
+        run: tofu init
+      - name: OpenTofu Plan
+        run: tofu plan
+
+  apply:
+    needs: plan
+    if: ${{ github.event.inputs.action == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/opentofu/azure
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.12.6
+      - name: OpenTofu Init
+        run: tofu init
+      - name: OpenTofu Apply
+        run: tofu apply -auto-approve
+
+  destroy:
+    if: ${{ github.event.inputs.action == 'destroy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/opentofu/azure
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.12.6
+      - name: OpenTofu Init
+        run: tofu init
+      - name: OpenTofu Destroy
+        run: tofu destroy -auto-approve
