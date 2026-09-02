@@ -1,0 +1,110 @@
+name: IaC Master Pipeline (Multi-Cloud & Multi-Tool)
+
+on:
+  workflow_dispatch:
+    inputs:
+      cloud:
+        description: 'Qual Cloud?'
+        required: true
+        type: choice
+        options:
+          - aws
+          - azure
+          - gcp
+      tool:
+        description: 'Qual Ferramenta?'
+        required: true
+        type: choice
+        options:
+          - terraform
+          - opentofu
+      environment:
+        description: 'Qual Ambiente?'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action:
+        description: 'O que voce quer fazer?'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - destroy
+
+jobs:
+  iac-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        # A MÁGICA AQUI: Monta o caminho da pasta dinamicamente (ex: 01-iac-railways/terraform/aws)
+        working-directory: 01-iac-railways/${{ github.event.inputs.tool }}/${{ github.event.inputs.cloud }}
+    
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
+      
+      # Mapeando todas as variáveis de Workspace do GitHub para o job
+      AWS_TERRAFORM: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
+      AWS_TOFU: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
+      AZURE_TERRAFORM: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
+      AZURE_TOFU: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
+      GCP_TERRAFORM: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      GCP_TOFU: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Instala o Terraform ou OpenTofu baseado no dropdown
+      - name: Configurar Terraform
+        if: ${{ github.event.inputs.tool == 'terraform' }}
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.0
+
+      - name: Configurar OpenTofu
+        if: ${{ github.event.inputs.tool == 'opentofu' }}
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.12.6
+
+      # Define qual binário rodar e qual Workspace do TFC usar
+      - name: Set Dynamic Variables
+        run: |
+          # Define o comando base (terraform ou tofu)
+          if [ "${{ github.event.inputs.tool }}" == "terraform" ]; then
+            echo "IAC_CMD=terraform" >> $GITHUB_ENV
+          else
+            echo "IAC_CMD=tofu" >> $GITHUB_ENV
+          fi
+          
+          # Define o Workspace do TFC lendo a variável correta do GitHub
+          TOOL_UPPER=$(echo "${{ github.event.inputs.tool }}" | tr '[:lower:]' '[:upper:]')
+          CLOUD_UPPER=$(echo "${{ github.event.inputs.cloud }}" | tr '[:lower:]' '[:upper:]')
+          VAR_NAME="${CLOUD_UPPER}_${TOOL_UPPER}"
+          
+          echo "TF_WORKSPACE=${!VAR_NAME}" >> $GITHUB_ENV
+
+      # ---- CAMINHO DO DEPLOY ----
+      - name: Init
+        run: $IAC_CMD init
+
+      - name: Validate
+        if: ${{ github.event.inputs.action == 'deploy' }}
+        run: $IAC_CMD validate
+
+      - name: Plan
+        if: ${{ github.event.inputs.action == 'deploy' }}
+        run: $IAC_CMD plan
+
+      - name: Apply
+        if: ${{ github.event.inputs.action == 'deploy' }}
+        run: $IAC_CMD apply -auto-approve
+
+      # ---- CAMINHO DO DESTROY ----
+      - name: Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        run: $IAC_CMD destroy -auto-approve
