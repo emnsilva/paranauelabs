@@ -83,7 +83,7 @@ resource "azurerm_subnet_network_security_group_association" "web_primary" {
 # 2. REDE REGIÃO SECUNDÁRIA (DR)
 
 resource "azurerm_resource_group" "rg_secondary" {
-  name     = "rg-paranauelabs-secondary-${var.ENVIRONMENT}"
+  name     = "rg-paranauelabs-secondary-${var.environment}"
   location = var.AZURE_SECONDARY_REGION
 }
 

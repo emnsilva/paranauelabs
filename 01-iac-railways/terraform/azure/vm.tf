@@ -3,7 +3,7 @@
 
 # VM na Região PRIMÁRIA (Standard_B1s é a mais barata / FinOps)
 resource "azurerm_linux_virtual_machine" "vm_primary" {
-  name                            = "vm-primary-${var.ENVIRONMENT}"
+  name                            = "vm-primary-${var.environment}"
   resource_group_name             = azurerm_resource_group.rg_primary.name
   location                        = azurerm_resource_group.rg_primary.location
   size                            = "Standard_B1s"
@@ -40,7 +40,7 @@ resource "azurerm_linux_virtual_machine" "vm_primary" {
 
 # Network Interface Primária
 resource "azurerm_network_interface" "nic_primary" {
-  name                = "nic-primary-${var.ENVIRONMENT}"
+  name                = "nic-primary-${var.environment}"
   location            = azurerm_resource_group.rg_primary.location
   resource_group_name = azurerm_resource_group.rg_primary.name
 
@@ -53,7 +53,7 @@ resource "azurerm_network_interface" "nic_primary" {
 
 # VM na Região SECUNDÁRIA (DR)
 resource "azurerm_linux_virtual_machine" "vm_secondary" {
-  name                            = "vm-secondary-${var.ENVIRONMENT}"
+  name                            = "vm-secondary-${var.environment}"
   resource_group_name             = azurerm_resource_group.rg_secondary.name
   location                        = azurerm_resource_group.rg_secondary.location
   size                            = "Standard_B1s"
@@ -88,7 +88,7 @@ resource "azurerm_linux_virtual_machine" "vm_secondary" {
 }
 
 resource "azurerm_network_interface" "nic_secondary" {
-  name                = "nic-secondary-${var.ENVIRONMENT}"
+  name                = "nic-secondary-${var.environment}"
   location            = azurerm_resource_group.rg_secondary.location
   resource_group_name = azurerm_resource_group.rg_secondary.name
 
