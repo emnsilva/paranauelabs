@@ -1,0 +1,8 @@
+# Copie este arquivo para 'terraform.tfvars' e ajuste os valores se for rodar localmente.
+# No pipeline de CI/CD, o GitHub injeta essas variáveis automaticamente.
+
+ENVIRONMENT          = "dev"
+GCP_REGION_PRIMARY   = "southamerica-east1"
+GCP_REGION_SECONDARY = "us-east1"
+GCP_PROJECT       = "ID do projeto"
+BILLING_ACCOUNT_ID   = "XXXXXX-XXXXXX-XXXXXX"
