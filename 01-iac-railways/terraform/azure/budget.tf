@@ -11,7 +11,7 @@ resource "azurerm_consumption_budget_subscription" "paranauelabs" {
   time_grain = "Monthly"
 
     time_period {
-    start_date = "2026-09-02T00:00:00Z"
+    start_date = "2026-10-01T00:00:00Z"
   }
   notification {
     enabled   = true
