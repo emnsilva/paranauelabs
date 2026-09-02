@@ -1,4 +1,4 @@
-# s3.tf
+# storage.tf
 # Provisionamento de Armazenamento (Cloud Storage Bucket)
 
 # Bucket na Região Primária

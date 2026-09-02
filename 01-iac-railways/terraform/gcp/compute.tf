@@ -1,4 +1,4 @@
-# ec2.tf
+# compute.tf
 # Provisionamento de Computação (VM Instance)
 
 data "google_compute_image" "debian" {
