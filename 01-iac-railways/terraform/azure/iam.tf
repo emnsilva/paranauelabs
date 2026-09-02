@@ -18,14 +18,14 @@ resource "azurerm_user_assigned_identity" "vm_identity_secondary" {
 
 # Atribuição de papel (Role Assignment) - Least Privilege
 # Dá permissão para a VM escrever no Storage Account respectivo
-resource "azurerm_role_assignment" "vm_storage_primary" {
-  scope                = azurerm_storage_account.storage_primary.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_user_assigned_identity.vm_identity_primary.principal_id
-}
+# resource "azurerm_role_assignment" "vm_storage_primary" {
+#  scope                = azurerm_storage_account.storage_primary.id
+#  role_definition_name = "Storage Blob Data Contributor"
+#  principal_id         = azurerm_user_assigned_identity.vm_identity_primary.principal_id
+# }
 
-resource "azurerm_role_assignment" "vm_storage_secondary" {
-  scope                = azurerm_storage_account.storage_secondary.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_user_assigned_identity.vm_identity_secondary.principal_id
-}
+# resource "azurerm_role_assignment" "vm_storage_secondary" {
+#  scope                = azurerm_storage_account.storage_secondary.id
+#  role_definition_name = "Storage Blob Data Contributor"
+#  principal_id         = azurerm_user_assigned_identity.vm_identity_secondary.principal_id
+# }
