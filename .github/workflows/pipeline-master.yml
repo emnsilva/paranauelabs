@@ -68,12 +68,13 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.tool }}" == "terraform" ]; then
             echo "IAC_CMD=terraform" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TERRAFORM" >> $GITHUB_ENV
           else
             echo "IAC_CMD=tofu" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TOFU" >> $GITHUB_ENV
           fi
-          TOOL_UPPER=$(echo "${{ github.event.inputs.tool }}" | tr '[:lower:]' '[:upper:]')
           CLOUD_UPPER=$(echo "${{ github.event.inputs.cloud }}" | tr '[:lower:]' '[:upper:]')
-          VAR_NAME="${CLOUD_UPPER}_${TOOL_UPPER}"
+          VAR_NAME="${CLOUD_UPPER}_${TOOL_SHORT}"
           echo "TF_WORKSPACE=${!VAR_NAME}" >> $GITHUB_ENV
       - name: Init
         run: $IAC_CMD init
@@ -114,12 +115,13 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.tool }}" == "terraform" ]; then
             echo "IAC_CMD=terraform" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TERRAFORM" >> $GITHUB_ENV
           else
             echo "IAC_CMD=tofu" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TOFU" >> $GITHUB_ENV
           fi
-          TOOL_UPPER=$(echo "${{ github.event.inputs.tool }}" | tr '[:lower:]' '[:upper:]')
           CLOUD_UPPER=$(echo "${{ github.event.inputs.cloud }}" | tr '[:lower:]' '[:upper:]')
-          VAR_NAME="${CLOUD_UPPER}_${TOOL_UPPER}"
+          VAR_NAME="${CLOUD_UPPER}_${TOOL_SHORT}"
           echo "TF_WORKSPACE=${!VAR_NAME}" >> $GITHUB_ENV
       - name: Init
         run: $IAC_CMD init
@@ -160,12 +162,13 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.tool }}" == "terraform" ]; then
             echo "IAC_CMD=terraform" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TERRAFORM" >> $GITHUB_ENV
           else
             echo "IAC_CMD=tofu" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TOFU" >> $GITHUB_ENV
           fi
-          TOOL_UPPER=$(echo "${{ github.event.inputs.tool }}" | tr '[:lower:]' '[:upper:]')
           CLOUD_UPPER=$(echo "${{ github.event.inputs.cloud }}" | tr '[:lower:]' '[:upper:]')
-          VAR_NAME="${CLOUD_UPPER}_${TOOL_UPPER}"
+          VAR_NAME="${CLOUD_UPPER}_${TOOL_SHORT}"
           echo "TF_WORKSPACE=${!VAR_NAME}" >> $GITHUB_ENV
       - name: Init
         run: $IAC_CMD init
@@ -205,12 +208,13 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.tool }}" == "terraform" ]; then
             echo "IAC_CMD=terraform" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TERRAFORM" >> $GITHUB_ENV
           else
             echo "IAC_CMD=tofu" >> $GITHUB_ENV
+            echo "TOOL_SHORT=TOFU" >> $GITHUB_ENV
           fi
-          TOOL_UPPER=$(echo "${{ github.event.inputs.tool }}" | tr '[:lower:]' '[:upper:]')
           CLOUD_UPPER=$(echo "${{ github.event.inputs.cloud }}" | tr '[:lower:]' '[:upper:]')
-          VAR_NAME="${CLOUD_UPPER}_${TOOL_UPPER}"
+          VAR_NAME="${CLOUD_UPPER}_${TOOL_SHORT}"          
           echo "TF_WORKSPACE=${!VAR_NAME}" >> $GITHUB_ENV
       - name: Init
         run: $IAC_CMD init
