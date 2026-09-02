@@ -5,19 +5,19 @@
 # 1. REDE REGIÃO PRIMÁRIA
 
 resource "azurerm_resource_group" "rg_primary" {
-  name     = "rg-paranauelabs-primary-${var.ENVIRONMENT}"
+  name     = "rg-paranauelabs-primary-${var.environment}"
   location = var.AZURE_PRIMARY_REGION
 }
 
 resource "azurerm_virtual_network" "vnet_primary" {
-  name                = "vnet-primary-${var.ENVIRONMENT}"
+  name                = "vnet-primary-${var.environment}"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg_primary.location
   resource_group_name = azurerm_resource_group.rg_primary.name
 }
 
 resource "azurerm_subnet" "subnet_primary" {
-  name                 = "subnet-primary-${var.ENVIRONMENT}"
+  name                 = "subnet-primary-${var.environment}"
   resource_group_name  = azurerm_resource_group.rg_primary.name
   virtual_network_name = azurerm_virtual_network.vnet_primary.name
   address_prefixes     = ["10.0.1.0/24"]
@@ -25,7 +25,7 @@ resource "azurerm_subnet" "subnet_primary" {
 
 # Security Groups (Least Privilege)
 resource "azurerm_network_security_group" "nsg_web_primary" {
-  name                = "nsg-web-primary-${var.ENVIRONMENT}"
+  name                = "nsg-web-primary-${var.environment}"
   location            = azurerm_resource_group.rg_primary.location
   resource_group_name = azurerm_resource_group.rg_primary.name
 
@@ -55,7 +55,7 @@ resource "azurerm_network_security_group" "nsg_web_primary" {
 }
 
 resource "azurerm_network_security_group" "nsg_compute_primary" {
-  name                = "nsg-compute-primary-${var.ENVIRONMENT}"
+  name                = "nsg-compute-primary-${var.environment}"
   location            = azurerm_resource_group.rg_primary.location
   resource_group_name = azurerm_resource_group.rg_primary.name
 
@@ -88,21 +88,21 @@ resource "azurerm_resource_group" "rg_secondary" {
 }
 
 resource "azurerm_virtual_network" "vnet_secondary" {
-  name                = "vnet-secondary-${var.ENVIRONMENT}"
+  name                = "vnet-secondary-${var.environment}"
   address_space       = ["10.1.0.0/16"]
   location            = azurerm_resource_group.rg_secondary.location
   resource_group_name = azurerm_resource_group.rg_secondary.name
 }
 
 resource "azurerm_subnet" "subnet_secondary" {
-  name                 = "subnet-secondary-${var.ENVIRONMENT}"
+  name                 = "subnet-secondary-${var.environment}"
   resource_group_name  = azurerm_resource_group.rg_secondary.name
   virtual_network_name = azurerm_virtual_network.vnet_secondary.name
   address_prefixes     = ["10.1.1.0/24"]
 }
 
 resource "azurerm_network_security_group" "nsg_web_secondary" {
-  name                = "nsg-web-secondary-${var.ENVIRONMENT}"
+  name                = "nsg-web-secondary-${var.environment}"
   location            = azurerm_resource_group.rg_secondary.location
   resource_group_name = azurerm_resource_group.rg_secondary.name
 

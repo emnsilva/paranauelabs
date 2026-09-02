@@ -18,3 +18,9 @@ variable "AZURE_SECONDARY_REGION" {
   type        = string
   default     = "eastus"
 }
+
+variable "ARM_SUBSCRIPTION_ID" {
+  description = "ID da Assinatura do Azure (Subscription ID)."
+  type        = string
+  default     = "00000000-0000-0000-0000-000000000000" # Substitua pelo seu ID real se for rodar local
+}
