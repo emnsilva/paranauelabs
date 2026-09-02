@@ -1,9 +1,11 @@
 # budget.tf
-# Configura o Azure Cost Management Budget para monitorar custos.
+
+# Pega o ID completo da assinatura automaticamente
+data "azurerm_subscription" "current" {}
 
 resource "azurerm_consumption_budget_subscription" "paranauelabs" {
   name            = "ParanaueLabs-Monthly-Budget-${var.environment}"
-  subscription_id = var.ARM_SUBSCRIPTION_ID
+  subscription_id = data.azurerm_subscription.current.id
 
   amount     = 5
   time_grain = "Monthly"

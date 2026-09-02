@@ -6,7 +6,7 @@
 
 resource "azurerm_resource_group" "rg_primary" {
   name     = "rg-paranauelabs-primary-${var.environment}"
-  location = var.AZURE_PRIMARY_REGION
+  location = var.ARM_PRIMARY_REGION
 }
 
 resource "azurerm_virtual_network" "vnet_primary" {
@@ -84,7 +84,7 @@ resource "azurerm_subnet_network_security_group_association" "web_primary" {
 
 resource "azurerm_resource_group" "rg_secondary" {
   name     = "rg-paranauelabs-secondary-${var.environment}"
-  location = var.AZURE_SECONDARY_REGION
+  location = var.ARM_SECONDARY_REGION
 }
 
 resource "azurerm_virtual_network" "vnet_secondary" {
