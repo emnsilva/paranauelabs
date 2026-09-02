@@ -36,7 +36,7 @@ jobs:
       - name: Configurar OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: 1.16.2
+          tofu_version: 1.12.6
       - name: OpenTofu Init
         run: tofu init
       - name: OpenTofu Validate
@@ -59,7 +59,7 @@ jobs:
       - name: Configurar OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: 1.16.2
+          tofu_version: 1.12.6
       - name: OpenTofu Init
         run: tofu init
       - name: OpenTofu Plan
@@ -82,7 +82,7 @@ jobs:
       - name: Configurar OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: 1.16.2
+          tofu_version: 1.12.6
       - name: OpenTofu Init
         run: tofu init
       - name: OpenTofu Apply
@@ -104,7 +104,7 @@ jobs:
       - name: Configurar OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: 1.16.2
+          tofu_version: 1.12.6
       - name: OpenTofu Init
         run: tofu init
       - name: OpenTofu Destroy
