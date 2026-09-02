@@ -28,9 +28,7 @@ on:
           - destroy
 
 jobs:
-  # ---------------------------------------------------------
-  # CAIXINHA 1: VALIDATE
-  # ---------------------------------------------------------
+  # Validate
   validate:
     if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
@@ -63,9 +61,7 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-  # ---------------------------------------------------------
-  # CAIXINHA 2: PLAN
-  # ---------------------------------------------------------
+  # Plan
   plan:
     needs: validate
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -99,9 +95,7 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-  # ---------------------------------------------------------
-  # CAIXINHA 3: APPLY
-  # ---------------------------------------------------------
+  # Apply
   apply:
     needs: plan
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -135,9 +129,7 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
-  # ---------------------------------------------------------
-  # CAIXINHA 4: DESTROY
-  # ---------------------------------------------------------
+  # Destroy
   destroy:
     if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
