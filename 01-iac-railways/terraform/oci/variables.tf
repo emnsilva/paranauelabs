@@ -4,15 +4,32 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "OCI_REGION" {
-  description = "Região da Oracle Cloud (ex: sa-saopaulo-1)."
+variable "tenancy_ocid" {
+  description = "OCID da Tenancy da Oracle"
+  type        = string
+  sensitive   = true
+}
+
+variable "user_ocid" {
+  description = "OCID do User da Oracle"
+  type        = string
+  sensitive   = true
+}
+
+variable "fingerprint" {
+  description = "Fingerprint da API Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "private_key" {
+  description = "Chave privada da API Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "region" {
+  description = "Região da Oracle Cloud"
   type        = string
   default     = "sa-saopaulo-1"
 }
-
-# As variáveis abaixo NÃO têm 'default' porque são sensíveis e virão do TFC.
-# No TFC, crie-as com os nomes: OCI_TENANCY_OCID, OCI_USER_OCID, OCI_FINGERPRINT, OCI_PRIVATE_KEY
-variable "OCI_TENANCY_OCID" { type = string }
-variable "OCI_USER_OCID" { type = string }
-variable "OCI_FINGERPRINT" { type = string }
-variable "OCI_PRIVATE_KEY" { type = string }
