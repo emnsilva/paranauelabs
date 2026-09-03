@@ -11,6 +11,7 @@ on:
           - aws
           - azure
           - gcp
+          - oci
       environment:
         description: 'Qual Ambiente?'
         required: true
@@ -42,6 +43,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -55,13 +57,15 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: Terraform Init
         run: terraform init
       - name: Terraform Validate
         run: terraform validate
 
-  # Plan
+  #Plan
   plan:
     needs: validate
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -76,6 +80,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -89,13 +94,15 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: Terraform Init
         run: terraform init
       - name: Terraform Plan
         run: terraform plan
 
-  # Apply
+  #Apply
   apply:
     needs: plan
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -110,6 +117,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -123,6 +131,8 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: Terraform Init
         run: terraform init
@@ -143,6 +153,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -156,6 +167,8 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: Terraform Init
         run: terraform init
