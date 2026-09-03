@@ -2,13 +2,13 @@
 # que serão injetadas pelo Variable Set do Terraform Cloud.
 
 provider "oci" {
-  tenancy_ocid = var.TENANCY_OCID
-  user_ocid    = var.OCI_USER_OCID
-  fingerprint  = var.OCI_FINGERPRINT
-  private_key  = var.OCI_PRIVATE_KEY
-  region       = var.OCI_REGION
+  tenancy_ocid = var.tenancy_ocid
+  user_ocid    = var.user_ocid
+  fingerprint  = var.fingerprint
+  private_key  = var.private_key
+  region       = var.region
 }
 
 data "oci_identity_compartment" "lab_compartment" {
-  id = var.TENANCY_OCID
+  id = var.tenancy_ocid
 }
