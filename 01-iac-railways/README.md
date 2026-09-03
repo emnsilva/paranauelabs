@@ -93,7 +93,7 @@ O projeto é entregue de forma incremental, versionada com Git Tags e Releases n
  - Adaptação do código base para o OpenTofu (fork open-source).
  - Isolamento total de pipelines (Terraform vs OpenTofu) via GitHub Actions.
  - Backend do estado gerenciado pelo Terraform Cloud para ambas as ferramentas.
-3. [R3] Expansão Multi-Cloud Declarativa (v1.0.0-beta.2) 🟡 (Em Desenvolvimento)
+3. [R3] Expansão Multi-Cloud Declarativa (v1.0.0-beta.2) ✅
  - Expansão da matriz para Azure, GCP e Oracle Cloud.
  - Configuração de OIDC para os 3 novos provedores.
  - Provisionamento do baseline de Rede, Compute, Storage e IAM nas 4 clouds.

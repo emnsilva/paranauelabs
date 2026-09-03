@@ -35,5 +35,5 @@ Utilizando condicionais em Groovy para verificar os arquivos alterados no reposi
 1. 🚄 IaC Railways (Multi-Cloud Baseline)
 Criação de um baseline de infraestrutura (Rede, Compute, Storage, IAM) funcionalmente equivalente em uma matriz 3x4: 4 provedores de nuvem (AWS, Azure, GCP e Oracle) provisionados por 2 ferramentas distintas (Terraform e OpenTofu).
 
-**Status:** 🟡 Em Desenvolvimento (Fase 1 - MVP AWS)<br>
-**Stack:** Terraform Cloud, OpenTofu, GitLab CI/CD, OIDC.
+Status: ✅ Matriz 2x4 Concluída (R1 a R4) - Pipelines Mestres dinâmicos ativos
+Stack: Terraform, OpenTofu, GitHub Actions, Terraform Cloud, OIDC.
