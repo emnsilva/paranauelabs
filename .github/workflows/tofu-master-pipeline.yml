@@ -11,6 +11,7 @@ on:
           - aws
           - azure
           - gcp
+          - oci
       environment:
         description: 'Qual Ambiente?'
         required: true
@@ -28,9 +29,7 @@ on:
           - destroy
 
 jobs:
-  # ---------------------------------------------------------
-  # CAIXINHA 1: VALIDATE
-  # ---------------------------------------------------------
+  # Validate
   validate:
     if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
@@ -44,6 +43,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
     steps:
       - uses: actions/checkout@v4
       - name: Configurar OpenTofu
@@ -58,15 +58,15 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: OpenTofu Init
         run: tofu init
       - name: OpenTofu Validate
         run: tofu validate
 
-  # ---------------------------------------------------------
-  # CAIXINHA 2: PLAN
-  # ---------------------------------------------------------
+  # Plan
   plan:
     needs: validate
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -81,6 +81,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
     steps:
       - uses: actions/checkout@v4
       - name: Configurar OpenTofu
@@ -95,15 +96,15 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: OpenTofu Init
         run: tofu init
       - name: OpenTofu Plan
         run: tofu plan
 
-  # ---------------------------------------------------------
-  # CAIXINHA 3: APPLY
-  # ---------------------------------------------------------
+  # Apply
   apply:
     needs: plan
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -118,6 +119,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
     steps:
       - uses: actions/checkout@v4
       - name: Configurar OpenTofu
@@ -132,15 +134,15 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: OpenTofu Init
         run: tofu init
       - name: OpenTofu Apply
         run: tofu apply -auto-approve
 
-  # ---------------------------------------------------------
-  # CAIXINHA 4: DESTROY
-  # ---------------------------------------------------------
+  # Destroy
   destroy:
     if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
@@ -154,6 +156,7 @@ jobs:
       AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
       AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
       GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
     steps:
       - uses: actions/checkout@v4
       - name: Configurar OpenTofu
@@ -168,6 +171,8 @@ jobs:
             echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then
             echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then
+            echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
       - name: OpenTofu Init
         run: tofu init
