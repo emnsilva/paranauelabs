@@ -14,21 +14,21 @@ Adotar uma estrutura de diretórios baseada em "Raiz por Ferramenta, subdividida
 A implementação seguirá as seguintes diretrizes:
 
 1. **Estrutura de Diretórios:**
- - Laboratórios na raiz prefixados numericamente (ex: 01-iac-railways/).
- - Dentro do lab, diretórios raiz por ferramenta (terraform/, opentofu/), subdivididos por cloud (aws/, azure/, gcp/, oci/).
- - Workflows do GitHub Actions isolados na pasta .github/workflows/ na raiz do repositório.
+    - Laboratórios na raiz prefixados numericamente (ex: 01-iac-railways/).
+    - Dentro do lab, diretórios raiz por ferramenta (terraform/, opentofu/), subdivididos por cloud (aws/, azure/, gcp/, oci/).
+    - Workflows do GitHub Actions isolados na pasta .github/workflows/ na raiz do repositório.
 2. **Arquitetura de CI/CD (GitHub Actions):**
- - Workflows Separados: Criação de arquivos de workflow separados por ferramenta (ex: tfc-pipeline.yml, tofu-pipeline.yml).
- - Gatilhos Manuais (workflow_dispatch): Para garantir governança (GMUD) e evitar execuções acidentais, os pipelines são acionados manualmente via interface do GitHub, utilizando dropdowns (inputs) para selecionar o Ambiente (dev, staging, prod) e a Ação (deploy ou destroy).
- - Isolamento de Jobs: Utilização da instrução needs para criar dependências (Validate -> Plan -> Apply) e if condicional para separar o caminho de deploy do caminho de destroy.
+    - Workflows Separados: Criação de arquivos de workflow separados por ferramenta (ex: tfc-pipeline.yml, tofu-pipeline.yml).
+    - Gatilhos Manuais (workflow_dispatch): Para garantir governança (GMUD) e evitar execuções acidentais, os pipelines são acionados manualmente via interface do GitHub, utilizando dropdowns (inputs) para selecionar o Ambiente (dev, staging, prod) e a Ação (deploy ou destroy).
+    - Isolamento de Jobs: Utilização da instrução needs para criar dependências (Validate -> Plan -> Apply) e if condicional para separar o caminho de deploy do caminho de destroy.
 3. **Versionamento de Ferramenta:**
- -Fixar a versão 1.16.0 para o Terraform e 1.12.6 para o OpenTofu nas actions oficiais do GitHub (hashicorp/setup-terraform e opentofu/setup-opentofu).
+    - Fixar a versão 1.16.0 para o Terraform e 1.12.6 para o OpenTofu nas actions oficiais do GitHub (hashicorp/setup-terraform e opentofu/setup-opentofu).
 
 ## Justificativa
 1. **Isolamento de Responsabilidades:** A estrutura "Raiz por Ferramenta" agrupa paradigmas semelhantes (HCL), facilitando a navegação e manutenção do código.
 2. **Eficiência de CI/CD (FinOps):** A abordagem de workflows separados e gatilhos manuais via dropdowns garante que o usuário tenha controle total sobre o que e quando rodar, evitando o disparo de pipelines inteiros por um simples push de código (o que consumiria minutos do GitHub Actions desnecessariamente).
 3. **Manutenibilidade:** Separar o código de infraestrutura (.tf) do código de automação (.github/workflows/) evita que arquivos fiquem escondidos no meio de pastas de módulos, mantendo o repositório limpo.
-4. **UX do GitHub Actions:* O uso de workflow_dispatch com inputs (dropdowns) provê uma experiência visual excelente para o operador de DevOps, simulando o "botão de Play" manual que existe em outras ferramentas como o GitLab.
+4. **UX do GitHub Actions:** O uso de workflow_dispatch com inputs (dropdowns) provê uma experiência visual excelente para o operador de DevOps, simulando o "botão de Play" manual que existe em outras ferramentas como o GitLab.
 5. **Compatibilidade de Versão:** Fixar versões específicas garante que o código não quebre por alterações em releases futuros das ferramentas.
 
 ## Alternativas consideradas
