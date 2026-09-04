@@ -18,13 +18,13 @@ A implementação seguirá esta arquitetura: Cada ambiente de execução atuará
 - **AWS:** IAM Roles com Trust Policies que aceitam tokens OIDC dos três runners.
 - **Azure:** Federated Credentials nos App Registrations do Entra ID.
 - **GCP:** Workload Identity Pools e Providers mapeando identidades para Service Accounts.
-- **Oracle (OCI):** Configuração de Identity Provider no OCI IAM (Identity Domains) mapeando os tokens OIDC para Dynamic Groups e Federated Users.
+- **Oracle (OCI):** Devido à ausência de suporte nativo a OIDC no TFC, a autenticação ocorre via API Key injetada de forma segura pelo Variable Set do TFC).
  - **Padronização por "Issuer" e "Audience":** A configuração nas clouds será reutilizável, mudando apenas o emissor do token (app.terraform.io, gitlab.com, github.com) e as claims de filtro (repository, branch, environment).Princípio do Menor Privilégio: Cada identidade federada terá permissões restritas e específicas, limitadas ao escopo necessário para o provisionamento da infraestrutura.
 
 ## Justificativa
 - **Eliminação de Segredos de Longo Prazo:** OIDC elimina completamente a necessidade de armazenar Access Keys, Client Secrets ou chaves de Service Account nos ambientes de CI/CD (GitHub Actions), reduzindo drasticamente a superfície de ataque e o risco de vazamento.
 - **Tokens de Curta Duração:** Os tokens JWT emitidos via OIDC têm validade de minutos (tipicamente 5-15 minutos), limitando a janela de exploração em caso de comprometimento.
-- **Suporte Nativo das Clouds e Ferramentas:** AWS, Azure, GCP e Oracle suportam nativamente OIDC, assim como Terraform Cloud e GitHub Actions. Não há necessidade de soluções customizadas ou workarounds.
+- **Suporte Nativo das Clouds e Ferramentas:** AWS, Azure e GCP suportam nativamente OIDC com o Terraform Cloud e GitLab CI/CD, sem necessidade de soluções customizadas. Para a Oracle (OCI), devido à complexidade e ausência de suporte transparente via TFC, optou-se por uma exceção arquitetural utilizando API Key injetada de forma segura via Variable Sets do TFC.
 - **Governança e Auditoria:** Cada execução de deploy gera logs de auditoria claros nas clouds, mostrando qual identidade federada (qual runner, qual repositório, qual branch) assumiu qual role/permission, facilitando troubleshooting e compliance.
 - **Escalabilidade e Manutenção:** A rotação de credenciais é automática e gerenciada pelos provedores de identidade. Não há "toil" operacional de rotacionar chaves a cada 90 dias ou gerenciar múltiplas versões de segredos.
 
