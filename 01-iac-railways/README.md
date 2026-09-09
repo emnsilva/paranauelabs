@@ -1,5 +1,5 @@
 ## 🚄 IaC Railways
-Este laboratório tem como objetivo criar um baseline de infraestrutura como código (IaC) funcionalmente equivalente em uma matriz 2x4: 4 provedores de nuvem (AWS, Azure, GCP e Oracle) provisionados por 2 ferramentas distintas (Terraform e OpenTofu).<br>
+Este laboratório tem como objetivo criar um baseline de infraestrutura como código (IaC) funcionalmente equivalente em uma matriz 2x4: 4 provedores de nuvem (AWS, Azure, GCP e Oracle) provisionados por 2 ferramentas distintas (Terraform e OpenTofu).
 
 O objetivo é demonstrar proficiência multi-cloud, domínio de diferentes paradigmas de IaC (declarativo vs declarativo open-source) e práticas de segurança (Zero Trust, OIDC) e FinOps desde a concepção.
 

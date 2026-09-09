@@ -13,7 +13,7 @@ Cada cloud possui seu próprio diretório isolado contendo os arquivos .tf:
 ---
 
 ## ⚙️ Execução Local
-Embora a esteira de CI/CD (GitHub Actions/Jenkins + Terraform Cloud) seja a responsável oficial pelos deploys, você pode executar este código localmente para testes.
+Embora a esteira de CI/CD seja a responsável oficial pelos deploys, você pode executar este código localmente para testes.
 1. Renomeie o terraform.tfvars.example para terraform.tfvars e ajuste os valores.
 2. Autentique-se na cloud desejada via CLI (ex: aws sso login ou az login).
 3. Inicialize o backend (requer token do Terraform Cloud configurado):
