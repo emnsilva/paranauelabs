@@ -3,7 +3,7 @@
 # Nas duas regiões: Primária (sa-east-1) e Secundária (us-east-1)
 
 # FEATURE FLAGS (FinOps)
-# Esta variável será injetada pelo pipeline do GitLab no futuro.
+# Esta variável será injetada pelo pipeline do GitLab/GitHub no futuro.
 # Se ela for "true", a instância ganha a tag 'Schedule' e um 
 # EventBridge a desligará fora do horário comercial para economizar.
 variable "enable_auto_shutdown_compute" {
@@ -12,9 +12,8 @@ variable "enable_auto_shutdown_compute" {
   default     = false
 }
 
-# 1. COMPUTE REGIÃO PRIMÁRIA (sa-east-1)
+# 1. Região Primária (sa-east-1)
 # Busca a AMI mais recente do Amazon Linux 2023.
-# Usar data sources garante que o código não quebre quando a AWS atualiza a imagem do sistema operacional.
 data "aws_ami" "amazon_linux_primary" {
   provider    = aws.primary
   most_recent = true
@@ -36,10 +35,20 @@ resource "aws_instance" "compute_primary" {
   subnet_id                   = aws_subnet.private_primary.id
   associate_public_ip_address = false
 
+  # Segurança exigida pelo tfsec (IMDSv2 obrigatório)
+  metadata_options {
+    http_tokens = "required"
+  }
+
+  # Segurança exigida pelo tfsec (Criptografia de disco em repouso)
+  root_block_device {
+    encrypted = true
+  }
+
   # Segurança: Anexa o Security Group de Compute (que só permite SSH via SG Web).
   vpc_security_group_ids      = [aws_security_group.compute_primary.id]
 
-  # Governança: Anexa a IAM Role criada no Card 9 (Least Privilege).
+  # Governança: Anexa a IAM Role criada no iam.tf (Least Privilege).
   iam_instance_profile        = aws_iam_instance_profile.ec2_profile_primary.name
 
   # Script de inicialização (User Data). Apenas para validar que a máquina 
@@ -50,13 +59,13 @@ resource "aws_instance" "compute_primary" {
               EOF
 
   tags = {
-    Name     = "ec2-primary-${var.environment}"
+    Name     = "ec2-primary-${var.ENVIRONMENT}"
     # FinOps: Aplica a tag de scheduler condicionalmente via ternário do Terraform.
     Schedule = var.enable_auto_shutdown_compute ? "off-hours" : "always-on"
   }
 }
 
-# 2. COMPUTE REGIÃO SECUNDÁRIA (us-east-1)
+# 2. Região Secundária (us-east-1)
 # A mesma lógica, mas aplicada na região de Disaster Recovery (DR).
 # Busca a AMI mais recente na região secundária
 data "aws_ami" "amazon_linux_secondary" {
@@ -79,6 +88,16 @@ resource "aws_instance" "compute_secondary" {
   subnet_id                   = aws_subnet.private_secondary.id
   associate_public_ip_address = false
 
+  # Segurança exigida pelo tfsec (IMDSv2 obrigatório)
+  metadata_options {
+    http_tokens = "required"
+  }
+
+  # Segurança exigida pelo tfsec (Criptografia de disco em repouso)
+  root_block_device {
+    encrypted = true
+  }
+
   vpc_security_group_ids      = [aws_security_group.compute_secondary.id]
   iam_instance_profile        = aws_iam_instance_profile.ec2_profile_secondary.name
 
@@ -88,7 +107,7 @@ resource "aws_instance" "compute_secondary" {
               EOF
 
   tags = {
-    Name     = "ec2-secondary-${var.environment}"
+    Name     = "ec2-secondary-${var.ENVIRONMENT}"
     Schedule = var.enable_auto_shutdown_compute ? "off-hours" : "always-on"
   }
 }

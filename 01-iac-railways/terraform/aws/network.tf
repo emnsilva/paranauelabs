@@ -2,49 +2,41 @@
 # Provisionamento da Rede (VPC, Subnets, IGW, Route Tables, SGs)
 # Nas duas regiões: Primária (sa-east-1) e Secundária (us-east-1)
 
-# 1. REDE REGIÃO PRIMÁRIA (sa-east-1)
-# Cria a VPC principal. É a rede isolada onde todos os recursos da região primária vão ficar. 
-# O DNS está ativado para que os recursos internos consigam se comunicar por nomes.
+# 1. Região Primária (sa-east-1)
 resource "aws_vpc" "primary" {
+  # tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs : Laboratório sem faturamento ativo, Flow Logs geram custos.
   provider             = aws.primary
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpc-primary-${var.environment}"
+    Name = "vpc-primary-${var.ENVIRONMENT}"
   }
 }
 
-# Cria o Internet Gateway (IGW). É a "porta de saída" da VPC para a internet pública. 
-# Sem ele, os recursos não conseguem acessar a web nem ser acessados de fora.
 resource "aws_internet_gateway" "primary" {
   provider = aws.primary
   vpc_id   = aws_vpc.primary.id
 
   tags = {
-    Name = "igw-primary-${var.environment}"
+    Name = "igw-primary-${var.ENVIRONMENT}"
   }
 }
 
-# Cria a Subnet Pública. 
-# Recursos criados aqui (como Load Balancers ou Bastions) recebem um IP público automaticamente 
-# (map_public_ip_on_launch = true) para serem acessíveis pela internet.
 resource "aws_subnet" "public_primary" {
   provider                  = aws.primary
   vpc_id                    = aws_vpc.primary.id
   cidr_block                = "10.0.1.0/24"
   availability_zone         = "sa-east-1a"
+  # tfsec:ignore:aws-ec2-no-public-ip-subnet : Subnet pública proposital para futuros Load Balancers/Bastions.
   map_public_ip_on_launch   = true
 
   tags = {
-    Name = "subnet-public-primary-${var.environment}"
+    Name = "subnet-public-primary-${var.ENVIRONMENT}"
   }
 }
 
-# Cria a Subnet Privada. 
-# Recursos criados aqui (como a instância EC2 do nosso laboratório) NÃO recebem IP público, ficando isolados da 
-# internet direta. Isso aumenta drasticamente a segurança.
 resource "aws_subnet" "private_primary" {
   provider          = aws.primary
   vpc_id            = aws_vpc.primary.id
@@ -52,12 +44,10 @@ resource "aws_subnet" "private_primary" {
   availability_zone = "sa-east-1a"
 
   tags = {
-    Name = "subnet-private-primary-${var.environment}"
+    Name = "subnet-private-primary-${var.ENVIRONMENT}"
   }
 }
 
-# Cria a Tabela de Rotas (Route Table) pública. Ela diz à VPC: 
-# "Qualquer tráfego que não seja interno (0.0.0.0/0) deve ser enviado para o Internet Gateway".
 resource "aws_route_table" "public_primary" {
   provider = aws.primary
   vpc_id   = aws_vpc.primary.id
@@ -68,25 +58,20 @@ resource "aws_route_table" "public_primary" {
   }
 
   tags = {
-    Name = "rt-public-primary-${var.environment}"
+    Name = "rt-public-primary-${var.ENVIRONMENT}"
   }
 }
 
-# Associa a Tabela de Rotas pública à Subnet Pública. 
-# É isso que efetivamente "liga a internet" na subnet pública.
 resource "aws_route_table_association" "public_primary" {
   provider       = aws.primary
   subnet_id      = aws_subnet.public_primary.id
   route_table_id = aws_route_table.public_primary.id
 }
 
-# SECURITY GROUPS (Região Primária)
-# Seguindo o princípio de Least Privilege (ADR-002)
-# Security Group Web: Atua como a "porta da frente". Libera as portas 80 (HTTP) e 443 (HTTPS) para qualquer pessoa na internet acessar.
-# Saída (egress) totalmente liberada para a máquina poder baixar atualizações.
+# Security Groups Primária (Least Privilege)
 resource "aws_security_group" "web_primary" {
   provider    = aws.primary
-  name        = "secgroup-web-primary-${var.environment}"
+  name        = "web-sg-primary-${var.ENVIRONMENT}"
   description = "Permite trafego HTTP e HTTPS de entrada"
   vpc_id      = aws_vpc.primary.id
 
@@ -95,6 +80,7 @@ resource "aws_security_group" "web_primary" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
+    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTP público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -103,27 +89,27 @@ resource "aws_security_group" "web_primary" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
+    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTPS público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
+    description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "secgroup-web-primary-${var.environment}"
+    Name = "web-sg-primary-${var.ENVIRONMENT}"
   }
 }
 
-# Security Group Compute: Atua como a "porta dos fundos". É onde a EC2 vai ficar. 
-# NUNCA liberamos SSH (porta 22) para a internet (0.0.0.0/0).
-# Em vez disso, o SSH só é permitido se vier de um recurso que está dentro do Security Group Web. Isso é chamado de referência cruzada.
 resource "aws_security_group" "compute_primary" {
   provider    = aws.primary
-  name        = "secgroup-compute-primary-${var.environment}"
+  name        = "compute-sg-primary-${var.ENVIRONMENT}"
   description = "Permite SSH apenas do SG Web"
   vpc_id      = aws_vpc.primary.id
 
@@ -136,57 +122,57 @@ resource "aws_security_group" "compute_primary" {
   }
 
   egress {
+    description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "secgroup-compute-primary-${var.environment}"
+    Name = "compute-sg-primary-${var.ENVIRONMENT}"
   }
 }
 
-# 2. REDE REGIÃO SECUNDÁRIA (us-east-1)
-# A mesma lógica da primária, mas usando o provider "secondary" e blocos CIDR diferentes (10.1.x.x). 
-# Usar CIDRs diferentes é obrigatório caso queiramos conectar as duas VPCs no futuro (VPC Peering).
-
-# VPC Secundária
+# 2. Região Secundária (us-east-1)
+# A mesma lógica da primária, mas usando o provider "secondary" e
+# blocos CIDR diferentes (10.1.x.x). Usar CIDRs diferentes é obrigatório
+# caso queiramos conectar as duas VPCs no futuro (VPC Peering).
 resource "aws_vpc" "secondary" {
+  # tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs : Laboratório sem faturamento ativo, Flow Logs geram custos.
   provider             = aws.secondary
   cidr_block           = "10.1.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpc-secondary-${var.environment}"
+    Name = "vpc-secondary-${var.ENVIRONMENT}"
   }
 }
 
-# Internet Gateway Secundário
 resource "aws_internet_gateway" "secondary" {
   provider = aws.secondary
   vpc_id   = aws_vpc.secondary.id
 
   tags = {
-    Name = "igw-secondary-${var.environment}"
+    Name = "igw-secondary-${var.ENVIRONMENT}"
   }
 }
 
-# Subnet Pública Secundária
 resource "aws_subnet" "public_secondary" {
   provider                  = aws.secondary
   vpc_id                    = aws_vpc.secondary.id
   cidr_block                = "10.1.1.0/24"
   availability_zone         = "us-east-1a"
+  # tfsec:ignore:aws-ec2-no-public-ip-subnet : Subnet pública proposital para futuros Load Balancers/Bastions.
   map_public_ip_on_launch   = true
 
   tags = {
-    Name = "subnet-public-secondary-${var.environment}"
+    Name = "subnet-public-secondary-${var.ENVIRONMENT}"
   }
 }
 
-# Subnet Privada Secundária
 resource "aws_subnet" "private_secondary" {
   provider          = aws.secondary
   vpc_id            = aws_vpc.secondary.id
@@ -194,11 +180,10 @@ resource "aws_subnet" "private_secondary" {
   availability_zone = "us-east-1a"
 
   tags = {
-    Name = "subnet-private-secondary-${var.environment}"
+    Name = "subnet-private-secondary-${var.ENVIRONMENT}"
   }
 }
 
-# Tabela de Rotas Pública Secundária
 resource "aws_route_table" "public_secondary" {
   provider = aws.secondary
   vpc_id   = aws_vpc.secondary.id
@@ -209,21 +194,20 @@ resource "aws_route_table" "public_secondary" {
   }
 
   tags = {
-    Name = "rt-public-secondary-${var.environment}"
+    Name = "rt-public-secondary-${var.ENVIRONMENT}"
   }
 }
 
-# Associação da Tabela de Rotas Pública Secundária
 resource "aws_route_table_association" "public_secondary" {
   provider       = aws.secondary
   subnet_id      = aws_subnet.public_secondary.id
   route_table_id = aws_route_table.public_secondary.id
 }
 
-# Security Group Web Secundário
+# Security Groups Secundária (Least Privilege)
 resource "aws_security_group" "web_secondary" {
   provider    = aws.secondary
-  name        = "secgroup-web-secondary-${var.environment}"
+  name        = "web-sg-secondary-${var.ENVIRONMENT}"
   description = "Permite trafego HTTP e HTTPS de entrada"
   vpc_id      = aws_vpc.secondary.id
 
@@ -232,6 +216,7 @@ resource "aws_security_group" "web_secondary" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
+    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTP público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -240,25 +225,27 @@ resource "aws_security_group" "web_secondary" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
+    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTPS público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
+    description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "secgroup-web-secondary-${var.environment}"
+    Name = "web-sg-secondary-${var.ENVIRONMENT}"
   }
 }
 
-# Security Group Compute Secundário
 resource "aws_security_group" "compute_secondary" {
   provider    = aws.secondary
-  name        = "secgroup-compute-secondary-${var.environment}"
+  name        = "compute-sg-secondary-${var.ENVIRONMENT}"
   description = "Permite SSH apenas do SG Web"
   vpc_id      = aws_vpc.secondary.id
 
@@ -267,17 +254,19 @@ resource "aws_security_group" "compute_secondary" {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = [aws_security_group.web_secondary.id]
+    security_groups = [aws_security_group.web_secondary.id] # Referência direta!
   }
 
   egress {
+    description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "secgroup-compute-secondary-${var.environment}"
+    Name = "compute-sg-secondary-${var.ENVIRONMENT}"
   }
 }

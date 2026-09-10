@@ -1,10 +1,11 @@
 # s3.tf
-# Provisionamento de Armazenamento (Buckets S3) nas duas regiões: Primária (sa-east-1) e Secundária (us-east-1)
+# Provisionamento de Armazenamento (Buckets S3)
+# Nas duas regiões: Primária (sa-east-1) e Secundária (us-east-1)
 
-# 1. STORAGE REGIÃO PRIMÁRIA (sa-east-1)
+# 1. Região Primária (sa-east-1)
 # Cria o Bucket S3 na região primária.
-# O nome usa o bloco 'locals' definido no iam.tf para garantir que seja globalmente único e bata 100% com a IAM Policy.
 resource "aws_s3_bucket" "primary" {
+  # tfsec:ignore:aws-s3-enable-bucket-logging : Logging exige criação de um segundo bucket de logs, fora do escopo do laboratório.
   provider = aws.primary
   bucket   = local.s3_bucket_name_primary
 
@@ -14,8 +15,6 @@ resource "aws_s3_bucket" "primary" {
 }
 
 # Configuração de Segurança: Bloqueia TODO o acesso público ao bucket.
-# É a configuração padrão para qualquer bucket que contenha dados 
-# privados ou de infraestrutura.
 resource "aws_s3_bucket_public_access_block" "primary" {
   provider                = aws.primary
   bucket                  = aws_s3_bucket.primary.id
@@ -26,22 +25,19 @@ resource "aws_s3_bucket_public_access_block" "primary" {
 }
 
 # Configuração de Segurança: Ativa a criptografia em repouso (SSE-S3).
-# Garante que se alguém conseguir baixar um arquivo do bucket, o arquivo 
-# estará inutilizável sem a chave da AWS.
 resource "aws_s3_bucket_server_side_encryption_configuration" "primary" {
   provider = aws.primary
   bucket   = aws_s3_bucket.primary.id
 
   rule {
     apply_server_side_encryption_by_default {
+      # tfsec:ignore:aws-s3-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, SSE-S3 (gratuito) atende ao lab.
       sse_algorithm = "AES256"
     }
   }
 }
 
 # Governança: Ativa o versionamento do bucket.
-# Protege contra deleções acidentais, mantendo um histórico de 
-# versões de cada arquivo enviado.
 resource "aws_s3_bucket_versioning" "primary" {
   provider = aws.primary
   bucket   = aws_s3_bucket.primary.id
@@ -51,10 +47,10 @@ resource "aws_s3_bucket_versioning" "primary" {
   }
 }
 
-# 2. STORAGE REGIÃO SECUNDÁRIA (us-east-1)
+# 2. Região Secundária (us-east-1)
 # A mesma lógica de segurança, mas na região de DR.
-
 resource "aws_s3_bucket" "secondary" {
+  # tfsec:ignore:aws-s3-enable-bucket-logging : Logging exige criação de um segundo bucket de logs, fora do escopo do laboratório.
   provider = aws.secondary
   bucket   = local.s3_bucket_name_secondary
 
@@ -78,6 +74,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "secondary" {
 
   rule {
     apply_server_side_encryption_by_default {
+      # tfsec:ignore:aws-s3-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, SSE-S3 (gratuito) atende ao lab.
       sse_algorithm = "AES256"
     }
   }
