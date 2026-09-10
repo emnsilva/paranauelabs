@@ -61,16 +61,19 @@ jobs:
       - name: OpenTofu Validate
         run: tofu validate
 
-  tfsec:
+    tfsec:
+    needs: [validate] # Garante que o tfsec só roda se o validate passar
     if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 01-iac-railways/opentofu/${{ github.event.inputs.cloud }}
     steps:
       - uses: actions/checkout@v4
       - name: Run tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: 01-iac-railways/terraform/${{ github.event.inputs.cloud }} # Força o tfsec a escanear só a pasta certa
+
+  plan:
+    needs: [validate, tfsec] # O plan só roda se o validate e o tfsec passarem
 
   plan:
     needs: [validate, tfsec]
