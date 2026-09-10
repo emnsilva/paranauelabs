@@ -2,9 +2,9 @@
 # Provisionamento da Rede (VPC, Subnets, IGW, Route Tables, SGs)
 # Nas duas regiões: Primária (sa-east-1) e Secundária (us-east-1)
 
-# 1. Região Primária (sa-east-1)
+# 1. Rede Primária (sa-east-1)
+# tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs : Laboratório sem faturamento ativo, Flow Logs geram custos.
 resource "aws_vpc" "primary" {
-  # tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs : Laboratório sem faturamento ativo, Flow Logs geram custos.
   provider             = aws.primary
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -24,12 +24,12 @@ resource "aws_internet_gateway" "primary" {
   }
 }
 
+# tfsec:ignore:aws-ec2-no-public-ip-subnet : Subnet pública proposital para futuros Load Balancers/Bastions.
 resource "aws_subnet" "public_primary" {
   provider                  = aws.primary
   vpc_id                    = aws_vpc.primary.id
   cidr_block                = "10.0.1.0/24"
   availability_zone         = "sa-east-1a"
-  # tfsec:ignore:aws-ec2-no-public-ip-subnet : Subnet pública proposital para futuros Load Balancers/Bastions.
   map_public_ip_on_launch   = true
 
   tags = {
@@ -75,30 +75,30 @@ resource "aws_security_group" "web_primary" {
   description = "Permite trafego HTTP e HTTPS de entrada"
   vpc_id      = aws_vpc.primary.id
 
+  # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTP público ao servidor Web.
   ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTP público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTPS público ao servidor Web.
   ingress {
     description = "HTTPS"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTPS público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
   egress {
     description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -121,12 +121,12 @@ resource "aws_security_group" "compute_primary" {
     security_groups = [aws_security_group.web_primary.id] # Referência direta!
   }
 
+  # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
   egress {
     description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -136,11 +136,8 @@ resource "aws_security_group" "compute_primary" {
 }
 
 # 2. Região Secundária (us-east-1)
-# A mesma lógica da primária, mas usando o provider "secondary" e
-# blocos CIDR diferentes (10.1.x.x). Usar CIDRs diferentes é obrigatório
-# caso queiramos conectar as duas VPCs no futuro (VPC Peering).
+# tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs : Laboratório sem faturamento ativo, Flow Logs geram custos.
 resource "aws_vpc" "secondary" {
-  # tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs : Laboratório sem faturamento ativo, Flow Logs geram custos.
   provider             = aws.secondary
   cidr_block           = "10.1.0.0/16"
   enable_dns_support   = true
@@ -160,12 +157,12 @@ resource "aws_internet_gateway" "secondary" {
   }
 }
 
+# tfsec:ignore:aws-ec2-no-public-ip-subnet : Subnet pública proposital para futuros Load Balancers/Bastions.
 resource "aws_subnet" "public_secondary" {
   provider                  = aws.secondary
   vpc_id                    = aws_vpc.secondary.id
   cidr_block                = "10.1.1.0/24"
   availability_zone         = "us-east-1a"
-  # tfsec:ignore:aws-ec2-no-public-ip-subnet : Subnet pública proposital para futuros Load Balancers/Bastions.
   map_public_ip_on_launch   = true
 
   tags = {
@@ -211,30 +208,30 @@ resource "aws_security_group" "web_secondary" {
   description = "Permite trafego HTTP e HTTPS de entrada"
   vpc_id      = aws_vpc.secondary.id
 
+  # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTP público ao servidor Web.
   ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTP público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTPS público ao servidor Web.
   ingress {
     description = "HTTPS"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    # tfsec:ignore:aws-ec2-no-public-ingress-sgr : Laboratório requer acesso HTTPS público ao servidor Web.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
   egress {
     description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -257,12 +254,12 @@ resource "aws_security_group" "compute_secondary" {
     security_groups = [aws_security_group.web_secondary.id] # Referência direta!
   }
 
+  # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
   egress {
     description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    # tfsec:ignore:aws-ec2-no-public-egress-sgr : Laboratório permite saída de internet para updates da VM.
     cidr_blocks = ["0.0.0.0/0"]
   }
 
