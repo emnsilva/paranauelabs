@@ -11,7 +11,7 @@ resource "aws_vpc" "primary" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpc-primary-${var.ENVIRONMENT}"
+    Name = "vpc-primary-${var.environment}"
   }
 }
 
@@ -33,7 +33,7 @@ resource "aws_subnet" "public_primary" {
   map_public_ip_on_launch   = true
 
   tags = {
-    Name = "subnet-public-primary-${var.ENVIRONMENT}"
+    Name = "subnet-public-primary-${var.environment}"
   }
 }
 
@@ -44,7 +44,7 @@ resource "aws_subnet" "private_primary" {
   availability_zone = "sa-east-1a"
 
   tags = {
-    Name = "subnet-private-primary-${var.ENVIRONMENT}"
+    Name = "subnet-private-primary-${var.environment}"
   }
 }
 
@@ -58,7 +58,7 @@ resource "aws_route_table" "public_primary" {
   }
 
   tags = {
-    Name = "rt-public-primary-${var.ENVIRONMENT}"
+    Name = "rt-public-primary-${var.environment}"
   }
 }
 
@@ -71,7 +71,7 @@ resource "aws_route_table_association" "public_primary" {
 # Security Groups Primária (Least Privilege)
 resource "aws_security_group" "web_primary" {
   provider    = aws.primary
-  name        = "web-sg-primary-${var.ENVIRONMENT}"
+  name        = "web-sg-primary-${var.environment}"
   description = "Permite trafego HTTP e HTTPS de entrada"
   vpc_id      = aws_vpc.primary.id
 
@@ -103,13 +103,13 @@ resource "aws_security_group" "web_primary" {
   }
 
   tags = {
-    Name = "web-sg-primary-${var.ENVIRONMENT}"
+    Name = "web-sg-primary-${var.environment}"
   }
 }
 
 resource "aws_security_group" "compute_primary" {
   provider    = aws.primary
-  name        = "compute-sg-primary-${var.ENVIRONMENT}"
+  name        = "compute-sg-primary-${var.environment}"
   description = "Permite SSH apenas do SG Web"
   vpc_id      = aws_vpc.primary.id
 
@@ -131,7 +131,7 @@ resource "aws_security_group" "compute_primary" {
   }
 
   tags = {
-    Name = "compute-sg-primary-${var.ENVIRONMENT}"
+    Name = "compute-sg-primary-${var.environment}"
   }
 }
 
@@ -147,7 +147,7 @@ resource "aws_vpc" "secondary" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpc-secondary-${var.ENVIRONMENT}"
+    Name = "vpc-secondary-${var.environment}"
   }
 }
 
@@ -156,7 +156,7 @@ resource "aws_internet_gateway" "secondary" {
   vpc_id   = aws_vpc.secondary.id
 
   tags = {
-    Name = "igw-secondary-${var.ENVIRONMENT}"
+    Name = "igw-secondary-${var.environment}"
   }
 }
 
@@ -169,7 +169,7 @@ resource "aws_subnet" "public_secondary" {
   map_public_ip_on_launch   = true
 
   tags = {
-    Name = "subnet-public-secondary-${var.ENVIRONMENT}"
+    Name = "subnet-public-secondary-${var.environment}"
   }
 }
 
@@ -180,7 +180,7 @@ resource "aws_subnet" "private_secondary" {
   availability_zone = "us-east-1a"
 
   tags = {
-    Name = "subnet-private-secondary-${var.ENVIRONMENT}"
+    Name = "subnet-private-secondary-${var.environment}"
   }
 }
 
@@ -194,7 +194,7 @@ resource "aws_route_table" "public_secondary" {
   }
 
   tags = {
-    Name = "rt-public-secondary-${var.ENVIRONMENT}"
+    Name = "rt-public-secondary-${var.environment}"
   }
 }
 
@@ -207,7 +207,7 @@ resource "aws_route_table_association" "public_secondary" {
 # Security Groups Secundária (Least Privilege)
 resource "aws_security_group" "web_secondary" {
   provider    = aws.secondary
-  name        = "web-sg-secondary-${var.ENVIRONMENT}"
+  name        = "web-sg-secondary-${var.environment}"
   description = "Permite trafego HTTP e HTTPS de entrada"
   vpc_id      = aws_vpc.secondary.id
 
@@ -239,13 +239,13 @@ resource "aws_security_group" "web_secondary" {
   }
 
   tags = {
-    Name = "web-sg-secondary-${var.ENVIRONMENT}"
+    Name = "web-sg-secondary-${var.environment}"
   }
 }
 
 resource "aws_security_group" "compute_secondary" {
   provider    = aws.secondary
-  name        = "compute-sg-secondary-${var.ENVIRONMENT}"
+  name        = "compute-sg-secondary-${var.environment}"
   description = "Permite SSH apenas do SG Web"
   vpc_id      = aws_vpc.secondary.id
 
@@ -267,6 +267,6 @@ resource "aws_security_group" "compute_secondary" {
   }
 
   tags = {
-    Name = "compute-sg-secondary-${var.ENVIRONMENT}"
+    Name = "compute-sg-secondary-${var.environment}"
   }
 }
