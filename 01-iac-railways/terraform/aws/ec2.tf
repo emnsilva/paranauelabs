@@ -59,7 +59,7 @@ resource "aws_instance" "compute_primary" {
               EOF
 
   tags = {
-    Name     = "ec2-primary-${var.environments}"
+    Name     = "ec2-primary-${var.environment}"
     # FinOps: Aplica a tag de scheduler condicionalmente via ternário do Terraform.
     Schedule = var.enable_auto_shutdown_compute ? "off-hours" : "always-on"
   }

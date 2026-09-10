@@ -20,7 +20,7 @@ resource "aws_internet_gateway" "primary" {
   vpc_id   = aws_vpc.primary.id
 
   tags = {
-    Name = "igw-primary-${var.ENVIRONMENT}"
+    Name = "igw-primary-${var.environment}"
   }
 }
 
