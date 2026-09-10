@@ -1,4 +1,4 @@
-name: OpenTofu Master Pipeline (Multi-Cloud)
+name: Terraform Master Pipeline (Multi-Cloud)
 
 on:
   workflow_dispatch:
@@ -29,26 +29,26 @@ on:
           - destroy
 
 jobs:
+  # Validate
   validate:
     if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
-        working-directory: 01-iac-railways/opentofu/${{ github.event.inputs.cloud }}
+        working-directory: 01-iac-railways/terraform/${{ github.event.inputs.cloud }}
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
       TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
-      AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
-      AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
-      GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
-      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
+      AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
+      AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
+      GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
-      - name: Configurar OpenTofu
-        uses: opentofu/setup-opentofu@v1
+      - uses: hashicorp/setup-terraform@v3
         with:
-          tofu_version: 1.12.6
+          terraform_version: 1.16.0
       - name: Set Workspace
         run: |
           if [ "${{ github.event.inputs.cloud }}" == "aws" ]; then echo "TF_WORKSPACE=$AWS_WS" >> $GITHUB_ENV
@@ -56,13 +56,14 @@ jobs:
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
-      - name: OpenTofu Init
-        run: tofu init
-      - name: OpenTofu Validate
-        run: tofu validate
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Validate
+        run: terraform validate
 
-    tfsec:
-    needs: [validate] # Garante que o tfsec só roda se o validate passar
+  # TFSEC (Análise de Segurança)
+  tfsec:
+    needs: [validate]
     if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
     steps:
@@ -70,11 +71,9 @@ jobs:
       - name: Run tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
-          working_directory: 01-iac-railways/terraform/${{ github.event.inputs.cloud }} # Força o tfsec a escanear só a pasta certa
+          working_directory: 01-iac-railways/terraform/${{ github.event.inputs.cloud }}
 
-  plan:
-    needs: [validate, tfsec] # O plan só roda se o validate e o tfsec passarem
-
+  # Plan
   plan:
     needs: [validate, tfsec]
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -82,20 +81,19 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
-        working-directory: 01-iac-railways/opentofu/${{ github.event.inputs.cloud }}
+        working-directory: 01-iac-railways/terraform/${{ github.event.inputs.cloud }}
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
       TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
-      AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
-      AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
-      GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
-      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
+      AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
+      AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
+      GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
-      - name: Configurar OpenTofu
-        uses: opentofu/setup-opentofu@v1
+      - uses: hashicorp/setup-terraform@v3
         with:
-          tofu_version: 1.12.6
+          terraform_version: 1.16.0
       - name: Set Workspace
         run: |
           if [ "${{ github.event.inputs.cloud }}" == "aws" ]; then echo "TF_WORKSPACE=$AWS_WS" >> $GITHUB_ENV
@@ -103,11 +101,12 @@ jobs:
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
-      - name: OpenTofu Init
-        run: tofu init
-      - name: OpenTofu Plan
-        run: tofu plan
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Plan
+        run: terraform plan
 
+  # Apply
   apply:
     needs: plan
     if: ${{ github.event.inputs.action == 'deploy' }}
@@ -115,20 +114,19 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
-        working-directory: 01-iac-railways/opentofu/${{ github.event.inputs.cloud }}
+        working-directory: 01-iac-railways/terraform/${{ github.event.inputs.cloud }}
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
       TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
-      AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
-      AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
-      GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
-      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
+      AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
+      AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
+      GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
-      - name: Configurar OpenTofu
-        uses: opentofu/setup-opentofu@v1
+      - uses: hashicorp/setup-terraform@v3
         with:
-          tofu_version: 1.12.6
+          terraform_version: 1.16.0
       - name: Set Workspace
         run: |
           if [ "${{ github.event.inputs.cloud }}" == "aws" ]; then echo "TF_WORKSPACE=$AWS_WS" >> $GITHUB_ENV
@@ -136,31 +134,31 @@ jobs:
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
-      - name: OpenTofu Init
-        run: tofu init
-      - name: OpenTofu Apply
-        run: tofu apply -auto-approve
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
+  # Destroy
   destroy:
     if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
-        working-directory: 01-iac-railways/opentofu/${{ github.event.inputs.cloud }}
+        working-directory: 01-iac-railways/terraform/${{ github.event.inputs.cloud }}
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
       TF_VAR_ENVIRONMENT: ${{ github.event.inputs.environment }}
-      AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
-      AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
-      GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
-      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
+      AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
+      AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
+      GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
     steps:
       - uses: actions/checkout@v4
-      - name: Configurar OpenTofu
-        uses: opentofu/setup-opentofu@v1
+      - uses: hashicorp/setup-terraform@v3
         with:
-          tofu_version: 1.12.6
+          terraform_version: 1.16.0
       - name: Set Workspace
         run: |
           if [ "${{ github.event.inputs.cloud }}" == "aws" ]; then echo "TF_WORKSPACE=$AWS_WS" >> $GITHUB_ENV
@@ -168,7 +166,7 @@ jobs:
           elif [ "${{ github.event.inputs.cloud }}" == "gcp" ]; then echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
           elif [ "${{ github.event.inputs.cloud }}" == "oci" ]; then echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
           fi
-      - name: OpenTofu Init
-        run: tofu init
-      - name: OpenTofu Destroy
-        run: tofu destroy -auto-approve
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
