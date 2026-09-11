@@ -1,7 +1,7 @@
 # storage.tf
 # Provisionamento de Armazenamento (Cloud Storage Bucket)
 
-# Bucket na Região Primária
+# tfsec:ignore:google-storage-bucket-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, default do Google atende ao lab.
 resource "google_storage_bucket" "bucket_primary" {
   name          = "paranauelabs-iac-railways-${var.environment}-gcp-primary"
   location      = lower(var.GCP_PRIMARY_REGION)
@@ -13,7 +13,7 @@ resource "google_storage_bucket" "bucket_primary" {
   }
 }
 
-# Bucket na Região Secundária
+# tfsec:ignore:google-storage-bucket-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, default do Google atende ao lab.
 resource "google_storage_bucket" "bucket_secondary" {
   name          = "paranauelabs-iac-railways-${var.environment}-gcp-secondary"
   location      = lower(var.GCP_SECONDARY_REGION)
