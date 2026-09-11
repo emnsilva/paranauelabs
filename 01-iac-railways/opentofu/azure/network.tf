@@ -2,8 +2,7 @@
 # Provisionamento da Rede (VNet, Subnets e NSGs)
 # Nas duas regiões: Primária e Secundária (DR)
 
-# 1. REDE REGIÃO PRIMÁRIA
-
+# 1. Região Primária
 resource "azurerm_resource_group" "rg_primary" {
   name     = "rg-paranauelabs-primary-${var.environment}"
   location = var.ARM_PRIMARY_REGION
@@ -29,6 +28,7 @@ resource "azurerm_network_security_group" "nsg_web_primary" {
   location            = azurerm_resource_group.rg_primary.location
   resource_group_name = azurerm_resource_group.rg_primary.name
 
+  # tfsec:ignore:azure-network-no-public-ingress : Laboratório requer acesso HTTP público ao servidor Web.
   security_rule {
     name                       = "AllowHTTP"
     priority                   = 100
@@ -41,6 +41,7 @@ resource "azurerm_network_security_group" "nsg_web_primary" {
     destination_address_prefix = "*"
   }
 
+  # tfsec:ignore:azure-network-no-public-ingress : Laboratório requer acesso HTTPS público ao servidor Web.
   security_rule {
     name                       = "AllowHTTPS"
     priority                   = 110
@@ -80,8 +81,7 @@ resource "azurerm_subnet_network_security_group_association" "web_primary" {
   network_security_group_id = azurerm_network_security_group.nsg_web_primary.id
 }
 
-# 2. REDE REGIÃO SECUNDÁRIA (DR)
-
+# 2. Região Secundária (DR)
 resource "azurerm_resource_group" "rg_secondary" {
   name     = "rg-paranauelabs-secondary-${var.environment}"
   location = var.ARM_SECONDARY_REGION
@@ -106,6 +106,7 @@ resource "azurerm_network_security_group" "nsg_web_secondary" {
   location            = azurerm_resource_group.rg_secondary.location
   resource_group_name = azurerm_resource_group.rg_secondary.name
 
+  # tfsec:ignore:azure-network-no-public-ingress : Laboratório requer acesso HTTP público ao servidor Web.
   security_rule {
     name                       = "AllowHTTP"
     priority                   = 100

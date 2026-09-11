@@ -7,7 +7,7 @@ resource "google_compute_network" "vpc_network" {
   auto_create_subnetworks = false
 }
 
-# Subnet na Região PRIMÁRIA
+# tfsec:ignore:google-compute-enable-vpc-flow-logs : Laboratório sem faturamento ativo, Flow Logs geram custos.
 resource "google_compute_subnetwork" "subnet_primary" {
   name          = "subnet-primary-${var.environment}"
   ip_cidr_range = "10.0.1.0/24"
@@ -15,7 +15,7 @@ resource "google_compute_subnetwork" "subnet_primary" {
   network       = google_compute_network.vpc_network.id
 }
 
-# Subnet na Região SECUNDÁRIA (DR)
+# tfsec:ignore:google-compute-enable-vpc-flow-logs : Laboratório sem faturamento ativo, Flow Logs geram custos.
 resource "google_compute_subnetwork" "subnet_secondary" {
   name          = "subnet-secondary-${var.environment}"
   ip_cidr_range = "10.1.1.0/24"
@@ -23,10 +23,8 @@ resource "google_compute_subnetwork" "subnet_secondary" {
   network       = google_compute_network.vpc_network.id
 }
 
-
-# Regras de Firewall
-
-# Libera HTTP e HTTPS para a internet
+# FIREWALL RULES (São globais, valem para as duas regiões)
+# tfsec:ignore:google-compute-no-public-ingress : Laboratório requer acesso HTTP/HTTPS público ao servidor Web.
 resource "google_compute_firewall" "web_rules" {
   name    = "fw-web-${var.environment}"
   network = google_compute_network.vpc_network.name
@@ -40,7 +38,6 @@ resource "google_compute_firewall" "web_rules" {
   target_tags   = ["web"]
 }
 
-# Libera SSH apenas para instâncias com a tag "web"
 resource "google_compute_firewall" "ssh_internal" {
   name    = "fw-ssh-internal-${var.environment}"
   network = google_compute_network.vpc_network.name

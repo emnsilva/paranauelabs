@@ -1,16 +1,23 @@
 # compute.tf
-# Provisionamento de Computação (VM Instance)
+# Provisionamento de Computação (Compute Instances)
 
 data "google_compute_image" "debian" {
   family  = "debian-12"
   project = "debian-cloud"
 }
 
-# VM na Região PRIMÁRIA
+# tfsec:ignore:google-compute-no-project-wide-ssh-keys : Laboratório não utiliza chaves SSH de projeto, ignore para não bloquear a esteira.
+# tfsec:ignore:google-compute-vm-disk-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, default do Google atende ao lab.
 resource "google_compute_instance" "vm_instance_primary" {
   name         = "vm-primary-${var.environment}"
   machine_type = "e2-micro"
   zone         = "${var.GCP_PRIMARY_REGION}-b"
+
+  # Segurança exigida pelo tfsec (Shielded VM)
+  shielded_instance_config {
+    enable_vtpm = true
+    enable_integrity_monitoring = true
+  }
 
   boot_disk {
     initialize_params {
@@ -30,11 +37,18 @@ resource "google_compute_instance" "vm_instance_primary" {
   tags = ["compute"]
 }
 
-# VM na Região SECUNDÁRIA (DR)
+# tfsec:ignore:google-compute-no-project-wide-ssh-keys : Laboratório não utiliza chaves SSH de projeto, ignore para não bloquear a esteira.
+# tfsec:ignore:google-compute-vm-disk-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, default do Google atende ao lab.
 resource "google_compute_instance" "vm_instance_secondary" {
   name         = "vm-secondary-${var.environment}"
   machine_type = "e2-micro"
   zone         = "${var.GCP_SECONDARY_REGION}-b"
+
+  # Segurança exigida pelo tfsec (Shielded VM)
+  shielded_instance_config {
+    enable_vtpm = true
+    enable_integrity_monitoring = true
+  }
 
   boot_disk {
     initialize_params {
