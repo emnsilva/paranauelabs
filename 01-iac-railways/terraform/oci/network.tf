@@ -1,4 +1,7 @@
-# VCN (Virtual Cloud Network)
+# network.tf
+# Provisionamento da Rede (VCN, Subnets e Security Lists)
+
+# VCN (Virtual Cloud Network) - Equivalente à VPC da AWS
 resource "oci_core_vcn" "lab_vcn" {
   compartment_id = data.oci_identity_compartment.lab_compartment.id
   display_name   = "vcn-${var.environment}"
@@ -19,7 +22,7 @@ resource "oci_core_security_list" "lab_sl" {
   vcn_id         = oci_core_vcn.lab_vcn.id
   display_name   = "sl-${var.environment}"
 
-  # Libera HTTP
+  # tfsec:ignore:oci-core-no-public-ingress : Laboratório requer acesso HTTP público ao servidor Web.
   ingress_security_rules {
     source   = "0.0.0.0/0"
     protocol = "6"
