@@ -1,0 +1,59 @@
+name: OpenTofu Drift Audit (Cron)
+
+on:
+  schedule:
+    # Roda todos os dias à 04:00 AM (Horário de Brasília / 07:00 UTC) - 1h após o Terraform para não estourar limites do TFC
+    - cron: "0 7 * * *"
+  workflow_dispatch: # Permite rodar manualmente para testar
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, staging, prod]
+        cloud: [aws, azure, gcp, oci]
+        
+    environment: ${{ matrix.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/opentofu/${{ matrix.cloud }}
+        
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_VAR_ENVIRONMENT: ${{ matrix.environment }}
+      AWS_WS: ${{ vars.TF_WORKSPACE_TOFU_AWS }}
+      AZURE_WS: ${{ vars.TF_WORKSPACE_TOFU_AZURE }}
+      GCP_WS: ${{ vars.TF_WORKSPACE_TOFU_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TOFU_OCI }}
+      
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.12.6
+          
+      - name: Set Workspace
+        run: |
+          if [ "${{ matrix.cloud }}" == "aws" ]; then echo "TF_WORKSPACE=$AWS_WS" >> $GITHUB_ENV
+          elif [ "${{ matrix.cloud }}" == "azure" ]; then echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
+          elif [ "${{ matrix.cloud }}" == "gcp" ]; then echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ matrix.cloud }}" == "oci" ]; then echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
+          fi
+          
+      - name: OpenTofu Init
+        run: tofu init
+        
+      - name: OpenTofu Plan (Drift Check)
+        id: plan
+        run: tofu plan -detailed-exitcode
+        continue-on-error: true
+        
+      - name: Alert on Drift
+        if: steps.plan.outcome == 'failure'
+        run: |
+          echo "🚨 DRIFT DETECTED em ${{ matrix.cloud }} - ${{ matrix.environment }} 🚨"
+          echo "A infraestrutura na nuvem difere do código versionado no Git!"
+          exit 1

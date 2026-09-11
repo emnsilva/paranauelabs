@@ -1,0 +1,58 @@
+name: Terraform Drift Audit (Cron)
+
+on:
+  schedule:
+    # Roda todos os dias à 03:00 AM (Horário de Brasília / 06:00 UTC)
+    - cron: "0 6 * * *"
+  workflow_dispatch: # Permite rodar manualmente para testar
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # Se a AWS der drift, ainda verifica o Azure, GCP e OCI
+      matrix:
+        environment: [dev, staging, prod]
+        cloud: [aws, azure, gcp, oci]
+        
+    environment: ${{ matrix.environment }}
+    defaults:
+      run:
+        working-directory: 01-iac-railways/terraform/${{ matrix.cloud }}
+        
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN_app_terraform_io }}
+      TF_VAR_ENVIRONMENT: ${{ matrix.environment }}
+      AWS_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AWS }}
+      AZURE_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_AZURE }}
+      GCP_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_GCP }}
+      OCI_WS: ${{ vars.TF_WORKSPACE_TERRAFORM_OCI }}
+      
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.0
+          
+      - name: Set Workspace
+        run: |
+          if [ "${{ matrix.cloud }}" == "aws" ]; then echo "TF_WORKSPACE=$AWS_WS" >> $GITHUB_ENV
+          elif [ "${{ matrix.cloud }}" == "azure" ]; then echo "TF_WORKSPACE=$AZURE_WS" >> $GITHUB_ENV
+          elif [ "${{ matrix.cloud }}" == "gcp" ]; then echo "TF_WORKSPACE=$GCP_WS" >> $GITHUB_ENV
+          elif [ "${{ matrix.cloud }}" == "oci" ]; then echo "TF_WORKSPACE=$OCI_WS" >> $GITHUB_ENV
+          fi
+          
+      - name: Terraform Init
+        run: terraform init
+        
+      - name: Terraform Plan (Drift Check)
+        id: plan
+        run: terraform plan -detailed-exitcode
+        continue-on-error: true # Não falha a esteira imediatamente, deixa o próximo step decidir
+        
+      - name: Alert on Drift
+        if: steps.plan.outcome == 'failure'
+        run: |
+          echo "🚨 DRIFT DETECTED em ${{ matrix.cloud }} - ${{ matrix.environment }} 🚨"
+          echo "A infraestrutura na nuvem difere do código versionado no Git!"
+          exit 1 # Aqui sim, falha a esteira para gerar o alerta vermelho
