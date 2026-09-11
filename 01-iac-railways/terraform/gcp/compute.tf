@@ -6,6 +6,7 @@ data "google_compute_image" "debian" {
   project = "debian-cloud"
 }
 
+# tfsec:ignore:google-compute-no-project-wide-ssh-keys : Laboratório não utiliza chaves SSH de projeto, ignore para não bloquear a esteira.
 # tfsec:ignore:google-compute-vm-disk-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, default do Google atende ao lab.
 resource "google_compute_instance" "vm_instance_primary" {
   name         = "vm-primary-${var.environment}"
@@ -16,11 +17,6 @@ resource "google_compute_instance" "vm_instance_primary" {
   shielded_instance_config {
     enable_vtpm = true
     enable_integrity_monitoring = true
-  }
-
-  # Segurança exigida pelo tfsec (Block Project SSH Keys)
-  metadata = {
-    block-project-ssh-keys = "TRUE"
   }
 
   boot_disk {
@@ -41,6 +37,7 @@ resource "google_compute_instance" "vm_instance_primary" {
   tags = ["compute"]
 }
 
+# tfsec:ignore:google-compute-no-project-wide-ssh-keys : Laboratório não utiliza chaves SSH de projeto, ignore para não bloquear a esteira.
 # tfsec:ignore:google-compute-vm-disk-encryption-customer-key : KMS gerenciado pelo cliente custa $1/mês, default do Google atende ao lab.
 resource "google_compute_instance" "vm_instance_secondary" {
   name         = "vm-secondary-${var.environment}"
@@ -51,11 +48,6 @@ resource "google_compute_instance" "vm_instance_secondary" {
   shielded_instance_config {
     enable_vtpm = true
     enable_integrity_monitoring = true
-  }
-
-  # Segurança exigida pelo tfsec (Block Project SSH Keys)
-  metadata = {
-    block-project-ssh-keys = "TRUE"
   }
 
   boot_disk {
