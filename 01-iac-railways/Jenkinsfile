@@ -18,7 +18,7 @@ pipeline {
     
     stages {
         
-        // Prepare  (Configura o Workspace dinamicamente)
+        // Prepare (Configura o Workspace dinamicamente)
         stage('Prepare') {
             steps {
                 script {
@@ -31,18 +31,19 @@ pipeline {
             }
         }
         
-        // Validate
-        stage('Validate') {
+        // Validate & SAST (Inclui tfsec)
+        stage('Validate & SAST') {
             when { expression { params.ACTION == 'deploy' } }
             steps {
                 dir("${WORKSPACE_DIR}") {
                     sh 'terraform fmt -recursive'
                     sh 'terraform init -backend=false'
                     sh 'terraform validate'
+                    sh 'tfsec .' // Roda a análise de segurança
                 }
             }
         }
-        
+
         // Plan
         stage('Plan') {
             when { expression { params.ACTION == 'deploy' } }
