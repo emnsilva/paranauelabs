@@ -1,0 +1,58 @@
+// Arquivo: 01-iac-railways/Jenkinsfile.drift
+// Pipeline de Auditoria de Drift (Continuous Compliance)
+
+pipeline {
+    agent any
+    
+    environment {
+        TF_TOKEN_app_terraform_io = credentials('tf-token-terraform-cloud')
+    }
+    
+    stages {
+        stage('Drift Audit Matrix') {
+            matrix {
+                axes {
+                    axis {
+                        name 'CLOUD'
+                        values 'aws', 'azure', 'gcp', 'oci'
+                    }
+                    axis {
+                        name 'ENVIRONMENT'
+                        values 'dev', 'staging', 'prod'
+                    }
+                }
+                
+                stages {
+                    stage('Check Drift') {
+                        steps {
+                            dir("01-iac-railways/terraform/${CLOUD}") {
+                                script {
+                                    // Configura o Workspace dinamicamente
+                                    def wsMap = [aws: 'aws_tfc', azure: 'azure_tfc', gcp: 'gcp_tfc', oci: 'oci_tfc']
+                                    env.TF_WORKSPACE = "${ENVIRONMENT}_${wsMap[CLOUD]}"
+                                    env.TF_VAR_ENVIRONMENT = "${ENVIRONMENT}"
+                                }
+                                
+                                sh 'terraform init'
+                                
+                                // Roda o plan com detailed-exitcode
+                                // Exit 0 = Sem drift | Exit 2 = Drift detectado
+                                script {
+                                    def exitCode = sh(script: 'terraform plan -detailed-exitcode', returnStatus: true)
+                                    if (exitCode == 2) {
+                                        echo "🚨 DRIFT DETECTADO em ${CLOUD} - ${ENVIRONMENT} 🚨"
+                                        currentBuild.result = 'FAILURE' // Marca a build como falha (vermelho) para gerar alerta
+                                    } else if (exitCode != 0) {
+                                        error("Erro ao executar o terraform plan.")
+                                    } else {
+                                        echo "✅ Sem drift em ${CLOUD} - ${ENVIRONMENT}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

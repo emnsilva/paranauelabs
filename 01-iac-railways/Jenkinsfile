@@ -1,16 +1,14 @@
-// Arquivo: 01-iac-railways/Jenkinsfile
-// Pipeline Mestre do Laboratório IaC Railways
-
 pipeline {
     agent any
     
     environment {
         TF_TOKEN_app_terraform_io = credentials('tf-token-terraform-cloud')
         TF_VAR_ENVIRONMENT = "${params.ENVIRONMENT}"
-        WORKSPACE_DIR = "01-iac-railways/terraform/${params.CLOUD}"
+        WORKSPACE_DIR = "01-iac-railways/${params.TOOL}/${params.CLOUD}"
     }
     
     parameters {
+        choice(name: 'TOOL', choices: ['terraform', 'opentofu'], description: 'Qual Ferramenta?')
         choice(name: 'CLOUD', choices: ['aws', 'azure', 'gcp', 'oci'], description: 'Qual Cloud?')
         choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Qual Ambiente?')
         choice(name: 'ACTION', choices: ['deploy', 'destroy'], description: 'O que voce quer fazer?')
@@ -18,50 +16,56 @@ pipeline {
     
     stages {
         
-        // Prepare (Configura o Workspace dinamicamente)
+        // Prepare
         stage('Prepare') {
             steps {
                 script {
-                    def wsMap = [aws: 'dev_aws_tfc', azure: 'dev_azure_tfc', gcp: 'dev_gcp_tfc', oci: 'dev_oci_tfc']
-                    if (params.ENVIRONMENT != 'dev') {
-                        wsMap[params.CLOUD] = wsMap[params.CLOUD].replace('dev', params.ENVIRONMENT)
+                    if (params.TOOL == 'terraform') {
+                        env.IAC_CMD = 'terraform'
+                        def wsMap = [aws: 'dev_aws_tfc', azure: 'dev_azure_tfc', gcp: 'dev_gcp_tfc', oci: 'dev_oci_tfc']
+                        if (params.ENVIRONMENT != 'dev') { wsMap[params.CLOUD] = wsMap[params.CLOUD].replace('dev', params.ENVIRONMENT) }
+                        env.TF_WORKSPACE = wsMap[params.CLOUD]
+                    } else {
+                        env.IAC_CMD = 'tofu'
+                        def wsMap = [aws: 'dev_aws_tofu', azure: 'dev_azure_tofu', gcp: 'dev_gcp_tofu', oci: 'dev_oci_tofu']
+                        if (params.ENVIRONMENT != 'dev') { wsMap[params.CLOUD] = wsMap[params.CLOUD].replace('dev', params.ENVIRONMENT) }
+                        env.TF_WORKSPACE = wsMap[params.CLOUD]
                     }
-                    env.TF_WORKSPACE = wsMap[params.CLOUD]
                 }
             }
         }
         
-        // Validate & SAST (Inclui tfsec)
+        // Validate & SAST
         stage('Validate & SAST') {
             when { expression { params.ACTION == 'deploy' } }
             steps {
                 dir("${WORKSPACE_DIR}") {
-                    sh 'terraform fmt -recursive'
-                    sh 'terraform init -backend=false'
-                    sh 'terraform validate'
-                    sh 'tfsec .' // Roda a análise de segurança
+                    sh '${IAC_CMD} fmt -recursive'
+                    sh '${IAC_CMD} init -backend=false'
+                    sh '${IAC_CMD} validate'
+                    sh 'tfsec .'
                 }
             }
         }
-
+        
         // Plan
         stage('Plan') {
             when { expression { params.ACTION == 'deploy' } }
             steps {
                 dir("${WORKSPACE_DIR}") {
-                    sh 'terraform init'
-                    sh 'terraform plan'
+                    sh '${IAC_CMD} init'
+                    sh '${IAC_CMD} plan'
                 }
             }
         }
         
-        // Apply (Com aprovação manual - A GMUD)
+        // Apply (GMUD)
         stage('Apply (GMUD)') {
             when { expression { params.ACTION == 'deploy' } }
             steps {
                 input message: "Deseja aplicar o deploy no ambiente ${params.ENVIRONMENT}?", ok: "Aplicar"
                 dir("${WORKSPACE_DIR}") {
-                    sh 'terraform apply -auto-approve'
+                    sh '${IAC_CMD} apply -auto-approve'
                 }
             }
         }
@@ -71,8 +75,8 @@ pipeline {
             when { expression { params.ACTION == 'destroy' } }
             steps {
                 dir("${WORKSPACE_DIR}") {
-                    sh 'terraform init'
-                    sh 'terraform destroy -auto-approve'
+                    sh '${IAC_CMD} init'
+                    sh '${IAC_CMD} destroy -auto-approve'
                 }
             }
         }
