@@ -1,0 +1,90 @@
+// Arquivo: 01-iac-railways/Jenkinsfile
+// Pipeline Mestre do Laboratório IaC Railways
+
+pipeline {
+    // Usa um container Docker com Terraform já instalado para rodar os comandos
+    agent {
+        docker {
+            image 'hashicorp/terraform:1.6.0'
+            args '--entrypoint=""'
+        }
+    }
+    
+    environment {
+        // Pega o token do TFC das credenciais seguras do Jenkins
+        TF_TOKEN_app_terraform_io = credentials('tf-token-terraform-cloud')
+        TF_VAR_ENVIRONMENT = "${params.ENVIRONMENT}"
+        WORKSPACE_DIR = "01-iac-railways/terraform/${params.CLOUD}"
+    }
+    
+    // Cria os Dropdowns iguais aos do GitHub Actions
+    parameters {
+        choice(name: 'CLOUD', choices: ['aws', 'azure', 'gcp', 'oci'], description: 'Qual Cloud?')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Qual Ambiente?')
+        choice(name: 'ACTION', choices: ['deploy', 'destroy'], description: 'O que voce quer fazer?')
+    }
+    
+    stages {
+        
+        // ---------------------------------------------------------
+        // CAIXINHA 1: VALIDATE
+        // ---------------------------------------------------------
+        stage('Validate') {
+            when { expression { params.ACTION == 'deploy' } }
+            steps {
+                dir("${WORKSPACE_DIR}") {
+                    // Configura o Workspace dinamicamente
+                    script {
+                        def wsMap = [aws: 'dev_aws_tfc', azure: 'dev_azure_tfc', gcp: 'dev_gcp_tfc', oci: 'dev_oci_tfc']
+                        if (params.ENVIRONMENT != 'dev') {
+                            wsMap[params.CLOUD] = wsMap[params.CLOUD].replace('dev', params.ENVIRONMENT)
+                        }
+                        env.TF_WORKSPACE = wsMap[params.CLOUD]
+                    }
+                    sh 'terraform fmt -recursive'
+                    sh 'terraform init -backend=false'
+                    sh 'terraform validate'
+                }
+            }
+        }
+        
+        // ---------------------------------------------------------
+        // CAIXINHA 2: PLAN
+        // ---------------------------------------------------------
+        stage('Plan') {
+            when { expression { params.ACTION == 'deploy' } }
+            steps {
+                dir("${WORKSPACE_DIR}") {
+                    sh 'terraform init'
+                    sh 'terraform plan'
+                }
+            }
+        }
+        
+        // ---------------------------------------------------------
+        // CAIXINHA 3: APPLY (Com aprovação manual - A GMUD)
+        // ---------------------------------------------------------
+        stage('Apply (GMUD)') {
+            when { expression { params.ACTION == 'deploy' } }
+            steps {
+                input message: "Deseja aplicar o deploy no ambiente ${params.ENVIRONMENT}?", ok: "Aplicar"
+                dir("${WORKSPACE_DIR}") {
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
+        
+        // ---------------------------------------------------------
+        // CAIXINHA 4: DESTROY
+        // ---------------------------------------------------------
+        stage('Destroy') {
+            when { expression { params.ACTION == 'destroy' } }
+            steps {
+                dir("${WORKSPACE_DIR}") {
+                    sh 'terraform init'
+                    sh 'terraform destroy -auto-approve'
+                }
+            }
+        }
+    }
+}
