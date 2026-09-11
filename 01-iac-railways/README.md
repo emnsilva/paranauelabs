@@ -17,28 +17,32 @@ Este laboratório opera sob rigorosas boas práticas de engenharia de plataforma
 ## 📂 Estrutura do repositório
 ```
 paranauelabs/
-├── Jenkinsfile                                # Raiz: Roteia para o lab correto
-├── .github/                                   # Raiz: Roteia para o lab correto
-│   └── workflows/                             # Orquestrador do Lab: Faz os "includes"
-│       ├── tfc-pipeline.yml                   # Pipeline Terraform (AWS)
-│       └── tofu-pipeline.yml                  # Pipeline OpenTofu (AWS)
+├── Jenkinsfile                     # Orquestração CI/CD (GitHub Actions)
+├── .github/workflows/              # Orquestração CI/CD (GitHub Actions)
+│   ├── tfc-master-pipeline.yml     # Pipeline Mestre do Terraform (Deploy/Destroy)
+│   ├── tofu-master-pipeline.yml    # Pipeline Mestre do OpenTofu (Deploy/Destroy)
+│   ├── tfc-drift-pipeline.yml      # Auditoria de Drift (Terraform)
+│   └── tofu-drift-pipeline.yml     # Auditoria de Drift (OpenTofu)
 ├── 01-iac-railways/
-│   ├── Jenkinsfile                            # Orquestrador do Lab: Faz os "includes"
+|   ├── Jenkinsfile                 # Orquestrador do Lab
+|   ├── README.md                   # Informações do lab
 │   ├── docs/
-│   │   ├── adr/                               # Architecture Decision Records
-│   │   └── arq/                               # Diagramas e Imagens
-│   ├── terraform/                             # Código HCL (Terraform)
-│   │   ├── aws/                               # Baseline AWS
-│   │   ├── azure/                             # Baseline Azure
-│   │   ├── gcp/                               # Baseline GCP
-│   │   └── oci/                               # Baseline Oracle
-│   └── opentofu/                              # Código HCL (OpenTofu)
-│       ├── aws/                               # Baseline AWS
-│       ├── azure/                             # Baseline Azure (Futuro)
-│       ├── gcp/                               # Baseline GCP (Futuro)
-│       └── oci/                               # Baseline Oracle (Futuro)
+│   │   ├── adr/                    # Architecture Decision Records
+│   │   └── arq/                    # Diagramas e Imagens
+│   ├── opentofu/                   # Código HCL (OpenTofu)
+│   │   ├── README                  # Informações do diretório
+│   │   ├── aws/                    # Baseline AWS
+│   │   ├── azure/                  # Baseline Azure
+│   │   ├── gcp/                    # Baseline GCP
+│   │   └── oci/                    # Baseline Oracle
+│   └── terraform/                  # Código HCL (Terraform)
+│       ├── README                  # Informações do diretório
+│       ├── aws/                    # Baseline AWS
+│       ├── azure/                  # Baseline Azure
+│       ├── gcp/                    # Baseline GCP
+│       └── oci/                    # Baseline Oracle
 └── 02-futuro-lab/
-    └── Jenkinsfile                            # Orquestrador do Lab: Faz os "includes"
+    └── Jenkinsfile                 # Orquestrador do Lab
 ```
 
 ## ⚙️ Arquitetura de CI/CD
@@ -54,11 +58,55 @@ A esteira foi desenhada para ser 100% manual (GitOps/GMUD). Ao acionar um workfl
 ## 📐 Diagramas de Arquitetura
 1. **Fluxo de CI/CD e OIDC (Zero Trust)**<br>
 Este diagrama demonstra como o GitLab CI/CD se integra ao Terraform Cloud e à AWS sem o uso de credenciais estáticas (100% Passwordless via OIDC).<br>
-[CI/CD com Zero Trust](https://gitlab.com/emnsilva/paranauelabs/-/blob/418b84bf8821618c0dd0ae2d219e54928b559450/01-iac-railways/docs/arq/ci-cd.png)
+
+```
++-------------------+        +-------------------+        +-------------------+
+|   GitHub Actions  | Token  |   Terraform Cloud |  OIDC  | AWS/Azure/GCP     |
+|  (Orquestrador)   | -----> |    (Backend)      | -----> | (Assume Role JWT) |
++-------------------+        +-------------------+        +-------------------+
+        |                            |                             |
+        | 1. Runner envia código     | 2. TFC assume Role          |
+        |    via API Token           |    via Token JWT (15 min)   |
+        |                            |                             |
+        |                            | 3. Provisiona Recursos      |
+        |                            v                             v
+        |                    +-------------------+        +-------------------+
+        |                    |   TFC State File  |        |   Infraestrutura  |
+        |                    |   (State Lock)    |        |   (VPC, EC2, S3)  |
+        |                    +-------------------+        +-------------------+
+        |                                                                  |
+        '------------------------------------------------------------------'
+                             4. Log retornado ao Runner
+
+                     +-------------------+
+                     |   Oracle (OCI)    |
+                     | API Key injetada  | <--- Exceção arquitetural (Sem OIDC nativo)
+                     | via TFC Var Set   |
+                     +-------------------+
+```
 
 2. **Arquitetura de Rede na AWS (Baseline R1)**<br>
 Este diagrama ilustra o baseline de infraestrutura provisionado na AWS para cada ambiente (Região Primária em sa-east-1).<br>
-[R1 Baseline AWS](https://gitlab.com/emnsilva/paranauelabs/-/blob/e8a9c9ae96224b1c4c2be0064fb6e3b925b57f68/01-iac-railways/docs/arq/baselineR1.png)
+
+```
+[ AWS ]                           [ AZURE ]
+VPC (10.0.0.0/16)                 VNet (10.0.0.0/16)
+  ├── Public Subnet                  ├── Public Subnet
+  ├── Private Subnet                 ├── Private Subnet
+  ├── Internet Gateway (IGW)         ├── (Bastion/Load Balancer)
+  ├── Security Groups (SGs)          ├── Network Security Groups (NSGs)
+  └── EC2 / S3                       └── VM / Storage Account
+
+
+[ GCP ]                           [ ORACLE (OCI) ]
+VPC Global                        VCN (10.0.0.0/16)
+  ├── Regional Subnets              ├── Regional Subnets
+  ├── Cloud NAT                     ├── Internet Gateway
+  ├── Firewall Rules                ├── Security Lists
+  └── Compute / Storage             └── Compute / Object Storage
+
+Regra de Segurança: Compute (Privado) só aceita tráfego do Web (Público).
+```
 
 ---
 
@@ -66,11 +114,12 @@ Este diagrama ilustra o baseline de infraestrutura provisionado na AWS para cada
 - **Zero Trust:** Autenticação 100% passwordless via OIDC entre GitLab, ferramentas de IaC e Clouds (Sem Access Keys).
 - **Least Privilege:** IAM Roles e Policies restritas aos recursos do laboratório (ex: EC2 só acessa o bucket S3 específico).
 - **FinOps:** Tags obrigatórias em 100% dos recursos via default_tags e AWS Budgets configurado com alerta de $5/mês.
+- **DevSecOps:** Análise Estática (SAST) integrada localmente e na pipeline via tfsec.
 
 ---
 
 ## 🛡️ Decisões Arquiteturais (ADRs)
-**Decisões técnicas detalhadas na pasta docs/adr/:
+Decisões técnicas detalhadas na pasta docs/adr/:
  - **ADR-001:** Autenticação Passwordless (OIDC)
  - **ADR-002:** IAM e Least Privileges
  - **ADR-003:** Estrutura do Monorepo e Arquitetura de CI/CD
@@ -96,7 +145,7 @@ O projeto é entregue de forma incremental, versionada com Git Tags e Releases n
     - Provisionamento do baseline de Rede, Compute, Storage e IAM nas 4 clouds.
 4. **[R4] Matriz Imperativa Multi-Cloud (v1.0.0-beta.3) 🔴 (Não será feito)**
     - A Release 4 original, que envolveria Pulumi, foi cancelada e absorvida pela R2/R3 para manter o foco em ferramentas declarativas de alto padrão.
-5. **[R5] Hardening e Observabilidade (v1.0.0-rc.1)** 🔲 (Futuro)
+5. **[R5] Hardening e Observabilidade (v1.0.0-rc.1)** 🟡 Em Desenvolvimento
     - Implementação de pipelines agendados de auditoria de drift.
     - Configuração de dashboards de FinOps nativos nas 4 clouds.
     - Finalização de documentações e artigo técnico.
