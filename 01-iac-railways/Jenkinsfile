@@ -3,12 +3,7 @@
 
 pipeline {
     // Usa um container Docker com Terraform já instalado para rodar os comandos
-    agent {
-        docker {
-            image 'hashicorp/terraform:1.16.0'
-            args '--entrypoint=""'
-        }
-    }
+        agent any
     
     environment {
         // Pega o token do TFC das credenciais seguras do Jenkins
