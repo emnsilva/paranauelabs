@@ -46,7 +46,7 @@ A esteira foi desenhada para ser 100% manual (GitOps/GMUD) utilizando workflow_d
 1. **🚄 IaC Railways (Multi-Cloud Baseline)**
 Criação de um baseline de infraestrutura (Rede, Compute, Storage, IAM) funcionalmente equivalente em uma matriz 2x4: 4 provedores de nuvem (AWS, Azure, GCP e Oracle) provisionados por 2 ferramentas distintas (Terraform e OpenTofu).
 
-**Status:** ✅ Matriz 2x4 Concluída (R1 a R4) - Pipelines dinâmicos e isolados ativos
+**Status:** ✅ Matriz 2x4 Concluída (R1 a R4) - Pipelines dinâmicos e isolados ativos<br>
 **Stack:** Terraform, OpenTofu, GitHub Actions, Terraform Cloud, OIDC.
 
 ---
