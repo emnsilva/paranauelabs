@@ -145,7 +145,7 @@ O projeto é entregue de forma incremental, versionada com Git Tags e Releases n
     - Provisionamento do baseline de Rede, Compute, Storage e IAM nas 4 clouds.
 4. **[R4] Matriz Imperativa Multi-Cloud (v1.0.0-beta.3) 🔴 (Não será feito)**
     - A Release 4 original, que envolveria Pulumi, foi cancelada e absorvida pela R2/R3 para manter o foco em ferramentas declarativas de alto padrão.
-5. **[R5] Hardening e Observabilidade (v1.0.0-rc.1)** 🟡 Em Desenvolvimento
+5. **[R5] Hardening e Observabilidade (v1.0.0-rc.1)** ✅
     - Implementação de pipelines agendados de auditoria de drift.
     - Configuração de dashboards de FinOps nativos nas 4 clouds.
     - Finalização de documentações e artigo técnico.
