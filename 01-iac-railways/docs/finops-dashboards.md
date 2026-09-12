@@ -13,14 +13,14 @@ Todos os recursos provisionados via Terraform/OpenTofu nascem com as seguintes t
 #### 1. AWS (Amazon Web Services)
 **Onde acessar:**
 1. Faça login no Console da AWS.
-2. Procure por Cost Explorer (ou Billing and Cost Management > Cost Explorer).
-3. Clique em Launch Cost Explorer.
+2. Procure por Gerenciamento de faturamento e custos → Explorador de custo (ou Billing and Cost Management → Cost Explorer).
+3. Em painéis, você pode criar um painel e adicionar widgets de visualização predefinidos ou personalizdos.
 
 **Como visualizar:**
-1. No painel esquerdo, em Group by, selecione Tag.
+1. No painel direito, em Filtros, selecione Tag.
 2. Escolha a tag Project ou Environment.
 3. Filtre por Project = paranauelabs para ver apenas os custos deste laboratório.
-4. Você também pode ver os alertas de orçamento (Budgets) criados via Terraform indo em Budgets no menu de Billing.
+4. Você também pode ver os alertas de orçamento (Budgets) criados via Terraform indo em Budgets no menu de Detecção de anomalias de custos.
 
 ---
 
@@ -29,14 +29,12 @@ Todos os recursos provisionados via Terraform/OpenTofu nascem com as seguintes t
 
 **Onde acessar:**
 1. Faça login no Portal do Azure.
-2. Procure por Cost Management + Billing.
-3. Selecione Cost analysis no menu lateral.
+2. Procure por Gerenciamento de custo + cobrança.
+3. Selecione Análise de custos no menu lateral.
 
 **Como visualizar:**
-1. Clique em Add filter.
-2. Selecione Tag e escolha Project (ou Environment).
-3. Selecione o valor paranauelabs.
-4. Para ver os alertas de orçamento criados via Terraform, vá em Budgets no menu lateral de Cost Management.
+1. Clique em Exibição.
+2. Selecione como você quer ver as informações.
 
 ---
 
@@ -45,11 +43,11 @@ Todos os recursos provisionados via Terraform/OpenTofu nascem com as seguintes t
 
 **Onde acessar:**
 1. Faça login no Console do GCP.
-2. Abra o menu de navegação e vá em Billing.
+2. Abra o menu de navegação e vá em Faturamento.
 3. Clique em Reports (Relatórios).
 
 **Como visualizar:**
-1. No painel de filtros (lado direito), em Group by, selecione Labels.
+1. No painel, clique em Agrupar por, selecione Labels.
 2. Escolha o label project ou environment.
 3. Os custos serão agrupados e exibidos no gráfico de barras.
 
