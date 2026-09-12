@@ -21,7 +21,10 @@ A implementação seguirá as seguintes diretrizes:
     - Workflows Separados: Criação de arquivos de workflow separados por ferramenta (ex: tfc-pipeline.yml, tofu-pipeline.yml).
     - Gatilhos Manuais (workflow_dispatch): Para garantir governança (GMUD) e evitar execuções acidentais, os pipelines são acionados manualmente via interface do GitHub, utilizando dropdowns (inputs) para selecionar o Ambiente (dev, staging, prod) e a Ação (deploy ou destroy).
     - Isolamento de Jobs: Utilização da instrução needs para criar dependências (Validate -> Plan -> Apply) e if condicional para separar o caminho de deploy do caminho de destroy.
-3. **Versionamento de Ferramenta:**
+3. **Arquitetura de CI/CD (Multi-Engine):** 
+    - GitHub Actions: Orquestração principal do repositório no GitHub, utilizando workflow_dispatch com dropdowns dinâmicos para seleção de Cloud, Ambiente e Ação.
+    - Jenkins: Orquestração secundária no repositório do GitHub, utilizando Jenkinsfile declarativo com agent any e binários nativos do Terraform/OpenTofu/tfsec. A escolha do Jenkins demonstra proficiência em CI/CD self-hosted e automação via Groovy, mantendo o mesmo padrão de GMUD e Dropdowns.
+4. **Versionamento de Ferramenta:**
     - Fixar a versão 1.16.0 para o Terraform e 1.12.6 para o OpenTofu nas actions oficiais do GitHub (hashicorp/setup-terraform e opentofu/setup-opentofu).
 
 ## Justificativa
