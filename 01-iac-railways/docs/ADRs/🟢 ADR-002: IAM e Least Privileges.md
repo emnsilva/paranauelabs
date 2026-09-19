@@ -34,7 +34,8 @@ Risco altíssimo de blast radius ilimitado. Violação direta das melhores prát
 **Alternativa 2: Políticas 100% Customizadas do Zero para cada API**<br>
 Descrição: Mapear cada ação de API necessária (ex: ec2:RunInstances, s3:PutObject) e criar policies customizadas granulares do zero.<br> 
 
-**Por que foi descartada?** Custo de manutenção altíssimo. As clouds atualizam APIs constantemente. O esforço para manter essas policies em dia geraria "toil" excessivo para a equipe de SRE.<br>
+**Por que foi descartada?**<br>
+Custo de manutenção altíssimo. As clouds atualizam APIs constantemente. O esforço para manter essas policies em dia geraria "toil" excessivo para a equipe de SRE.<br>
 
 **Alternativa 3: Workload Identity específica por Cloud**<br>
 Descrição: Dar permissões amplas, mas usar condições de IAM para bloquear ações em recursos que não possuam a tag Project=Lab-MultiCloud.<br>

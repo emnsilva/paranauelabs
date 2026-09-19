@@ -27,9 +27,9 @@ paranauelabs/
 │       └── tofu-master-pipeline.yml      # Pipeline OpenTofu (Multi-Cloud)
 ├── 01-iac-railways/                      # Laboratório IaC Railways
 │   ├── docs/
-│   │   ├── ADR/                          # Architecture Decision Records
-│   │   ├── arq/                          # Diagramas e Imagens de Arquitetura
-│   │   └── licoes-aprendidas/            # Documentação de Lições Aprendidas
+│   │   ├── adr/                          # Architecture Decision Records
+│   │   ├── lições-aprendidas/            # Lições aprendidas
+│   │   └── finops-dashboards.md          # Passo a passo de como configurar dashboards de FinOps
 │   ├── terraform/                        # Código HCL (Terraform)
 │   └── opentofu/                         # Código HCL (OpenTofu)
 └── 02-futuro-lab/

@@ -28,7 +28,8 @@ paranauelabs/
 |   ├── README.md                   # Informações do lab
 │   ├── docs/
 │   │   ├── adr/                    # Architecture Decision Records
-│   │   └── arq/                    # Diagramas e Imagens
+│   │   ├── lições-aprendidas/      # Lições aprendidas
+│   │   └── finops-dashboards.md    # Passo a passo de como configurar dashboards de FinOps
 │   ├── opentofu/                   # Código HCL (OpenTofu)
 │   │   ├── README                  # Informações do diretório
 │   │   ├── aws/                    # Baseline AWS
