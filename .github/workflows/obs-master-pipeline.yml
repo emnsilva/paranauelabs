@@ -1,0 +1,32 @@
+name: obs-master-pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "02-o-ministério-da-observabilidade/**"
+      - ".github/workflows/obs-master-pipeline.yml"
+  pull_request:
+    paths:
+      - "02-o-ministério-da-observabilidade/**"
+      - ".github/workflows/obs-master-pipeline.yml"
+
+jobs:
+  lint:
+    name: Lab 02 — lint (Helm, YAML, JSON)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 02-o-ministério-da-observabilidade
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar yamllint e kubeconform
+        run: |
+          pip install --user --break-system-packages yamllint
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          curl -sL "https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz" | tar xz
+          sudo install -m 0755 kubeconform /usr/local/bin/kubeconform
+
+      - name: make lint
+        run: make lint
