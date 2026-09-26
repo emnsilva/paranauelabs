@@ -1,8 +1,0 @@
-extends: default
-ignore: |
-  helm/*/templates/
-  .yamllint
-rules:
-  line-length:
-    max: 120
-  truthy: disable
