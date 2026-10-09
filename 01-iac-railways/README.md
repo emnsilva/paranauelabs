@@ -130,7 +130,7 @@ Decisões técnicas detalhadas na pasta docs/adr/:
 ---
 
 ## 🚀 Releases e Roadmap
-O projeto é entregue de forma incremental, versionada com Git Tags e Releases no GitLab:
+O projeto é entregue de forma incremental, versionada com Git Tags e Releases no GitHub:
 
 1. **[R1] MVP AWS + Terraform (v1.0.0-alpha.1)** ✅
     - Configuração inicial do monorepo no GitHub Actions.
