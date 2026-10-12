@@ -1,0 +1,31 @@
+# ==============================================================
+# paranauelabs / carmen — nunca versionado neste lab
+# (ruído de OS/IDE é responsabilidade do .gitignore raiz)
+# ==============================================================
+
+# segredos locais: .env nunca sobe; .env.example é o gêmeo
+# versionado que documenta as variáveis
+.env
+
+# dependências
+node_modules/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# caches de ferramentas (chegam com as APIs na R2/R3)
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# cobertura de testes
+.coverage
+coverage.xml
+htmlcov/
+
+# runtime e logs: bancos moram em volumes nomeados do Docker —
+# nada de runtime dentro do repo; *.log é rede de segurança
+*.log

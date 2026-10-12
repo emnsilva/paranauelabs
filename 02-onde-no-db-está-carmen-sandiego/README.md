@@ -7,10 +7,11 @@ O objetivo é demonstrar proficiência em polyglot persistence, domínio de dife
 
 |  | python-api | node-api |
 | :--- | :--- | :--- |
-| Linguagem | Python 3.12 | Node.js 22 |
-| Framework | FastAPI | Express |
-| Acesso a dados | SQLAlchemy 2.0 | Mongoose |
+| Linguagem | Python 3.13 | Node.js 22 LTS|
+| Framework | FastAPI | Express 4 |
+| Acesso a dados | SQLAlchemy 2.0 + psycopg 3 | Mongoose 8 |
 | Banco | PostgreSQL 17 | MongoDB 8 |
+| Imagem base | python:3.13-slim | node:22-alpine |
 
 ---
 ## 🎯 Princípios e Padrões
@@ -35,7 +36,6 @@ paranauelabs/
 ├── 01-iac-railways/
 |   └── ...                                 # Lab de IaC multi-cloud
 ├── 02-onde-no-db-está-carmen-sandiego/     # <-- este lab
-|   ├── Jenkinsfile                         # Orquestrador do Lab
 |   ├── README.md                           # Informações do lab
 |   ├── docker-compose.yml                  # Sobe 2 APIs + 2 bancos
 |   ├── docs/
