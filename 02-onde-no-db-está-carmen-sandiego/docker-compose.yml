@@ -1,43 +1,47 @@
-# roast/docker-compose.yml — SOMENTE os bancos do lab roast.
-# As APIs rodam no host (hot reload), fora de container.
-# `name:` fixa o projeto: volumes/rede sempre roast_*, independente do
-# nome da pasta onde o arquivo estiver (02-a-api-o-codigo-e-o-db, home da VM…).
-name: roast
+# bancos do lab carmen — estrutura pura; TODOS os valores vivem no .env
+# (bootstrap: cp .env.example .env — ou make up, que faz isso automaticamente)
+
+name: carmen
 
 services:
-  mongo:
-    image: mongo:7
-    container_name: roast-mongo          # nome fixo = alvo da varredura do uninstallparanaue
-    ports:
-      - "27017:27017"                    # colide com um mongo local? troque para 27018:27017
-    volumes:
-      - mongo_data:/data/db              # volume nomeado = dados sobrevivem a down/up
-    healthcheck:                         # up --wait só devolve o terminal com isto verde
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 24
-      start_period: 20s
-
   postgres:
-    image: postgres:16
-    container_name: roast-postgres
+    image: postgres:17
+    container_name: carmen-postgres
     environment:
-      POSTGRES_USER: roast
-      POSTGRES_PASSWORD: roast           # lab-only: localhost + dados fictícios
-      POSTGRES_DB: roast
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5433:5432"                      # 5433 na máquina: não briga com um postgres local
+      - "${BIND_HOST}:${POSTGRES_PORT}:${PG_INTERNAL_PORT}"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      # -h 127.0.0.1 = TCP: o servidor temporário de init (que só escuta socket) não responde
-      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "roast", "-d", "roast"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${PG_INTERNAL_PORT}"]
       interval: 5s
       timeout: 3s
-      retries: 24
-      start_period: 10s
+      retries: 10
+    networks: [carmen-net]
+
+  mongo:
+    image: mongo:8
+    container_name: carmen-mongo
+    ports:
+      - "${BIND_HOST}:${MONGO_PORT}:${MONGO_INTERNAL_PORT}"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [carmen-net]
 
 volumes:
-  mongo_data:
   pg_data:
+    name: ${PG_VOLUME}
+  mongo_data:
+    name: ${MONGO_VOLUME}
+
+networks:
+  carmen-net:
+    name: carmen-net
