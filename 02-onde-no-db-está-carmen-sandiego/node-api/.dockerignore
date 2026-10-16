@@ -1,0 +1,4 @@
+# node_modules local é da plataforma errada; .env nunca entra em imagem
+node_modules
+.env
+.git

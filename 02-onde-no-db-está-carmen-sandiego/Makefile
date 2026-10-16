@@ -7,7 +7,7 @@
 .RECIPEPREFIX = >
 
 COMPOSE      = docker compose
-COMPOSE_FULL = docker compose -f docker-compose.yml -f compose.apis.yaml
+COMPOSE_FULL = docker compose -f docker-compose.yml -f api-compose.yml
 
 .PHONY: help up check down reset full parity logs
 
@@ -24,14 +24,14 @@ check: ## status + healthy dos dois bancos
 >@$(COMPOSE) ps mongo     2>/dev/null | grep -q healthy && echo "[ok] mongo healthy"    || echo "[X] mongo NAO healthy"
 
 down: ## desmonta o ambiente (volumes preservados)
->$(COMPOSE) down
+>$(COMPOSE_FULL) --profile full --profile parity down
 
 reset: ## desmonta ZERANDO os dados e sobe de novo
 >$(COMPOSE) down -v
 >$(COMPOSE) up -d --wait
 
 full: ## bancos + APIs (a partir da R2/R3)
->$(COMPOSE_FULL) --profile full up -d --wait
+>$(COMPOSE_FULL) --profile full up -d --wait --build
 
 parity: ## suíte de paridade via runner Bruno (R4 — placeholder até lá)
 >$(COMPOSE_FULL) --profile full --profile parity up -d --wait
