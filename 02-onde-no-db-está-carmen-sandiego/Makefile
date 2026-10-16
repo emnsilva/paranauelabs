@@ -6,7 +6,7 @@
 
 .RECIPEPREFIX = >
 
-COMPOSE      = docker compose
+COMPOSE      = docker compose -f docker-compose.yml
 COMPOSE_FULL = docker compose -f docker-compose.yml -f api-compose.yml
 
 .PHONY: help up check down reset full parity logs
@@ -23,18 +23,18 @@ check: ## status + healthy dos dois bancos
 >@$(COMPOSE) ps postgres 2>/dev/null | grep -q healthy && echo "[ok] postgres healthy" || echo "[X] postgres NAO healthy"
 >@$(COMPOSE) ps mongo     2>/dev/null | grep -q healthy && echo "[ok] mongo healthy"    || echo "[X] mongo NAO healthy"
 
-down: ## desmonta o ambiente (volumes preservados)
+down: ## desmonta o ambiente INTEIRO (bancos + APIs; volumes preservados)
 >$(COMPOSE_FULL) --profile full --profile parity down
 
 reset: ## desmonta ZERANDO os dados e sobe de novo
->$(COMPOSE) down -v
->$(COMPOSE) up -d --wait
-
-full: ## bancos + APIs (a partir da R2/R3)
+>$(COMPOSE_FULL) --profile full --profile parity down -v
 >$(COMPOSE_FULL) --profile full up -d --wait --build
 
-parity: ## suíte de paridade via runner Bruno (R4 — placeholder até lá)
->$(COMPOSE_FULL) --profile full --profile parity up -d --wait
+full: ## bancos + node-api, com rebuild (o fluxo de scp precisa: o compose nao percebe arquivo mudado)
+>$(COMPOSE_FULL) --profile full up -d --wait --build
 
-logs: ## acompanha os logs dos bancos
->$(COMPOSE) logs -f
+parity: ## suite de paridade via runner Bruno (R4 — placeholder ate la)
+>$(COMPOSE_FULL) --profile full --profile parity up -d --wait --build
+
+logs: ## acompanha os logs
+>$(COMPOSE_FULL) --profile full logs -f

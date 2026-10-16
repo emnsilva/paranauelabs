@@ -30,27 +30,45 @@ Este laboratório opera sob rigorosas boas práticas de engenharia de APIs:
 
 ## 📂 Estrutura do repositório
 ```
-paranauelabs/
-├── Jenkinsfile                             # Orquestração CI/CD (GitHub Actions)
-├── .github/workflows/                      # Orquestração CI/CD (GitHub Actions)
-|   ├── carmen-python-api.yml               # Pipeline python-api (lint + testes + build)
-|   ├── carmen-node-api.yml                 # Pipeline node-api (lint + testes + build)
-│   └── carmen-parity-pipeline.yml          # Testes de contrato (paridade das duas APIs)
-├── 01-iac-railways/
-|   └── ...                                 # Lab de IaC multi-cloud
-├── 02-onde-no-db-está-carmen-sandiego/     # <-- este lab
-|   ├── README.md                           # Informações do lab
-|   ├── docker-compose.yml                  # Sobe 2 APIs + 2 bancos
-|   ├── docs/
-|   |   ├── ADRs/                           # Architecture Decision Records
-|   |   └── lições-aprendidas/              # Lições aprendidas
-|   ├── data/
-|   |   └── seed.json                       # Elenco da V.I.L.E. + cidades (fonte única)
-|   ├── python-api/                         # A API em FastAPI + SQLAlchemy + PostgreSQL
-|   └── node-api/                           # A API em Express + Mongoose + MongoDB
-├── 03-futuro-lab/
-    └── Jenkinsfile                         # Orquestrador do Lab
-
+02-onde-no-db-esta-carmen-sandiego/
+├── docker-compose.yml              # R1: os bancos (postgres + mongo)
+├── api-compose.yml                 # camada de aplicacao: node-api (+ python-api e runner futuros)
+├── Makefile                        # up / check / down / reset / full(--build) / parity
+├── .env.example                    # gemeo versionado do .env (gitignored)
+├── .gitignore
+├── docs/
+|   ├── adr/                        # ADRs 001-006
+|   ├── contrato-v1.md              # contrato narrativo
+|   ├── openapi-v1.yaml             # spec canonica (o que a suite valida)
+|   ├── matriz-decisao.md           # criterios, pesos, desempate (R1)
+|   ├── aprovacao-matriz-v1.md      # registro da aprovacao (R1)
+|   └── licoes-aprendidas/
+|       ├── r1.md
+|       └── r2.md
+├── data/
+|   └── seed.json                   # fonte unica: 21 bandidos + 12 cidades (ADR-002)
+├── collections/                    # collections .bru + runner (R2.9/R4)
+├── scripts/
+|   ├── installparanaue.sh          # prep de maquina (5 distros)
+|   └── uninstallparanaue.sh        # devolve a VM ao estado pre-lab
+├── python-api/                     # R3: FastAPI + SQLAlchemy + PostgreSQL (futura)
+└── node-api/                       # R2: Express + Mongoose + MongoDB
+    ├── Dockerfile
+    ├── package.json
+    ├── package-lock.json
+    ├── data/
+    |   └── seed.json               # copia de build (fonte unica em ../data/)
+    └── src/
+        ├── index.js                # bootstrap + registro das rotas
+        ├── db.js                   # conexao Mongoose
+        ├── dicionario.js           # enums do dicionario + ordem de revelacao
+        ├── erros.js                # envelope de erro da casa
+        ├── seed.js                 # models Criminal/City/Counter + carga idempotente
+        ├── casos.js                # model Case + sorteio + paraPublico
+        └── rotas/
+            ├── criminals.js        # GET /criminals (filtros) + GET /criminals/:id
+            ├── cities.js           # GET /cities
+            └── casos.js            # POST /cases
 ```
 
 Sem Jenkinsfile por decisão registrada: CI do paranauelabs é GitHub Actions; a dupla Jenkins × Actions já foi demonstrada no [01-iac-railways](../01-iac-railways/). Cada lab varia a sua variável — aqui, a variável é stack, não orquestrador.

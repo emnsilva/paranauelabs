@@ -1,18 +1,31 @@
-// R2.3: rotas no app + error handler central.
-// Ordem do bootstrap segue contrato informal: conectar -> seed -> escutar.
+// R2.7: mandado + reset. Os 9 endpoints completos.
 import express from 'express';
 import { conectar } from './db.js';
-import { carregarSeed } from './seed.js';
+import { carregarSeed, resetSeed } from './seed.js';
 import criminals from './rotas/criminals.js';
+import cities from './rotas/cities.js';
+import casos from './rotas/casos.js';
 
 const app = express();
 const PORT = process.env.PORT || 7421;
 
 app.use(express.json());
 app.use(criminals);
+app.use(cities);
+app.use(casos);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', api: 'node-api' });
+});
+
+// POST /api/seed — o reset determinístico (ponto de partida da suíte R4).
+app.post('/api/seed', async (_req, res, next) => {
+  try {
+    const resultado = await resetSeed();
+    res.json(resultado);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Error handler central: tudo que escapar das rotas vira envelope 500.

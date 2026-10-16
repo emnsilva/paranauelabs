@@ -1,5 +1,7 @@
 // ADR-002: seed única (data/seed.json) com carga idempotente.
 // ADR-006: o contador nasce sincronizado com MAX — carga manual não avança gerador.
+// R2.7: resetSeed — o reset determinístico (apaga casos, recarrega, ressincroniza).
+// Startup e reset compartilham ESTE arquivo: um só caminho de carga (ADR-002).
 import fs from 'node:fs';
 import path from 'node:path';
 import mongoose from 'mongoose';
@@ -65,7 +67,38 @@ export async function carregarSeed() {
     console.log(`[seed] ignorada (banco populado: ${nCriminals} bandidos, ${nCities} cidades)`);
   }
 
-  // ADR-006: ressincroniza o contador com o MAX — sempre, populado ou recém-carregado.
+  await sincronizarContador();
+}
+
+// R2.7: o reset determinístico — o ponto de partida da suíte R4.
+// Apaga CASOS (investigações são descartáveis), recarrega o dossiê do zero
+// e ressincroniza o contador. O MESMO caminho de código do startup (ADR-002):
+// não existe segundo carregador.
+export async function resetSeed() {
+  const seed = JSON.parse(fs.readFileSync(path.resolve('/app/seed.json'), 'utf8'));
+
+  const casosApagados = await mongoose.connection.dropCollection('cases')
+    .then(() => true)
+    .catch(() => false);   // coleção inexistente: nada a apagar
+
+  await Criminal.deleteMany({});
+  await City.deleteMany({});
+  validarSeed(seed.criminals);
+  await Criminal.insertMany(seed.criminals);
+  await City.insertMany(seed.cities);
+
+  await sincronizarContador();
+
+  return {
+    status: 'reset',
+    criminals: seed.criminals.length,
+    cities: seed.cities.length,
+    cases_deleted: casosApagados,
+  };
+}
+
+// ADR-006: ressincroniza o contador com o MAX — sempre.
+async function sincronizarContador() {
   const ultimo = await Criminal.findOne({}).sort({ id: -1 });
   const max = ultimo ? ultimo.id : 0;
   await Counter.findByIdAndUpdate(
