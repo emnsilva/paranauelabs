@@ -298,14 +298,14 @@ Decisões técnicas detalhadas na pasta docs/adr/:
 
 O projeto é entregue de forma incremental, versionado com Git Tags e Releases no GitHub (tags prefixadas por lab no repositório):
 
-1. **[R1] Contrato, ambiente e matriz de decisão (02-carmen/v0.1.0-alpha.1)** 🚧
+1. **[R1] Contrato, ambiente e matriz de decisão (02-carmen/v0.1.0-alpha.1)** 🟢
     - Contrato v1 congelado (OpenAPI canônica + narrativo): 9 endpoints, envelope de erro, dicionário de pistas, regras da mecânica, anti-spoiler.
     - data/seed.json congelada como contrato de dados.
     - Infra: docker-compose (bancos) + compose.apis.yaml (APIs + runner), Makefile, .env.example.
     - Prep de máquina validado em 4 distros (Alpine, Debian, CentOS, RHEL) — install/uninstall idempotentes.
     - Spikes: sanidade das stacks (ADR-005) e estratégia de ids (ADR-006).
     - Matriz de decisão com pesos e desempate, aprovada com stakeholders.
-2. **[R2] node-api, a implementação de referência (v0.1.0-beta.1)** ⏳
+2. **[R2] node-api, a implementação de referência (v0.1.0-beta.1)** 🟢
     - Express + Mongoose sobre MongoDB — a stack de referência primeiro; o custo de aprendizado da segunda vira dado do relatório.
     - Dossiê, casos e mecânica completa; collection .bru nasce junto.
 3. **[R3] python-api, o espelho relacional (v0.1.0-beta.2)** ⏳
