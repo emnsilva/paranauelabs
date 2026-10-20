@@ -1,3 +1,4 @@
+services:
   node-api:
     build: ./node-api
     container_name: carmen-node-api
@@ -17,3 +18,19 @@
       start_period: 5s
     networks: [carmen-net]
     profiles: [full]
+
+  parity-tests:
+    # one-shot: sobe via `docker compose run`, exit code = veredito da suíte
+    build:
+      context: ./parity
+      args:
+        BRUNO_VERSION: ${BRUNO_CLI_VERSION}
+    volumes:
+      - ./bruno:/src:ro
+    environment:
+      BRUNO_ENVS: node-container
+    depends_on:
+      node-api:
+        condition: service_healthy
+    networks: [carmen-net]
+    profiles: [parity]

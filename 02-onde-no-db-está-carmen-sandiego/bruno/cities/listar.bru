@@ -1,0 +1,36 @@
+meta {
+  name: listar
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/cities
+  body: none
+  auth: none
+}
+
+script:post-response {
+  const b = res.body;
+  const lista = Array.isArray(b) ? b : [];
+  bru.setVar('total_cities', lista.length);
+}
+
+tests {
+  test('200 no catálogo de cidades', function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test('12 cidades na seed', function() {
+    expect(bru.getVar('total_cities')).to.equal(12);
+  });
+
+  test('shape do catálogo: campo name presente', function() {
+    const lista = Array.isArray(res.body) ? res.body : [];
+    expect(lista.length).to.be.at.least(1);
+    expect(lista[0]).to.have.property('name');
+  });
+
+  test('x-request-id ecoado (Req. F)', function() {
+    expect((res.headers['x-request-id'] || '').startsWith('bru-')).to.be.true;
+  });
+}

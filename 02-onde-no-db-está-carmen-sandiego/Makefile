@@ -6,10 +6,10 @@
 
 .RECIPEPREFIX = >
 
-COMPOSE      = docker compose -f docker-compose.yml
+COMPOSE      = docker compose
 COMPOSE_FULL = docker compose -f docker-compose.yml -f api-compose.yml
 
-.PHONY: help up check down reset full parity logs
+.PHONY: help up check down reset full parity smoke logs
 
 help: ## lista os comandos
 >@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  make %-8s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -23,18 +23,24 @@ check: ## status + healthy dos dois bancos
 >@$(COMPOSE) ps postgres 2>/dev/null | grep -q healthy && echo "[ok] postgres healthy" || echo "[X] postgres NAO healthy"
 >@$(COMPOSE) ps mongo     2>/dev/null | grep -q healthy && echo "[ok] mongo healthy"    || echo "[X] mongo NAO healthy"
 
-down: ## desmonta o ambiente INTEIRO (bancos + APIs; volumes preservados)
+down: ## desmonta o ambiente (volumes preservados)
 >$(COMPOSE_FULL) --profile full --profile parity down
 
 reset: ## desmonta ZERANDO os dados e sobe de novo
->$(COMPOSE_FULL) --profile full --profile parity down -v
+>$(COMPOSE) down -v
+>$(COMPOSE) up -d --wait
+
+full: ## bancos + APIs (a partir da R2/R3)
 >$(COMPOSE_FULL) --profile full up -d --wait --build
 
-full: ## bancos + node-api, com rebuild (o fluxo de scp precisa: o compose nao percebe arquivo mudado)
+parity: ## suíte de paridade Bruno — vermelho quebra (exit code do runner)
 >$(COMPOSE_FULL) --profile full up -d --wait --build
+>$(COMPOSE_FULL) --profile full --profile parity run --rm --build parity-tests
 
-parity: ## suite de paridade via runner Bruno (R4 — placeholder ate la)
->$(COMPOSE_FULL) --profile full --profile parity up -d --wait --build
+smoke: ## o jogo inteiro de ponta a ponta — vermelho quebra (exit code do script)
+>@test -f .env || { cp .env.example .env; echo "== .env criado a partir do .env.example"; }
+>$(COMPOSE_FULL) --profile full up -d --wait
+>BASE="http://$$(grep -m1 '^BIND_HOST=' .env | cut -d= -f2):$$(grep -m1 '^NODE_API_PORT=' .env | cut -d= -f2)" && echo "== smoke: $$BASE" && sh smoke-test.sh "$$BASE"
 
-logs: ## acompanha os logs
->$(COMPOSE_FULL) --profile full logs -f
+logs: ## acompanha os logs dos bancos
+>$(COMPOSE) logs -f

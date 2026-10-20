@@ -1,7 +1,7 @@
 #!/bin/sh
-# smoke-r2.sh — o jogo inteiro de ponta a ponta: abrir, viajar, afunilar,
-# mandado certo, mandado errado, reset. R2.7 (embrião do smoke da R2.11).
-# Uso: sh smoke-r2.sh [base_url]   (default http://127.0.0.1:7421)
+# smoke-test.sh — o jogo inteiro de ponta a ponta: abrir, viajar, afunilar,
+# mandado certo, mandado errado, reset. R2.11 (formalizado: make smoke).
+# Uso: sh smoke-test.sh [base_url]   (default http://127.0.0.1:7421)
 set -eu
 
 BASE="${1:-http://127.0.0.1:7421}"
@@ -12,6 +12,10 @@ CASO_JSON=/tmp/smoke-caso.json
 CASO2_JSON=/tmp/smoke-caso2.json
 SUSPEITO_JSON=/tmp/smoke-suspeito.json
 trap 'rm -f "$CASO_JSON" "$CASO2_JSON" "$SUSPEITO_JSON"' EXIT
+
+# === 0. PRECONDITION — API de pe (falha amigavel em vez de curl misterioso) ===
+curl -sf "$BASE/health" > /dev/null || falha "API nao responde em $BASE — suba o ambiente: make full"
+ok "api no ar: $BASE"
 
 # === 1. ABRIR O CASO ===
 curl -sf -X POST "$BASE/cases" > "$CASO_JSON" || falha "abrir caso"

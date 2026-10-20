@@ -1,0 +1,39 @@
+meta {
+  name: 01-abrir
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/cases
+  body: none
+  auth: none
+}
+
+script:post-response {
+  // extração por regex no corpo inteiro — método provado no smoke.
+  // A API usa case_number (snake_case, como heading_to/revealed_trait)
+  const texto = JSON.stringify(res.body);
+  const m = texto.match(/CASE-\d{4}-\d{3}/);
+  if (m) {
+    bru.setEnvVar('case_id', m[0]);
+  }
+  // heading_to (provado no smoke): o destino da trilha vira a próxima viagem
+  const h = texto.match(/"heading_to":"([^"]*)"/);
+  if (h) {
+    bru.setEnvVar('cidade_destino', h[1]);
+  }
+}
+
+tests {
+  test('201 caso aberto', function() {
+    expect(res.status).to.equal(201);
+  });
+
+  test('case_id capturado no formato CASE-AAAA-NNN', function() {
+    expect(bru.getEnvVar('case_id') || '').to.match(/^CASE-\d{4}-\d{3}$/);
+  });
+
+  test('x-request-id ecoado (Req. F)', function() {
+    expect((res.headers['x-request-id'] || '').startsWith('bru-')).to.be.true;
+  });
+}

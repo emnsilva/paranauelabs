@@ -1,0 +1,33 @@
+meta {
+  name: filtrar-dossie
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/criminals?sexo=fem&hobby=cricket&cabelo=preto&traco=manca&veiculo=limusine
+  body: none
+  auth: none
+}
+
+script:post-response {
+  const b = res.body;
+  const lista = Array.isArray(b) ? b : [];
+  bru.setVar('suspeitos', lista.length);
+  if (lista.length === 1) {
+    bru.setVar('suspeito_traits', JSON.stringify(lista[0]));
+  }
+}
+
+tests {
+  test('200 no dossiê filtrado', function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test('afunilamento: exatamente 1 suspeito', function() {
+    expect(bru.getVar('suspeitos')).to.equal(1);
+  });
+
+  test('x-request-id ecoado (Req. F)', function() {
+    expect((res.headers['x-request-id'] || '').startsWith('bru-')).to.be.true;
+  });
+}

@@ -1,0 +1,36 @@
+meta {
+  name: 02-detalhar
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/cases/{{case_id}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  const texto = JSON.stringify(res.body);
+  // pistas são cumulativas na resposta (provado no smoke)
+  const pistas = texto.match(/"revealed_trait"/g) || [];
+  bru.setVar('pistas_reveladas', pistas.length);
+  // trilha à disposição para o 03-viajar
+  const h = texto.match(/"heading_to":"([^"]*)"/);
+  if (h) {
+    bru.setEnvVar('cidade_destino', h[1]);
+  }
+}
+
+tests {
+  test('200 no detalhe do caso', function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test('anti-spoiler (ADR-003): culprit_codename ausente em caso aberto', function() {
+    expect(JSON.stringify(res.body)).to.not.include('culprit_codename');
+  });
+
+  test('x-request-id ecoado (Req. F)', function() {
+    expect((res.headers['x-request-id'] || '').startsWith('bru-')).to.be.true;
+  });
+}

@@ -1,0 +1,40 @@
+meta {
+  name: 04-mandado-errado
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/cases/{{case_id}}/warrant
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "sexo": "fem",
+    "hobby": "tenis",
+    "cabelo": "ruivo",
+    "traco": "anel",
+    "veiculo": "limusine"
+  }
+}
+
+tests {
+  test('mandado errado processado (200) — rejeição de negócio', function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test('juiz rejeitou e o caso segue aberto', function() {
+    const texto = JSON.stringify(res.body);
+    expect(texto).to.include('"status":"open"');
+    expect(texto).to.include('rejeitou');
+  });
+
+  test('SEM dica (ADR-003): culprit_codename não pode vazar', function() {
+    expect(JSON.stringify(res.body)).to.not.include('culprit_codename');
+  });
+
+  test('x-request-id ecoado (Req. F)', function() {
+    expect((res.headers['x-request-id'] || '').startsWith('bru-')).to.be.true;
+  });
+}

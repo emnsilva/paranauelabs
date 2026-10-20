@@ -1,0 +1,31 @@
+meta {
+  name: listar-todos
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/criminals
+  body: none
+  auth: none
+}
+
+script:post-response {
+  // dossiê devolve array puro (provado em runtime pelo smoke e por este CLI)
+  const b = res.body;
+  const lista = Array.isArray(b) ? b : [];
+  bru.setVar('total_criminals', lista.length);
+}
+
+tests {
+  test('200 no dossiê completo', function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test('20 bandidos na seed', function() {
+    expect(bru.getVar('total_criminals')).to.equal(20);
+  });
+
+  test('x-request-id ecoado (Req. F)', function() {
+    expect((res.headers['x-request-id'] || '').startsWith('bru-')).to.be.true;
+  });
+}

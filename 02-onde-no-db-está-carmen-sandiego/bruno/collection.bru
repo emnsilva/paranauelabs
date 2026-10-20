@@ -1,0 +1,10 @@
+meta {
+  name: carmen-sandiego
+}
+
+script:pre-request {
+  // Req. F: toda request sai com x-request-id próprio (prefixo bru-).
+  // Cada request confere, nos tests, que a resposta ecoou um id bru-
+  const id = 'bru-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  req.setHeader('x-request-id', id);
+}

@@ -1,7 +1,9 @@
-// R2.7: mandado + reset. Os 9 endpoints completos.
+// R2.8: observabilidade PRIMEIRO na cadeia — request que não casa rota
+// nenhuma também é evento observável.
 import express from 'express';
 import { conectar } from './db.js';
 import { carregarSeed, resetSeed } from './seed.js';
+import { observabilidade } from './observabilidade.js';
 import criminals from './rotas/criminals.js';
 import cities from './rotas/cities.js';
 import casos from './rotas/casos.js';
@@ -9,6 +11,7 @@ import casos from './rotas/casos.js';
 const app = express();
 const PORT = process.env.PORT || 7421;
 
+app.use(observabilidade);   // primeiro: cronômetro e id valem para TUDO
 app.use(express.json());
 app.use(criminals);
 app.use(cities);
