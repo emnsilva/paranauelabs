@@ -37,7 +37,7 @@ paranauelabs/
     │   │   ├── 0004-argo-rollouts-bluegreen.md
     │   │   └── 0005-alocacoes-estaticas-e-ksm.md
     │   ├── licoes-aprendidas/
-    │   │   └── 2026-11-XX-r1.md
+    │   │   └── 🛠️ Troubleshooting (Lições Aprendidas na R1).md
     │   └── tutoriais/
     │       ├── provisionamento-do-lab.md
     │       ├── runbook-operacao.md
@@ -47,15 +47,8 @@ paranauelabs/
     │   ├── scripts/
     │   │   ├── provision-vms.sh
     │   │   ├── prepare-kernel.sh
-    │   │   ├── install-k3s.sh
-    │   │   ├── enable-ksm.sh
-    │   │   └── lib/common.sh
-    │   ├── cloud-init/
-    │   │   ├── user-data.tpl
-    │   │   ├── meta-data.tpl
-    │   │   └── network-config.tpl
-    │   └── inventory/
-    │       └── hosts.yml.example
+    │   │   ├── installparanaue.sh
+    │   │   └── installparanaue.sh
     ├── cluster/
     │   ├── bootstrap/argocd/
     │   ├── apps/

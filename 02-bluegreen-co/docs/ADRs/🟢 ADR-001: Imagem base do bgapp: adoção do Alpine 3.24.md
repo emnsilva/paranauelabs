@@ -17,10 +17,10 @@ O candidato é a série Alpine 3.24, com o patch 3.24.2 como específico. Antes 
 O spike rodou em VM Alpine descartável (minirootfs oficial do CDN) e coletou evidências direto das fontes primárias (Alpine CDN, APKINDEX v3.24, wiki oficial do k3s sobre Alpine, release notes do OpenRC), com versões e hashes verificados — reproduzível pelo script do projeto.
 
 ## Decisão
-Adotar Alpine Linux 3.24.2 como SO das 3 VMs do lab, instalado via minirootfs oficial (alpine-minirootfs-3.24.2-x86_64.tar.gz, sha256 registrado em docs/research/alpine-k3s.md, medido em 2026-10-30), com k3s v1.36.x instalado pelo instalador oficial get.k3s.io. A troca é confinada ao cloud-init e ao script de provisionamento (card 1.2); o restante do lab (manifests, stack Argo, aplicação) não depende do SO do host.
+A imagem base escolhida é a cloud oficial Alpine 3.23.7 com a variante x86_64-bios-cloudinit. A versão 3.24.x foi descartada porque a distribuição Alpine substituiu o suporte a BIOS/UEFI nessas imagens pelo bootloader limine, que exige configuração adicional e não é compatível nativamente com o virt-install padrão. A variante bios da 3.23.7 garante compatibilidade de primeira classe com o KVM/libvirt sem necessidade de customização de firmware.
 
 A implementação seguirá este desenho:
-- Pin por versão exata: Alpine 3.24.2 (minirootfs com hash registrado) e k3s v1.36.x fixado via INSTALL_K3S_VERSION. Sem latest.
+- Pin por versão exata: Alpine 3.23.7 (minirootfs com hash registrado) e k3s v1.36.x fixado via INSTALL_K3S_VERSION. Sem latest.
 - Ajustes obrigatórios no cloud-init:
     - Habilitar o serviço cgroups no OpenRC (rc-update add cgroups).
     - Criar /etc/modules-load.d/k3s.conf com br_netfilter, overlay, nf_conntrack.
