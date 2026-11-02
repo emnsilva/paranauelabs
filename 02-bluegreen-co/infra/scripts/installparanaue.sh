@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# install-paranaue.sh
+# installparanaue.sh
+# Uso:
+#   Server: sudo ./installparanaue.sh server
+#   Agent:  sudo ./installparanaue.sh agent <IP_DO_CONTROL_PLANE> <TOKEN>
+
 set -e
 
 log() { printf '[%s] %s\n' "$(date '+%H:%M:%S')" "$*"; }
@@ -8,6 +12,7 @@ log() { printf '[%s] %s\n' "$(date '+%H:%M:%S')" "$*"; }
 MODE="${1:-server}"
 CP_IP="${2:-}"
 TOKEN="${3:-}"
+K3S_VERSION="v1.36.5+k3s1"
 
 if [[ "$MODE" != "server" && "$MODE" != "agent" ]]; then
   echo "Erro: O primeiro argumento deve ser 'server' ou 'agent'."
@@ -23,18 +28,22 @@ if command -v k3s >/dev/null 2>&1; then
     exit 0
 fi
 
-log "3. Instalando o k3s no modo: ${MODE}..."
+log "3. Instalando o k3s versão ${K3S_VERSION} no modo: ${MODE}..."
+
 if [[ "$MODE" == "server" ]]; then
-    curl -sfL https://get.k3s.io | sh -
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${K3S_VERSION}" sh -
+    
     log "Aguardando o servidor inicializar..."
     sleep 10
     log "=========================================================="
     log "TOKEN DO NÓ (copie para usar nos workers):"
     cat /var/lib/rancher/k3s/server/node-token
     log "=========================================================="
+    
 elif [[ "$MODE" == "agent" ]]; then
     [[ -z "$CP_IP" || -z "$TOKEN" ]] && { echo "Erro: Para agent, informe o IP do control plane e o Token."; exit 1; }
-    curl -sfL https://get.k3s.io | K3S_URL="https://${CP_IP}:6443" K3S_TOKEN="${TOKEN}" sh -
+    
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${K3S_VERSION}" K3S_URL="https://${CP_IP}:6443" K3S_TOKEN="${TOKEN}" sh -
 fi
 
 log "=== Instalação do k3s concluída! ==="

@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: argocd
+spec:
+  limits:
+  - default: {cpu: 200m, memory: 256Mi}
+    defaultRequest: {cpu: 100m, memory: 128Mi}
+    type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: ingress-nginx
+spec:
+  limits:
+  - default: {cpu: 200m, memory: 256Mi}
+    defaultRequest: {cpu: 100m, memory: 128Mi}
+    type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: cert-manager
+spec:
+  limits:
+  - default: {cpu: 200m, memory: 256Mi}
+    defaultRequest: {cpu: 100m, memory: 128Mi}
+    type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: observability
+spec:
+  limits:
+  - default: {cpu: 500m, memory: 512Mi}
+    defaultRequest: {cpu: 200m, memory: 256Mi}
+    type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: bluegreen
+spec:
+  limits:
+  - default: {cpu: 200m, memory: 256Mi}
+    defaultRequest: {cpu: 100m, memory: 128Mi}
+    type: Container
