@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/SEU_USUARIO/paranauelabs.git' # <-- Coloque a URL do seu repo
+    repoURL: 'https://github.com/emnsilva/paranauelabs.git' # <-- Coloque a URL do seu repo
     targetRevision: HEAD
     path: 02-bluegreen-co/cluster/apps/children
   destination:
