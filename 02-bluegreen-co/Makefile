@@ -23,15 +23,6 @@ installparanaue:
 	$(MAKE) bootstrap-ingress
 	@echo "🎉 Tudo pronto! Acesse o Argo CD em https://$(IP_CP):30443"
 
-setup-ssh:
-	@echo "🔑 Configurando SSH e Sudo sem senha (vai pedir a senha de cada VM)..."
-	for ip in $(IP_CP) $(IP_W1) $(IP_W2); do \
-		echo ">>> Configurando $$ip <<<"; \
-		ssh-copy-id alpine@$$ip; \
-		ssh -t alpine@$$ip "echo 'alpine ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/alpine > /dev/null && sudo chmod 0440 /etc/sudoers.d/alpine"; \
-	done
-	@echo "✅ Pronto! O 'make lab-up' agora rodará sem senhas."
-
 lab-up:
 	@echo "🚀 Iniciando o laboratório BlueGreen Co..."
 	@echo "⏳ Verificando conectividade SSH..."
