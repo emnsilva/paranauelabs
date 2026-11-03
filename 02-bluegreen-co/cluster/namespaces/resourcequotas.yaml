@@ -4,7 +4,7 @@ metadata:
   name: quota-argocd
   namespace: argocd
 spec:
-  hard: {requests.cpu: "500m", requests.memory: 512Mi, limits.cpu: "1", limits.memory: 1Gi}
+  hard: {requests.cpu: "1", requests.memory: 1Gi, limits.cpu: "2", limits.memory: 1Gi}
 ---
 apiVersion: v1
 kind: ResourceQuota
