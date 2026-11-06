@@ -21,17 +21,17 @@ log "3. Instalando Argo CD (com timeout estendido e recursos ajustados)..."
 # Os recursos foram reduzidos para caber nas ResourceQuotas do lab.
 helm upgrade --install argocd argo/argo-cd \
   --namespace argocd \
+  --create-namespace \
   --timeout 10m \
   --set server.service.type=NodePort \
   --set server.service.nodePortHttps=30443 \
   --set applicationSet.enabled=false \
-  --set controller.resources.requests.cpu=100m \
-  --set controller.resources.requests.memory=128Mi \
-  --set controller.resources.limits.memory=256Mi \
-  --set repoServer.resources.requests.cpu=100m \
-  --set repoServer.resources.requests.memory=128Mi \
-  --set repoServer.resources.limits.memory=256Mi \
-  --set server.resources.requests.cpu=50m \
+  --set dex.enabled=false \
+  --set notifications.enabled=false \
+  --set controller.resources.requests.memory=256Mi \
+  --set controller.resources.limits.memory=512Mi \
+  --set repoServer.resources.requests.memory=256Mi \
+  --set repoServer.resources.limits.memory=512Mi \
   --set server.resources.requests.memory=64Mi \
   --set server.resources.limits.memory=128Mi
 
