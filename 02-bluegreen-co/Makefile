@@ -1,4 +1,4 @@
-# Variáveis de ambiente (IPs estáticos atualizados)
+# Variáveis de ambiente (IPs estáticos)
 IP_CP ?= 192.168.122.122
 IP_W1 ?= 192.168.122.126
 IP_W2 ?= 192.168.122.161
@@ -9,19 +9,18 @@ PREPARE = $(SCRIPTS_DIR)/prepare-kernel.sh
 INSTALL = $(SCRIPTS_DIR)/installparanaue.sh
 UNINSTALL = $(SCRIPTS_DIR)/uninstallparanaue.sh
 ARGOCD = $(SCRIPTS_DIR)/installargocd.sh
-INGRESS = $(SCRIPTS_DIR)/install-ingress-certmanager.sh
 
-# Declaração de todos os alvos para o Make não confundir com arquivos/pastas reais
-.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd bootstrap-ingress argocd-password ssh-cp ssh-w1 ssh-w2
+.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd wait-argocd bootstrap-gitops argocd-password ssh-cp ssh-w1 ssh-w2
 
 installparanaue:
 	@echo "🚀 Iniciando o bootstrap COMPLETO do laboratório..."
-	$(MAKE) setup-ssh
 	$(MAKE) lab-up
 	$(MAKE) apply-base
 	$(MAKE) bootstrap-argocd
-	$(MAKE) bootstrap-ingress
-	@echo "🎉 Tudo pronto! Acesse o Argo CD em https://$(IP_CP):30443"
+	$(MAKE) wait-argocd
+	$(MAKE) bootstrap-gitops
+	@echo "🎉 Tudo pronto! O Argo CD está sincronizando o cluster."
+	@echo "Acesse: https://$(IP_CP):30443"
 
 lab-up:
 	@echo "🚀 Iniciando o laboratório BlueGreen Co..."
@@ -43,13 +42,13 @@ lab-up:
 	@echo "✅ Lab no ar! Use 'make status' para ver os nós."
 
 uninstallparanaue:
-	@echo "🛑 Limpando o laboratório..."
+	@echo "🛑 Desligando o laboratório e limpando o k3s..."
 	@for ip in $(IP_CP) $(IP_W1) $(IP_W2); do \
 		echo "Limpando $$ip..."; \
 		ssh alpine@$$ip 'sudo sh -s' < $(UNINSTALL) || true; \
-		ssh alpine@$$ip "sudo reboot" || true; \
+		ssh alpine@$$ip "sudo poweroff" || true; \
 	done
-	@echo "😴 VMs reiniciadas e ambiente limpo."
+	@echo "😴 VMs desligadas e ambiente limpo."
 
 status:
 	@echo "📊 Status dos nós do cluster:"
@@ -66,12 +65,16 @@ bootstrap-argocd:
 	@echo "🚀 Instalando Argo CD..."
 	ssh alpine@$(IP_CP) 'sudo sh -s' < $(ARGOCD)
 
-bootstrap-ingress:
-	@echo "🚀 Instalando Ingress-Nginx e Cert-Manager..."
-	ssh alpine@$(IP_CP) 'sudo sh -s' < $(INGRESS)
-	@echo "📜 Aplicando ClusterIssuer..."
-	cat cluster/namespaces/clusterissuer.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
-	@echo "✅ Ingress e Cert-Manager instalados!"
+wait-argocd:
+	@echo "⏳ Aguardando a VM respirar e o Argo CD subir (isso pode levar 2 minutos)..."
+	@sleep 30
+	@echo "Verificando se os pods do Argo CD estão prontos..."
+	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=180s" || true
+
+bootstrap-gitops:
+	@echo "🔄 Aplicando a aplicação raiz (root-app) para iniciar o GitOps..."
+	cat cluster/apps/root-app.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
+	@echo "✅ Root-app aplicada! O Argo CD agora gerenciará o Ingress, Cert-Manager, Banco, etc."
 
 argocd-password:
 	@echo "🔑 Senha inicial do Argo CD:"

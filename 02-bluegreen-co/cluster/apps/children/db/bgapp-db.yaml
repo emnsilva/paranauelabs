@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bgapp-db-credentials
+  namespace: bluegreen
+type: Opaque
+stringData:
+  username: bgapp
+  password: lab123
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: bgapp-db
+  namespace: bluegreen
+spec:
+  instances: 1
+  postgresql:
+    parameters:
+      max_connections: "50"
+      shared_buffers: "128MB"
+  storage:
+    size: 1Gi
+    storageClass: local-path
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
