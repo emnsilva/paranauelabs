@@ -13,5 +13,6 @@ class Config:
     DB_PASS = os.getenv("DB_PASS", "postgres")
     DB_NAME = os.getenv("DB_NAME", "bgapp")
     
-    SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    # O "+psycopg2" garante que o SQLAlchemy use o pacote correto
+    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
