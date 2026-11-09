@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/emnsilva/paranauelabs.git'
     targetRevision: HEAD
-    path: 02-bluegreen-co/cluster/apps/db
+    path: 02-bluegreen-co/cluster/apps/children/db
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: bluegreen
