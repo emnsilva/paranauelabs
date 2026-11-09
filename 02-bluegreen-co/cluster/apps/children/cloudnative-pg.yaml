@@ -8,15 +8,17 @@ spec:
   source:
     repoURL: 'https://cloudnative-pg.github.io/charts'
     chart: cloudnative-pg
-    targetRevision: 0.23.0 # <-- Versão atualizada que corrige o bug do Liveness Probe
+    targetRevision: 0.24.0 # <-- Chart mais recente
     helm:
       values: |
+        image:
+          tag: "1.25.1" # <-- Força a versão do operador que corrige o bug
         resources:
           requests:
             memory: "50Mi"
             cpu: "50m"
           limits:
-            memory: "128Mi"
+            memory: "256Mi"
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: bluegreen
