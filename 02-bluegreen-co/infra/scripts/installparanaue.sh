@@ -31,7 +31,8 @@ fi
 log "3. Instalando o k3s versão ${K3S_VERSION} no modo: ${MODE}..."
 
 if [[ "$MODE" == "server" ]]; then
-    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${K3S_VERSION}" sh -
+    # Desabilita o Traefik no server para economizar RAM e evitar conflito com o Ingress-Nginx
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${K3S_VERSION}" INSTALL_K3S_EXEC="server --disable traefik" sh -
     
     log "Aguardando o servidor inicializar..."
     sleep 10
