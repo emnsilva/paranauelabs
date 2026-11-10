@@ -8,23 +8,78 @@ stringData:
   username: bgapp
   password: lab123
 ---
-apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
+apiVersion: v1
+kind: Service
 metadata:
   name: bgapp-db
   namespace: bluegreen
 spec:
-  instances: 1
-  postgresql:
-    parameters:
-      max_connections: "50"
-      shared_buffers: "128MB"
-  storage:
-    size: 1Gi
-    storageClass: local-path
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "256Mi"
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: bgapp-db
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bgapp-db
+  namespace: bluegreen
+spec:
+  serviceName: "bgapp-db"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bgapp-db
+  template:
+    metadata:
+      labels:
+        app: bgapp-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "bgapp"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: bgapp-db-credentials
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bgapp-db-credentials
+                  key: password
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          # Limites de recursos ajustados para o lab
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "bgapp", "-d", "bgapp"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "bgapp", "-d", "bgapp"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 1Gi
