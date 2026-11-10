@@ -8,12 +8,32 @@ spec:
   source:
     repoURL: 'https://charts.jetstack.io'
     chart: cert-manager
-    targetRevision: v1.14.5 # Substitua pela versão que você instalou
+    targetRevision: v1.14.5
     helm:
       values: |
         installCRDs: true
         startupapicheck:
           enabled: false
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+        webhook:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+        cainjector:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: cert-manager
@@ -21,3 +41,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

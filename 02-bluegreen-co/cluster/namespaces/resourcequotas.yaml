@@ -24,7 +24,11 @@ metadata:
   name: quota-cert-manager
   namespace: cert-manager
 spec:
-  hard: {requests.cpu: "300m", requests.memory: 300Mi, limits.cpu: "500m", limits.memory: 512Mi}
+  hard:
+    requests.cpu: "500m"
+    requests.memory: 512Mi
+    limits.cpu: "1"
+    limits.memory: 1Gi
 ---
 apiVersion: v1
 kind: ResourceQuota
