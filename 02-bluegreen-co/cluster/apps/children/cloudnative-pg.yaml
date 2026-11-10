@@ -14,13 +14,25 @@ spec:
         image:
           tag: "1.24.3"
         certManager:
-          enabled: false # <-- CNPG gerencia os próprios certificados
+          enabled: false
         resources:
-          requests: {memory: "50Mi", cpu: "50m"}
-          limits: {memory: "256Mi"}
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        # Desabilita os probes para evitar o CrashLoopBackOff
+        livenessProbe:
+          enabled: false
+        readinessProbe:
+          enabled: false
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: bluegreen
   syncPolicy:
-    automated: {prune: true, selfHeal: true}
-    syncOptions: [CreateNamespace=true]
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
