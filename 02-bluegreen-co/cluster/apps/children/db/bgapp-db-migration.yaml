@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bgapp-migration-sql
+  namespace: bluegreen
+data:
+  01_expand.sql: |
+    CREATE TABLE IF NOT EXISTS items (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(80) NOT NULL,
+        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+    );
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bgapp-db-migration
+  namespace: bluegreen
+spec:
+  template:
+    spec:
+      containers:
+        - name: migrate
+          image: postgres:16-alpine
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Aguardando o banco ficar pronto..."
+              until pg_isready -h bgapp-db -U bgapp -d bgapp; do sleep 2; done
+              echo "Rodando migração Expand..."
+              psql -h bgapp-db -U bgapp -d bgapp -f /migrations/01_expand.sql
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bgapp-db-credentials
+                  key: password
+          volumeMounts:
+            - name: sql-volume
+              mountPath: /migrations
+      volumes:
+        - name: sql-volume
+          configMap:
+            name: bgapp-migration-sql
+      restartPolicy: Never
+  backoffLimit: 3
