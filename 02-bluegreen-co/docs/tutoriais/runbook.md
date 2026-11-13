@@ -34,3 +34,13 @@ Para instalar algo novo (ex: Prometheus):
 - **Erro `ComparisonError`:** O Argo CD não conseguiu ler o repositório. Verifique se o repositório está público ou se as credenciais (se privado) estão corretas em *Settings > Repositories*.
 - **App travado em `Progressing`:** O Kubernetes não consegue agendar os pods por falta de recursos (CPU/RAM). Verifique as `ResourceQuotas` do namespace e os eventos do cluster.
 - **UI Inacessível:** Verifique se os pods do `argocd-server` estão rodando e se a porta 30443 não foi bloqueada por firewall no host.
+
+## 7. Validação da Aplicação (R3)
+A versão v1 da aplicação está rodando no slot `blue`. Para validar o funcionamento e o TLS, execute:
+
+1. **Via Terminal (Host):** 
+   `curl -k -i https://bgapp.local:30444/version`
+   *O retorno esperado é `HTTP/2 200` e `{"color":"blue","version":"v1.0.0"}`.*
+
+2. **No Navegador:** 
+   Acesse `https://bgapp.local:30444`. O navegador exibirá um alerta de segurança (certificado autoassinado). Prossiga e o JSON da aplicação será exibido.
