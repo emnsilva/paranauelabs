@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bgapp-blue
+  namespace: bluegreen
+  labels:
+    app: bgapp
+    slot: blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bgapp
+      slot: blue
+  template:
+    metadata:
+      labels:
+        app: bgapp
+        slot: blue
+    spec:
+      containers:
+        - name: bgapp
+          image: ghcr.io/emnsilva/paranauelabs/bgapp:v1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: APP_COLOR
+              value: "blue"
+            - name: APP_VERSION
+              value: "v1.0.0"
+            - name: DB_HOST
+              value: "bgapp-db"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: bgapp-db-credentials
+                  key: username
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: bgapp-db-credentials
+                  key: password
+            - name: DB_NAME
+              value: "bgapp"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"

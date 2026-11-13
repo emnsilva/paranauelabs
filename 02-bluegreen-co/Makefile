@@ -10,7 +10,7 @@ INSTALL = $(SCRIPTS_DIR)/installparanaue.sh
 UNINSTALL = $(SCRIPTS_DIR)/uninstallparanaue.sh
 ARGOCD = $(SCRIPTS_DIR)/installargocd.sh
 
-.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd wait-argocd bootstrap-gitops argocd-password ssh-cp ssh-w1 ssh-w2
+.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd wait-argocd bootstrap-gitops wait-gitops argocd-password ssh-cp ssh-w1 ssh-w2
 
 installparanaue:
 	@echo "🚀 Iniciando o bootstrap COMPLETO do laboratório..."
@@ -19,8 +19,9 @@ installparanaue:
 	$(MAKE) bootstrap-argocd
 	$(MAKE) wait-argocd
 	$(MAKE) bootstrap-gitops
-	@echo "🎉 Tudo pronto! O Argo CD está sincronizando o cluster."
-	@echo "Acesse: https://$(IP_CP):30443"
+	$(MAKE) wait-gitops
+	@echo "🎉 Tudo pronto! O cluster está sincronizado e a aplicação no ar."
+	@echo "Acesse o Argo CD em: https://$(IP_CP):30443"
 
 lab-up:
 	@echo "🚀 Iniciando o laboratório BlueGreen Co..."
@@ -66,15 +67,21 @@ bootstrap-argocd:
 	ssh alpine@$(IP_CP) 'sudo sh -s' < $(ARGOCD)
 
 wait-argocd:
-	@echo "⏳ Aguardando a VM respirar e o Argo CD subir (isso pode levar 2 minutos)..."
+	@echo "⏳ Aguardando a VM respirar e o Argo CD subir..."
 	@sleep 30
-	@echo "Verificando se os pods do Argo CD estão prontos..."
 	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=180s" || true
 
 bootstrap-gitops:
 	@echo "🔄 Aplicando a aplicação raiz (root-app) para iniciar o GitOps..."
 	cat cluster/apps/root-app.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
-	@echo "✅ Root-app aplicada! O Argo CD agora gerenciará o Ingress, Cert-Manager, Banco, etc."
+	@echo "✅ Root-app aplicada! O Argo CD agora gerenciará os componentes."
+
+wait-gitops:
+	@echo "⏳ Aguardando o Argo CD sincronizar e criar todos os recursos (isso pode levar alguns minutos)..."
+	@ssh alpine@$(IP_CP) "sudo k3s kubectl -n argocd wait --for=condition=Synced application/root-app --timeout=180s" || true
+	@echo "⏳ Aguardando o banco de dados e a aplicação subirem..."
+	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=Available deployment/bgapp-blue -n bluegreen --timeout=180s" || true
+	@echo "✅ Aplicação e banco estão prontos!"
 
 argocd-password:
 	@echo "🔑 Senha inicial do Argo CD:"

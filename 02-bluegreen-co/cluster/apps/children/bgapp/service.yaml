@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bgapp-blue-svc
+  namespace: bluegreen
+spec:
+  type: ClusterIP
+  selector:
+    app: bgapp
+    slot: blue
+  ports:
+    - port: 80
+      targetPort: 5000
