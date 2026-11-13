@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bgapp-ingress
+  namespace: bluegreen
+  annotations:
+    cert-manager.io/cluster-issuer: "lab-issuer" # O issuer que criamos na R2
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - bgapp.local
+      secretName: bgapp-tls-secret
+  rules:
+    - host: bgapp.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bgapp-blue-svc # O Service do nosso Deployment
+                port:
+                  number: 80
