@@ -10,7 +10,7 @@ INSTALL = $(SCRIPTS_DIR)/installparanaue.sh
 UNINSTALL = $(SCRIPTS_DIR)/uninstallparanaue.sh
 ARGOCD = $(SCRIPTS_DIR)/installargocd.sh
 
-.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd wait-argocd bootstrap-gitops wait-gitops argocd-password ssh-cp ssh-w1 ssh-w2
+.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd wait-argocd bootstrap-gitops apply-issuer wait-gitops argocd-password ssh-cp ssh-w1 ssh-w2
 
 installparanaue:
 	@echo "🚀 Iniciando o bootstrap COMPLETO do laboratório..."
@@ -19,6 +19,7 @@ installparanaue:
 	$(MAKE) bootstrap-argocd
 	$(MAKE) wait-argocd
 	$(MAKE) bootstrap-gitops
+	$(MAKE) apply-issuer
 	$(MAKE) wait-gitops
 	@echo "🎉 Tudo pronto! O cluster está sincronizado e a aplicação no ar."
 	@echo "Acesse o Argo CD em: https://$(IP_CP):30443"
@@ -76,12 +77,23 @@ bootstrap-gitops:
 	cat cluster/apps/root-app.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
 	@echo "✅ Root-app aplicada! O Argo CD agora gerenciará os componentes."
 
+apply-issuer:
+	@echo "🔒 Aguardando o Cert-Manager instalar o CRD para aplicar o ClusterIssuer..."
+	@until ssh alpine@$(IP_CP) "sudo k3s kubectl get crd clusterissuers.cert-manager.io" >/dev/null 2>&1; do \
+		echo "Aguardando CRD do Cert-Manager..."; sleep 5; \
+	done
+	@echo "Aplicando ClusterIssuer..."
+	cat cluster/namespaces/clusterissuer.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
+	@echo "✅ ClusterIssuer aplicado com sucesso!"
+
 wait-gitops:
-	@echo "⏳ Aguardando o Argo CD sincronizar e criar todos os recursos (isso pode levar alguns minutos)..."
+	@echo "⏳ Aguardando o Argo CD sincronizar e criar todos os recursos..."
 	@ssh alpine@$(IP_CP) "sudo k3s kubectl -n argocd wait --for=condition=Synced application/root-app --timeout=180s" || true
-	@echo "⏳ Aguardando o banco de dados e a aplicação subirem..."
+	@echo "⏳ Aguardando a aplicação e o banco subirem..."
 	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=Available deployment/bgapp-blue -n bluegreen --timeout=180s" || true
-	@echo "✅ Aplicação e banco estão prontos!"
+	@echo "⏳ Verificando se o certificado TLS foi emitido..."
+	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=Ready certificate/bgapp-tls-secret -n bluegreen --timeout=120s" || true
+	@echo "✅ Aplicação, banco e certificado TLS estão prontos!"
 
 argocd-password:
 	@echo "🔑 Senha inicial do Argo CD:"
