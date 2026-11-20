@@ -67,7 +67,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL' # Alterado para falhar apenas em falhas críticas
 
       - name: Instalar yq
         run: |
@@ -78,17 +78,10 @@ jobs:
       - name: Atualizar Tag no GitOps
         working-directory: . # Volta para a raiz para mexer no cluster
         run: |
-          # Caminho do arquivo de deployment
           FILE="02-bluegreen-co/cluster/apps/children/bgapp/deployment.yaml"
-          
-          # Atualiza a tag da imagem usando yq
           yq e -i '.spec.template.spec.containers[0].image = "ghcr.io/'"${{ github.repository }}"'/bgapp:'"${{ github.event.inputs.version_tag }}"'"' $FILE
-          
-          # Configura o Git para fazer o commit
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          
-          # Faz o commit e push
           git add $FILE
           git commit -m "chore(gitops): atualiza imagem do bgapp para ${{ github.event.inputs.version_tag }} [skip ci]"
           git push

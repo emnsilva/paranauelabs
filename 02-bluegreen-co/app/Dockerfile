@@ -17,8 +17,8 @@ FROM python:3.12-alpine3.24
 
 WORKDIR /app
 
-# Instala apenas a biblioteca de runtime do PostgreSQL (sem compiladores)
-RUN apk add --no-cache libpq
+# Instala a biblioteca de runtime e ATUALIZA os pacotes do sistema (correção de CVE)
+RUN apk add --no-cache libpq && apk upgrade --no-cache
 
 # Copia o ambiente virtual criado no estágio 1
 COPY --from=builder /opt/venv /opt/venv
