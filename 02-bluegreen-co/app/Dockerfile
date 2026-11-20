@@ -17,8 +17,13 @@ FROM python:3.12-alpine3.24
 
 WORKDIR /app
 
-# Instala a biblioteca de runtime e ATUALIZA os pacotes do sistema (correção de CVE)
-RUN apk add --no-cache libpq && apk upgrade --no-cache
+# Instala a biblioteca de runtime, atualiza os índices e FORÇA a atualização de pacotes vulneráveis.
+# A flag --available garante que o apk busque a versão mais recente no repositório,
+# resolvendo as vulnerabilidades HIGH do krb5-libs.
+RUN apk update && \
+    apk add --no-cache libpq && \
+    apk upgrade --no-cache --available && \
+    apk add --no-cache --upgrade krb5 krb5-libs
 
 # Copia o ambiente virtual criado no estágio 1
 COPY --from=builder /opt/venv /opt/venv
