@@ -25,7 +25,7 @@ spec:
         fsGroup: 1001
       containers:
         - name: bgapp
-          image: ghcr.io/emnsilva/paranauelabs/bgapp:v1.0.1
+          image: ghcr.io/emnsilva/paranauelabs/bgapp:v1.0.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
