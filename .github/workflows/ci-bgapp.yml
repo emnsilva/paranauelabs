@@ -70,7 +70,10 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Instalar yq
-        uses: mikefarah/yq-action@v4
+        run: |
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+          yq --version
 
       - name: Atualizar Tag no GitOps
         working-directory: . # Volta para a raiz para mexer no cluster
