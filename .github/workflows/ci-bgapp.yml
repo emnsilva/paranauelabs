@@ -79,9 +79,20 @@ jobs:
         working-directory: . # Volta para a raiz para mexer no cluster
         run: |
           FILE="02-bluegreen-co/cluster/apps/children/bgapp/deployment.yaml"
+          
+          # Atualiza a imagem no arquivo
           yq e -i '.spec.template.spec.containers[0].image = "ghcr.io/'"${{ github.repository }}"'/bgapp:'"${{ github.event.inputs.version_tag }}"'"' $FILE
+          
+          # Configura o Git
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
+          
+          # Só faz o commit se o arquivo realmente tiver mudado
           git add $FILE
-          git commit -m "chore(gitops): atualiza imagem do bgapp para ${{ github.event.inputs.version_tag }} [skip ci]"
-          git push
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudança na imagem. A tag ${{ github.event.inputs.version_tag }} já está em uso."
+          else
+            git commit -m "chore(gitops): atualiza imagem do bgapp para ${{ github.event.inputs.version_tag }} [skip ci]"
+            git push
+            echo "Tag atualizada com sucesso no GitOps!"
+          fi
