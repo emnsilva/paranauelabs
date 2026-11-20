@@ -79,8 +79,12 @@ bootstrap-gitops:
 
 apply-issuer:
 	@echo "🔒 Aguardando o Cert-Manager instalar o CRD para aplicar o ClusterIssuer..."
-	@until ssh alpine@$(IP_CP) "sudo k3s kubectl get crd clusterissuers.cert-manager.io" >/dev/null 2>&1; do \
-		echo "Aguardando CRD do Cert-Manager..."; sleep 5; \
+	@for i in $$(seq 1 30); do \
+		if ssh -o StrictHostKeyChecking=no -o BatchMode=yes alpine@$(IP_CP) "sudo k3s kubectl get crd clusterissuers.cert-manager.io" >/dev/null 2>&1; then \
+			break; \
+		fi; \
+		echo "Aguardando CRD do Cert-Manager... (tentativa $$i/30)"; \
+		sleep 5; \
 	done
 	@echo "Aplicando ClusterIssuer..."
 	cat cluster/namespaces/clusterissuer.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"

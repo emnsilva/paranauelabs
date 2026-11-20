@@ -18,12 +18,20 @@ spec:
         app: bgapp
         slot: blue
     spec:
+      # Boas práticas de segurança: Não rodar como root
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001 # O UID do appuser criado no Dockerfile
+        fsGroup: 1001
+      
       containers:
         - name: bgapp
           image: ghcr.io/emnsilva/paranauelabs/bgapp:v1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
+              name: http
+          
           env:
             - name: APP_COLOR
               value: "blue"
@@ -31,6 +39,8 @@ spec:
               value: "v1.0.0"
             - name: DB_HOST
               value: "bgapp-db"
+            - name: DB_NAME
+              value: "bgapp"
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
@@ -41,24 +51,39 @@ spec:
                 secretKeyRef:
                   name: bgapp-db-credentials
                   key: password
-            - name: DB_NAME
-              value: "bgapp"
+          
+          # Recursos ajustados para o lab (evita OOM e throttling)
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          
+          # 1. STARTUP PROBE: Dá até 150s (30x5s) para o app e banco subirem. 
+          # Só depois disso as outras probes começam a valer.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            failureThreshold: 30
+            periodSeconds: 5
+          
+          # 2. READINESS PROBE: Só manda tráfego pro pod se o banco estiver conectado.
           readinessProbe:
             httpGet:
               path: /readiness
               port: 5000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 5
+            failureThreshold: 3
+          
+          # 3. LIVENESS PROBE: Se travar, reinicia o pod.
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 15
             periodSeconds: 10
-          resources:
-            requests:
-              cpu: "50m"
-              memory: "64Mi"
-            limits:
-              cpu: "200m"
-              memory: "128Mi"
+            failureThreshold: 3
