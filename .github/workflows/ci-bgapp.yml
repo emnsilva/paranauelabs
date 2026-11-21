@@ -1,17 +1,21 @@
 name: CI - Build, Scan e Deploy GitOps
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Deploy manual
     inputs:
       version_tag:
         description: 'Tag da versão (ex: v1.0.2)'
         required: true
         default: 'v1.0.2'
         type: string
+  pull_request: # Roda apenas os testes quando um PR é aberto
+    branches: [ "main" ]
+    paths:
+      - '02-bluegreen-co/app/**'
 
 permissions:
-  contents: write # Permite que a pipeline faça o commit no GitOps
-  packages: write # Permite publicar a imagem no GHCR
+  contents: write # Necessário para fazer o commit da nova tag
+  packages: write # Necessário para publicar no GHCR
 
 env:
   REGISTRY: ghcr.io
@@ -40,10 +44,13 @@ jobs:
           pip install -r requirements.txt
           python -m pytest tests/
 
+      # DAQUI PARA BAIXO SÓ RODA SE FOR WORKFLOW_DISPATCH (MANUAL)
       - name: Configurar Docker Buildx
+        if: github.event_name == 'workflow_dispatch'
         uses: docker/setup-buildx-action@v3
 
       - name: Login no GHCR
+        if: github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -51,6 +58,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build e Push da Imagem
+        if: github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v5
         with:
           context: ./02-bluegreen-co/app
@@ -60,6 +68,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Scan de Vulnerabilidades (Trivy)
+        if: github.event_name == 'workflow_dispatch'
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version_tag }}
@@ -70,25 +79,20 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Instalar yq
+        if: github.event_name == 'workflow_dispatch'
         run: |
           wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           chmod +x /usr/local/bin/yq
           yq --version
 
-      # Atualiza tag no GitOps
       - name: Atualizar Tag no GitOps
-        working-directory: . # Volta para a raiz para mexer na pasta do cluster
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: . # Volta para a raiz para mexer no cluster
         run: |
           FILE="02-bluegreen-co/cluster/apps/children/bgapp/deployment.yaml"
-          
-          # Altera a tag da imagem
           yq e -i '.spec.template.spec.containers[0].image = "ghcr.io/'"${{ github.repository }}"'/bgapp:'"${{ github.event.inputs.version_tag }}"'"' $FILE
-          
-          # Configura o bot do Git
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          
-          # Só commita se o yq realmente mudou o arquivo
           git add $FILE
           if git diff --cached --quiet; then
             echo "Nenhuma mudança na imagem. A tag ${{ github.event.inputs.version_tag }} já está em uso."

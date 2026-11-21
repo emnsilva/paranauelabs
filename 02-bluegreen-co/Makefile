@@ -10,7 +10,7 @@ INSTALL = $(SCRIPTS_DIR)/installparanaue.sh
 UNINSTALL = $(SCRIPTS_DIR)/uninstallparanaue.sh
 ARGOCD = $(SCRIPTS_DIR)/installargocd.sh
 
-.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd wait-argocd bootstrap-gitops apply-issuer wait-gitops argocd-password ssh-cp ssh-w1 ssh-w2
+.PHONY: installparanaue setup-ssh lab-up uninstallparanaue status apply-base bootstrap-argocd wait-argocd bootstrap-gitops wait-gitops argocd-password ssh-cp ssh-w1 ssh-w2
 
 installparanaue:
 	@echo "🚀 Iniciando o bootstrap COMPLETO do laboratório..."
@@ -19,10 +19,18 @@ installparanaue:
 	$(MAKE) bootstrap-argocd
 	$(MAKE) wait-argocd
 	$(MAKE) bootstrap-gitops
-	$(MAKE) apply-issuer
 	$(MAKE) wait-gitops
 	@echo "🎉 Tudo pronto! O cluster está sincronizado e a aplicação no ar."
 	@echo "Acesse o Argo CD em: https://$(IP_CP):30443"
+
+setup-ssh:
+	@echo "🔑 Configurando SSH e Sudo sem senha (vai pedir a senha de cada VM)..."
+	@for ip in $(IP_CP) $(IP_W1) $(IP_W2); do \
+		echo ">>> Configurando $$ip <<<"; \
+		ssh-copy-id alpine@$$ip; \
+		ssh -t alpine@$$ip "echo 'alpine ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/alpine > /dev/null && sudo chmod 0440 /etc/sudoers.d/alpine"; \
+	done
+	@echo "✅ Pronto! O 'make lab-up' agora rodará sem senhas."
 
 lab-up:
 	@echo "🚀 Iniciando o laboratório BlueGreen Co..."
@@ -41,7 +49,7 @@ lab-up:
 	echo "🎛️  Instalando Workers..."; \
 	ssh alpine@$(IP_W1) "sudo sh -s agent $(IP_CP) $$TOKEN" < $(INSTALL); \
 	ssh alpine@$(IP_W2) "sudo sh -s agent $(IP_CP) $$TOKEN" < $(INSTALL)
-	@echo "✅ Lab no ar! Use 'make status' para ver os nós."
+	@echo "✅ Lab no ar!"
 
 uninstallparanaue:
 	@echo "🛑 Desligando o laboratório e limpando o k3s..."
@@ -77,25 +85,18 @@ bootstrap-gitops:
 	cat cluster/apps/root-app.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
 	@echo "✅ Root-app aplicada! O Argo CD agora gerenciará os componentes."
 
-apply-issuer:
-	@echo "🔒 Aguardando o Cert-Manager instalar o CRD para aplicar o ClusterIssuer..."
-	@for i in $$(seq 1 30); do \
-		if ssh -o StrictHostKeyChecking=no -o BatchMode=yes alpine@$(IP_CP) "sudo k3s kubectl get crd clusterissuers.cert-manager.io" >/dev/null 2>&1; then \
-			break; \
-		fi; \
-		echo "Aguardando CRD do Cert-Manager... (tentativa $$i/30)"; \
-		sleep 5; \
-	done
-	@echo "Aplicando ClusterIssuer..."
-	cat cluster/namespaces/clusterissuer.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
-	@echo "✅ ClusterIssuer aplicado com sucesso!"
-
 wait-gitops:
-	@echo "⏳ Aguardando o Argo CD sincronizar e criar todos os recursos..."
-	@ssh alpine@$(IP_CP) "sudo k3s kubectl -n argocd wait --for=condition=Synced application/root-app --timeout=180s" || true
-	@echo "⏳ Aguardando a aplicação e o banco subirem..."
+	@echo "⏳ Aguardando o Argo CD sincronizar as aplicações (pode levar alguns minutos)..."
+	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=Synced application/root-app -n argocd --timeout=180s" || true
+	
+	@echo "⏳ Aguardando o Cert-Manager instalar os CRDs (isso pode demorar)..."
+	@ssh alpine@$(IP_CP) "for i in \$$(seq 1 60); do sudo k3s kubectl get crd clusterissuers.cert-manager.io >/dev/null 2>&1 && break; echo 'Aguardando CRD...'; sleep 5; done"
+	
+	@echo "🔒 Aplicando o ClusterIssuer (TLS)..."
+	cat cluster/namespaces/clusterissuer.yaml | ssh alpine@$(IP_CP) "sudo k3s kubectl apply -f -"
+	
+	@echo "⏳ Aguardando a aplicação, o banco e o TLS ficarem prontos..."
 	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=Available deployment/bgapp-blue -n bluegreen --timeout=180s" || true
-	@echo "⏳ Verificando se o certificado TLS foi emitido..."
 	@ssh alpine@$(IP_CP) "sudo k3s kubectl wait --for=condition=Ready certificate/bgapp-tls-secret -n bluegreen --timeout=120s" || true
 	@echo "✅ Aplicação, banco e certificado TLS estão prontos!"
 
