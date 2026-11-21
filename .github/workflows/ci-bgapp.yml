@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: 'Tag da versão (ex: v1.0.1)'
+        description: 'Tag da versão (ex: v1.0.2)'
         required: true
-        default: 'v1.0.1'
+        default: 'v1.0.2'
         type: string
 
 permissions:
-  contents: write # Necessário para fazer o commit da nova tag
-  packages: write # Necessário para publicar no GHCR
+  contents: write # Permite que a pipeline faça o commit no GitOps
+  packages: write # Permite publicar a imagem no GHCR
 
 env:
   REGISTRY: ghcr.io
@@ -75,19 +75,22 @@ jobs:
           chmod +x /usr/local/bin/yq
           yq --version
 
+      # ==========================================
+      # AQUI ESTÁ O CARD 4.4
+      # ==========================================
       - name: Atualizar Tag no GitOps
-        working-directory: . # Volta para a raiz para mexer no cluster
+        working-directory: . # Volta para a raiz para mexer na pasta do cluster
         run: |
           FILE="02-bluegreen-co/cluster/apps/children/bgapp/deployment.yaml"
           
-          # Atualiza a imagem no arquivo
+          # Altera a tag da imagem
           yq e -i '.spec.template.spec.containers[0].image = "ghcr.io/'"${{ github.repository }}"'/bgapp:'"${{ github.event.inputs.version_tag }}"'"' $FILE
           
-          # Configura o Git
+          # Configura o bot do Git
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           
-          # Só faz o commit se o arquivo realmente tiver mudado
+          # Só commita se o yq realmente mudou o arquivo
           git add $FILE
           if git diff --cached --quiet; then
             echo "Nenhuma mudança na imagem. A tag ${{ github.event.inputs.version_tag }} já está em uso."
