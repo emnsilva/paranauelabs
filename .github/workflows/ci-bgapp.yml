@@ -75,9 +75,7 @@ jobs:
           chmod +x /usr/local/bin/yq
           yq --version
 
-      # ==========================================
-      # AQUI ESTÁ O CARD 4.4
-      # ==========================================
+      # Atualiza tag no GitOps
       - name: Atualizar Tag no GitOps
         working-directory: . # Volta para a raiz para mexer na pasta do cluster
         run: |
