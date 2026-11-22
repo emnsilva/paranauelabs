@@ -44,3 +44,15 @@ A versão v1 da aplicação está rodando no slot `blue`. Para validar o funcion
 
 2. **No Navegador:** 
    Acesse `https://bgapp.local:30444`. O navegador exibirá um alerta de segurança (certificado autoassinado). Prossiga e o JSON da aplicação será exibido.
+
+## 8. Fluxo de CI/CD (Release 4)
+O laboratório utiliza uma esteira de Integração Contínua (CI) acionada manualmente para evitar deploys acidentais. O fluxo é 100% GitOps: a pipeline constrói a imagem, mas não acessa o cluster; ela atualiza o Git para que o Argo CD faça o deploy.
+
+### Passo a passo para um novo deploy:
+1. **Acionamento Manual:** Acesse o GitHub > Aba **Actions** > Selecione o workflow **"CI - Build, Scan e Deploy GitOps"** > Clique em **"Run workflow"**.
+2. **Informe a Tag:** Digite a versão desejada (ex: `v1.0.5`) e confirme.
+3. **Build e Scan:** A pipeline irá rodar os testes, construir a imagem Docker, escaneá-la com o Trivy e publicá-la no GHCR.
+4. **Atualização do GitOps:** Se o Trivy não encontrar vulnerabilidades críticas, a pipeline edita o arquivo `deployment.yaml` e faz um commit automático com a nova tag.
+5. **Deploy pelo Argo CD:** O Argo CD detecta o novo commit, sincroniza o cluster e inicia o processo de atualização dos pods da aplicação.
+
+> **Nota:** Se a pipeline falhar no passo do Trivy (vulnerabilidades), verifique a versão dos pacotes no Dockerfile base. O deploy não ocorrerá até que a falha seja corrigida.
