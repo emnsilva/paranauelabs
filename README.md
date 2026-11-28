@@ -25,6 +25,20 @@ paranauelabs/
 │   └── workflows/                        # Orquestrador do Lab: Faz os "includes"
 │       ├── tfc-master-pipeline.yml       # Pipeline Terraform (Multi-Cloud)
 │       └── tofu-master-pipeline.yml      # Pipeline OpenTofu (Multi-Cloud)
+├── 00-identidade-código-e-legado/        # Artigo sobre boas práticas no GitHub e GitLab
+├── README.md
+│   ├── 01-identidade.md
+│   ├── 02-automação.md
+│   ├── 03-segurança.md
+│   └── exemplos/
+│       ├── github-actions.yml
+│       ├── gitlab-ci.yml
+│       ├── dependabot.yml
+│       ├── gitlab-dependency-scanning.yml
+│       ├── renovate.json
+│       ├── gitlab-ci-security.yml
+│       ├── gitlab-ci-security-ultimate.yml
+│       └── gitignore.example
 ├── 01-iac-railways/                      # Laboratório IaC Railways
 │   ├── docs/
 │   │   ├── adr/                          # Architecture Decision Records
