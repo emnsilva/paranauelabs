@@ -1,0 +1,15 @@
+# Criação manual do pipeline pela interface
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - when: never
+
+stages:
+  - test
+
+teste:
+  stage: test
+  image: alpine:3
+
+  script:
+    - echo "Paranaue Labs - GitLab CI/CD"

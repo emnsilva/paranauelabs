@@ -1,0 +1,9 @@
+# Requer GitLab Ultimate
+# Incorporar ao pipeline existente
+
+include:
+  - template: Jobs/Dependency-Scanning.v2.gitlab-ci.yml
+
+variables:
+  # Configuração para pipelines de branch
+  AST_ENABLE_MR_PIPELINES: "false"

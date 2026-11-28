@@ -1,0 +1,70 @@
+# ==========================================================
+# TERRAFORM / OPENTOFU
+# ==========================================================
+
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfvars
+*.tfvars.json
+*.plan
+*.tfplan
+.plan
+
+# ==========================================================
+# PULUMI
+# ==========================================================
+
+# Avalie quais arquivos de stack devem ser versionados
+Pulumi.*.yaml
+
+# ==========================================================
+# SECRETS E CREDENCIAIS
+# ==========================================================
+
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.ppk
+*.p12
+*.pfx
+*.jks
+credentials.json
+service-account*.json
+aws-credentials
+
+# ==========================================================
+# IDE E EDITORES
+# ==========================================================
+
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# ==========================================================
+# LOGS E ARQUIVOS TEMPORÁRIOS
+# ==========================================================
+
+*.log
+logs/
+tmp/
+
+# ==========================================================
+# DEPENDÊNCIAS E CACHE
+# ==========================================================
+
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc

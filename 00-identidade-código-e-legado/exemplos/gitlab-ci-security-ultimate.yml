@@ -1,0 +1,25 @@
+# Pipeline manual com Secret Detection
+# e Dependency Scanning
+# Requer GitLab Ultimate
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - when: never
+
+stages:
+  - test
+
+variables:
+  AST_ENABLE_MR_PIPELINES: "false"
+
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.v2.gitlab-ci.yml
+
+teste:
+  stage: test
+  image: alpine:3
+
+  script:
+    - echo "Paranaue Labs"

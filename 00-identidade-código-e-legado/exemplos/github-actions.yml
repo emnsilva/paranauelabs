@@ -1,0 +1,13 @@
+name: Paranaue Labs
+
+# Acionamento exclusivamente manual
+on:
+  workflow_dispatch:
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Executar teste
+        run: echo "Paranaue Labs - GitHub Actions"
